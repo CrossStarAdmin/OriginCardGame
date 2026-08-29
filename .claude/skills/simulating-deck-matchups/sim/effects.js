@@ -140,7 +140,7 @@ function onSummon(g, p, u) {
       break;
     case 'バルザック＋':
       if (p.grave.includes('バルザック')) u.kw.add('速攻');
-      if (lookOdd(p)) u.kw.add('超貫通');
+      if (lookOdd(p)) u.kw.add('貫通');
       break;
     case 'キングレオ': {
       if (lookOdd(p)) {

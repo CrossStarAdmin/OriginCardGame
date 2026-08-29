@@ -64,7 +64,6 @@ class Player {
     this.spellDiscount = 0;
     this.spellsThisTurn = 0;
     this.tensionRaisedThisTurn = false;
-    this.skillUsedThisTurn = false;
     this.frozenPending = [];
     this.fatigueLoss = false;
   }
@@ -228,8 +227,8 @@ function attackUnit(g, p, u, target) {
   const dmgIn = target.atk;
   damageUnit(g, target, dmgOut, p, u.name);
   damageUnit(g, u, dmgIn, foe, target.name);
-  if (u.kw.has('超貫通')) damageLeader(g, foe, dmgOut, p, u.name);
-  else if (u.kw.has('貫通') && target.hp < 0) damageLeader(g, foe, -target.hp, p, u.name);
+  // 貫通：キャラクターに与えたダメージと同じ量をリーダーにも与える（ルール/06_キーワード能力）
+  if (u.kw.has('貫通')) damageLeader(g, foe, dmgOut, p, u.name);
   cleanup(g);
 }
 
@@ -238,13 +237,12 @@ function startPhase(g, p) {
   p.maxMp = Math.min(MAX_MP_CAP, p.maxMp + 1);
   p.mp = p.maxMp;
   p.tensionRaisedThisTurn = false;
-  p.skillUsedThisTurn = false;
   p.spellsThisTurn = 0;
   p.spellDiscount = 0;
   for (const u of p.frozenPending) u.frozen = false;
   p.frozenPending = [];
   for (const u of p.board) { u.sick = false; u.attacked = false; }
-  draw(g, p, 1);
+  if (g.turn > 1) draw(g, p, 1); // 先攻の最初のターンはドローしない（ルール/02_ターンの流れ）
   if (g.over) return;
   EFFECTS.onTurnStart(g, p);
   cleanup(g);

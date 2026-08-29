@@ -135,7 +135,7 @@ function planLethal(g, p) {
   const plan = [];
   // テンションスキル（ゼシカのみ打点）
   let skill = false;
-  if (p.leader === 'ゼシカ' && !p.skillUsedThisTurn) {
+  if (p.leader === 'ゼシカ') {
     if (p.tension === 3) { dmg += 2; skill = true; }
     else if (p.tension === 2 && mp >= 1 && !p.tensionRaisedThisTurn) { mp -= 1; dmg += 2; skill = true; }
   }
@@ -156,7 +156,7 @@ function executeLethal(g, p, lethal) {
     if (p.tension < 3 && !p.tensionRaisedThisTurn && p.mp >= 1) {
       p.mp -= 1; p.tensionRaisedThisTurn = true; E.raiseTension(g, p, 1);
     }
-    if (p.tension === 3) { FX.useTensionSkill(g, p); p.skillUsedThisTurn = true; }
+    if (p.tension === 3) FX.useTensionSkill(g, p);
   }
   for (const o of lethal.plan) {
     if (g.over) return;
@@ -248,9 +248,8 @@ function tensionPhase(g, p) {
     E.raiseTension(g, p, 1);
   }
   if (g.over) return;
-  if (p.tension === 3 && !p.skillUsedThisTurn && shouldUseSkill(g, p)) {
+  if (p.tension === 3 && shouldUseSkill(g, p)) {
     FX.useTensionSkill(g, p);
-    p.skillUsedThisTurn = true;
   }
 }
 
@@ -392,9 +391,8 @@ function takeTurn(g, p) {
     p.tensionRaisedThisTurn = true;
     E.raiseTension(g, p, 1);
     if (g.over) return;
-    if (p.tension === 3 && !p.skillUsedThisTurn && shouldUseSkill(g, p)) {
+    if (p.tension === 3 && shouldUseSkill(g, p)) {
       FX.useTensionSkill(g, p);
-      p.skillUsedThisTurn = true;
       if (g.over) return;
     }
   }
