@@ -274,7 +274,7 @@ function castSpell(g, p, name, target) {
       E.cleanup(g);
       break;
     case '消えぬ焔':
-      for (const x of p.board) { x.atk += 2; x.kw.add('速攻'); }
+      for (const x of p.board) { x.atk += 1; x.kw.add('速攻'); }
       break;
 
     // ---- ミッドレンジ奇数エルナ ----

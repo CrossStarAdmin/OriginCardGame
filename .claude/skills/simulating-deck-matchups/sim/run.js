@@ -16,6 +16,7 @@ function playGame(deckA, deckB, seed, stats, gameId) {
     AI.mulligan(g, p);
   }
   g.players[1].tension = 2; // 後攻はテンション2スタート
+  g.players[1].holy = 2;    // 後攻は聖水2つスタート（ルール/01_基本ルール）
   let tp = 0;
   while (!g.over && g.turn < E.TURN_CAP) {
     g.turn++;

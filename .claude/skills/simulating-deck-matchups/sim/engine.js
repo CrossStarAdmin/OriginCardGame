@@ -64,6 +64,8 @@ class Player {
     this.spellDiscount = 0;
     this.spellsThisTurn = 0;
     this.tensionRaisedThisTurn = false;
+    this.holy = 0;
+    this.holyUsedThisTurn = false;
     this.frozenPending = [];
     this.fatigueLoss = false;
   }
@@ -225,10 +227,14 @@ function attackUnit(g, p, u, target) {
   u.attacked = true;
   const dmgOut = u.atk;
   const dmgIn = target.atk;
+  const targetHp = target.hp;
   damageUnit(g, target, dmgOut, p, u.name);
   damageUnit(g, u, dmgIn, foe, target.name);
-  // 貫通：キャラクターに与えたダメージと同じ量をリーダーにも与える（ルール/06_キーワード能力）
-  if (u.kw.has('貫通')) damageLeader(g, foe, dmgOut, p, u.name);
+  // 貫通：相手の残りHPを超えたぶんをリーダーに与える（ルール/06_キーワード能力）
+  if (u.kw.has('貫通')) {
+    const through = dmgOut - targetHp;
+    if (through > 0) damageLeader(g, foe, through, p, u.name);
+  }
   cleanup(g);
 }
 
@@ -237,6 +243,7 @@ function startPhase(g, p) {
   p.maxMp = Math.min(MAX_MP_CAP, p.maxMp + 1);
   p.mp = p.maxMp;
   p.tensionRaisedThisTurn = false;
+  p.holyUsedThisTurn = false;
   p.spellsThisTurn = 0;
   p.spellDiscount = 0;
   for (const u of p.frozenPending) u.frozen = false;

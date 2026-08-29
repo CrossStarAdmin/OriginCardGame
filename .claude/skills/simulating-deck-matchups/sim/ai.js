@@ -389,6 +389,21 @@ function bestTrade(attackers, enemyUnits, allowAny) {
   return bestAct;
 }
 
+// 聖水：1ターン1つまで。「あと1MPあれば手札が使える」ときに切る
+function useHoly(g, p) {
+  if (!p.holy || p.holyUsedThisTurn) return;
+  const need = p.mp + 1;
+  const playable = p.hand.some((n) => {
+    const d = CARD_DB[n];
+    if (E.cardCost(p, n) !== need) return false;
+    return !(d.kind === 'unit' && p.board.length >= E.BOARD_MAX);
+  });
+  if (!playable) return;
+  p.holy--;
+  p.holyUsedThisTurn = true;
+  p.mp += 1;
+}
+
 // ---- 1ターン ----
 function takeTurn(g, p) {
   E.startPhase(g, p);
@@ -420,8 +435,10 @@ function takeTurn(g, p) {
     }
   }
 
+  useHoly(g, p);
   playPhase(g, p);
   if (g.over) return;
+  useHoly(g, p);
   tensionPhase(g, p);
   if (g.over) return;
   attackPhase(g, p, false);

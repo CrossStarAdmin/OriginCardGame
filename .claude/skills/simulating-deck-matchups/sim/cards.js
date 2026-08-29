@@ -44,7 +44,7 @@ const CARD_DB = {
   '聖獣キメラ':     { kind: 'unit', cost: 4, atk: 3, hp: 5 },
   '聖騎士ザキエル': { kind: 'unit', cost: 5, atk: 2, hp: 4, tag: '聖徒' },
   '老司祭ドラン':   { kind: 'unit', cost: 5, atk: 3, hp: 4, tag: '聖徒' },
-  '祈る巡礼者':     { kind: 'unit', cost: 5, atk: 1, hp: 2, tag: '聖徒' },
+  '祈る巡礼者':     { kind: 'unit', cost: 5, atk: 2, hp: 4, tag: '聖徒' },
   '継ぐ者の儀':     { kind: 'spell', cost: 6 },
   '偽善のミゼリア': { kind: 'unit', cost: 7, atk: 4, hp: 4, kw: ['守護'] },
   '継承の大鐘':     { kind: 'unit', cost: 10, atk: 7, hp: 7, kw: ['守護'] },
