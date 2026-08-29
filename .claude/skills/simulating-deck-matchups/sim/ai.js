@@ -233,7 +233,7 @@ function raiseTensionFirst(g, p) {
   if (p.tension === 2) {
     if (p.leader === 'ゼシカ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
     if (p.leader === 'ククール' && p.leaderHp <= 18 && (p.mp >= 3 || p.leaderHp <= 8)) return true;
-    if (p.leader === 'ミネア' && p.hand.length <= 4 && p.mp >= 3) return true;
+    if (p.leader === 'エルナ' && p.hand.length <= 4 && p.mp >= 3) return true;
   }
   const full = bestPlayScore(g, p, p.mp);
   const held = bestPlayScore(g, p, p.mp - 1);
@@ -255,7 +255,7 @@ function tensionPhase(g, p) {
 
 function shouldUseSkill(g, p) {
   if (p.leader === 'ゼシカ') return true;
-  if (p.leader === 'ミネア') return p.hand.length <= 8;
+  if (p.leader === 'エルナ') return p.hand.length <= 8;
   if (p.leader === 'ククール') {
     const unitHeal = p.board.reduce((a, u) => a + Math.min(3, u.maxhp - u.hp), 0);
     return p.leaderHp <= 22 || unitHeal >= 3;

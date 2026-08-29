@@ -49,9 +49,9 @@
 ## Step B. デッキリストを `cards.js` に登録する
 
 ```js
-'ミッドレンジ奇数ミネア': {
+'ミッドレンジ奇数エルナ': {
   style: 'midrange',        // aggro / midrange / control のどれか。AIの方針が変わる
-  leader: 'ミネア',          // effects.js の useTensionSkill に同じ名前で分岐が要る
+  leader: 'エルナ',          // effects.js の useTensionSkill に同じ名前で分岐が要る
   list: { 'モーモン': 3, 'サキュバス': 3, /* … 合計40枚 */ },
 },
 ```

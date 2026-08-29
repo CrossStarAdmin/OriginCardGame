@@ -112,7 +112,7 @@ function onSummon(g, p, u) {
       E.dealTo(g, chooseDamageTarget(g, p, 5), 5, p, u.name);
       break;
 
-    // ---- ミネア ----
+    // ---- エルナ ----
     case 'サキュバス':
       if (lookOdd(p)) E.draw(g, p, 1);
       break;
@@ -323,7 +323,7 @@ function useTensionSkill(g, p) {
   } else if (p.leader === 'ククール') {
     for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
     E.healLeader(g, p, 3, p, 'テンションスキル');
-  } else if (p.leader === 'ミネア') {
+  } else if (p.leader === 'エルナ') {
     const seen = p.deck.splice(0, Math.min(3, p.deck.length));
     if (seen.length) {
       // 一番使えそうな1枚を手札に、残りは奇数を上・偶数を下に
