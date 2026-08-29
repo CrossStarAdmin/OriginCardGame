@@ -110,7 +110,7 @@ node .claude/skills/simulating-deck-matchups/sim/validate.js
 ### 3-2. 1試合を目視する
 
 ```bash
-node .claude/skills/simulating-deck-matchups/sim/trace.js アグロゼシカ コントロールアルベル 777
+node .claude/skills/simulating-deck-matchups/sim/trace.js アグロリーゼ コントロールアルベル 777
 ```
 
 シードを変えて2〜3試合ぶん見る。次を確認する。
@@ -164,7 +164,7 @@ node .claude/skills/simulating-deck-matchups/sim/mirror.js 1000
 このスキルでやってほしくないこと。
 
 - **検証（Step3）を飛ばして数字を出さない。** AIの悪手はバグと同じで数字を大きく動かす。
-  実例：後攻ゼシカが初手の1MPをテンション上げに使い何も展開しない悪手を直しただけで、
+  実例：後攻のアグロが初手の1MPをテンション上げに使い何も展開しない悪手を直しただけで、
   ミラーの先攻勝率が95.3%→79.6%に動いた
 - **ミラーマッチ無しで「このデッキは先攻有利」と書かない。** 切り分けができていない
 - **カードテキストの曖昧な箇所を自分の判断で確定させない。** ユーザーに聞く

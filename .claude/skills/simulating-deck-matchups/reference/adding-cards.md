@@ -32,13 +32,13 @@
 
 ```js
 // ユニット：コスト / 攻撃力 / HP
-'ヒートギズモ':   { kind: 'unit', cost: 2, atk: 3, hp: 2, kw: ['突進'] },
+'ヴェルド':       { kind: 'unit', cost: 5, atk: 5, hp: 2, kw: ['速攻'] },
 
 // スペル：dmg は固定ダメージ量。効果が複雑ならここは省いて effects.js だけで書く
-'メラミ':         { kind: 'spell', cost: 2, dmg: 3 },
+'焔弾':           { kind: 'spell', cost: 2, dmg: 3 },
 
 // 種族タグを参照する効果があるカードには tag を付ける
-'イザヤール':     { kind: 'unit', cost: 3, atk: 2, hp: 2, kw: ['守護'], tag: '冒険者' },
+'修道女キーラ':   { kind: 'unit', cost: 3, atk: 2, hp: 2, kw: ['守護'], tag: '聖徒' },
 ```
 
 `kw` に書けるのは `ルール/06_キーワード能力.md` の常在キーワード（守護・突進・速攻・必殺・貫通）。
@@ -52,7 +52,7 @@
 'ミッドレンジ奇数エルナ': {
   style: 'midrange',        // aggro / midrange / control のどれか。AIの方針が変わる
   leader: 'エルナ',          // effects.js の useTensionSkill に同じ名前で分岐が要る
-  list: { 'モーモン': 3, 'サキュバス': 3, /* … 合計40枚 */ },
+  list: { 'オルレアの民': 3, '使い魔サキュ': 3, /* … 合計40枚 */ },
 },
 ```
 
@@ -70,15 +70,15 @@
 `u` が出たユニット、`p` が持ち主、`g` がゲーム全体。`case` で足す。
 
 ```js
-case 'メラゴースト':
+case '凶兆のまたたき':
   E.dealTo(g, chooseDamageTarget(g, p, 1), 1, p, u.name);
   break;
 
-case 'インキュバス':                       // ルック：奇数なら +1/+1
+case '夜番の観測者':                       // ルック：奇数なら +1/+1
   if (lookOdd(p)) { u.atk += 1; u.maxhp += 1; u.hp += 1; }
   break;
 
-case 'クリフト': {                          // 敵ユニット1体を破壊
+case '聖騎士ザキエル': {                    // 敵キャラクター1体を破壊
   if (foe.board.length) {
     const t = best(foe.board);
     t.hp = 0; t._killer = u.name; t._killerOwner = p.idx;
@@ -90,8 +90,8 @@ case 'クリフト': {                          // 敵ユニット1体を破壊
 ### 死亡時 — `onDeath(g, p, u)`
 
 ```js
-if (u.name === 'バルザック' && !u.token) {
-  const idx = p.deck.indexOf('バルザック＋');
+if (u.name === '相棒ヴァルザ' && !u.token) {
+  const idx = p.deck.indexOf('識りすぎたヴァルザ');
   if (idx >= 0) {
     p.hand.push(p.deck.splice(idx, 1)[0]);
     p.deck = E.shuffle(p.deck, g.rng);     // デッキを探したらシャッフルする
@@ -102,8 +102,8 @@ if (u.name === 'バルザック' && !u.token) {
 ### ターン終了時 — `onTurnEnd(g, p)`
 
 ```js
-if (u.name === 'ホイミスライム') E.healLeader(g, p, 1, p, u.name);
-else if (u.name === 'てつのさそり') E.healUnit(g, u, 1, p, u.name);
+if (u.name === '癒しの人形ホミ') E.healLeader(g, p, 1, p, u.name);
+else if (u.name === '長屋の病人') E.healUnit(g, u, 1, p, u.name);
 ```
 
 ### テンションリンク — `onTensionLink(g, p, u)`
@@ -111,12 +111,12 @@ else if (u.name === 'てつのさそり') E.healUnit(g, u, 1, p, u.name);
 テンションが上がるたび、場の自分のユニット全部に対して呼ばれる。
 
 ```js
-if (u.name === 'マルク') {
-  const idx = p.hand.indexOf('ポルク');
+if (u.name === 'マルカ') {
+  const idx = p.hand.indexOf('ポルカ');
   if (idx >= 0 && !E.boardFull(p)) {
     p.hand.splice(idx, 1);
-    E.recPlay(g, p, 'ポルク');              // 統計に「使った」と記録する
-    E.putUnit(g, p, 'ポルク', { trigger: true });
+    E.recPlay(g, p, 'ポルカ');              // 統計に「使った」と記録する
+    E.putUnit(g, p, 'ポルカ', { trigger: true });
   }
 }
 ```
@@ -130,11 +130,11 @@ if (u.name === 'マルク') {
 `target` はAIが渡してくる対象。無ければ自分で選ぶ。
 
 ```js
-case 'メラゾーマ':
-  E.dealTo(g, target || chooseDamageTarget(g, p, 5), 5, p, name);
+case '焔弾':
+  E.dealTo(g, target || chooseDamageTarget(g, p, 3), 3, p, name);
   break;
 
-case 'ようせいの笛':
+case '記録を繰る':
   E.draw(g, p, 2);
   break;
 ```
@@ -178,7 +178,7 @@ case 'ようせいの笛':
 
 `chooseDamageTarget(g, p, dmg, opts)` がデッキの `style` を見て顔／ユニットを選び分ける。
 
-- `{ faceOk: false }` — リーダーを狙えない効果（例：アルカナバースト「敵キャラクター1体」）
+- `{ faceOk: false }` — リーダーを狙えない効果（例：深読み「敵キャラクター1体」）
 - 省略時 — リーダーも対象になる
 
 自分で選ぶなら `foe.board` から条件で絞って `best()` に渡す。
@@ -189,7 +189,7 @@ case 'ようせいの笛':
 
 - **自傷ダメージの帰属**：味方を巻き込む効果（マーニャ、キングレオの偶数面）は、
   `srcPlayer` に**効果の持ち主**を渡す。相手を渡すと相手の撃破数に加算されてしまう
-- **トークンの無限ループ**：コピーを出す効果（わかめ王子）は `{ trigger: false, token: true }` で出す。
+- **トークンの無限ループ**：コピーを出す効果（双つの未来）は `{ trigger: false, token: true }` で出す。
   `trigger: true` にするとコピーがまたコピーを出し続ける
 - **墓地に入れない**：`token: true` のユニットは破壊されても墓地に残らない
 - **デッキを探したらシャッフル**：`ルール/07_効果処理.md` の通り。`indexOf` で抜いたら `E.shuffle`
@@ -205,12 +205,12 @@ case 'ようせいの笛':
 ユニットは `攻撃力 + HP`、スペルは0点で評価され、**強力なスペルが一生プレイされない**。
 
 ```js
-case 'クリフト': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
-case 'キングレオ': s += FX.lookOdd(p) ? 8 : -12; break;   // 撃ってはいけない状況は大きく下げる
+case '聖騎士ザキエル': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
+case '傲慢のノクス': s += FX.lookOdd(p) ? 8 : -12; break;   // 撃ってはいけない状況は大きく下げる
 ```
 
 スペルは `cardScore` の下半分の `switch` で必ず点数を付ける。
-**打っても無意味な状況では `-100` を返す**（例：蘇生対象が墓地に無いザオ）。そうしないとMPを捨てる。
+**打っても無意味な状況では `-100` を返す**（例：蘇生対象が墓地に無い「間に合わせの蘇生」）。そうしないとMPを捨てる。
 
 リーサル（とどめ）に使える顔ダメージ源は `faceBurnOptions(g, p)` にも足す。
 ここに無いカードはリーサル計算に入らず、勝てる場面を見逃す。

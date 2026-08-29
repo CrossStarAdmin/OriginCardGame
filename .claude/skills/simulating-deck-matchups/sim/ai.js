@@ -43,30 +43,37 @@ function cardScore(g, p, name) {
       if (d.kw.includes('守護')) s += (p.style === 'aggro' ? 0 : 2);
     }
     switch (name) {
-      case 'メラゴースト': s += 1; break;
-      case 'ベビーマジシャン': s += Math.min(2, p.spellsInGrave); break;
-      case 'まほうつかい': s += p.hand.some((n) => CARD_DB[n].kind === 'spell') ? 1 : 0; break;
-      case 'ヒートギズモ': s += p.spellsThisTurn > 0 ? 3 : 0; break;
-      case 'マージマタンゴ': s += enemyUnits.length ? 2 : 0; break;
-      case 'マルク': s += p.hand.includes('ポルク') ? 3 : 0; break;
-      case 'サーベルト': s += enemyTaunts.length ? 5 : 0; break;
-      case 'ベルゼバブ': s += 5; break;
-      case 'サキュバス': s += FX.lookOdd(p) ? 2 : 0; break;
-      case 'インキュバス': s += FX.lookOdd(p) ? 2 : 0; break;
-      case 'マーニャ': s += 1; break;
-      case 'エドガン': s += reviveBest(p, 4) * 0.6; break;
-      case 'しりょうのきし': s += (FX.lookOdd(p) && p.leaderHp < 22) ? 3 : 0; break;
-      case 'わかめ王子': s += FX.lookOdd(p) ? 5 : 0; break;
-      case 'バルザック＋': s += p.grave.includes('バルザック') ? 6 : 0; s += FX.lookOdd(p) ? 3 : 0; break;
-      case 'キングレオ': s += FX.lookOdd(p) ? 8 : -12; break;
-      case 'さまようたましい': s -= 2; break;
-      case 'イザヤール': s += 3; break;
-      case 'リトルライバーン': s += 3; break;
-      case 'クリフト': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
-      case 'ラヴィエル': s += 3; break;
-      case 'プリン': s += enemyUnits.length >= 2 ? 5 : (enemyUnits.length ? 2 : 0); break;
-      case 'マルチェロ': s += enemyUnits.length >= 2 ? 5 : 2; break;
-      case 'レティス': s += 6; break;
+      // アグロリーゼ
+      case '火の子': s += 1; break;
+      case '学舎の見習い': s += FX.afterburn(p) ? 2 : 0; break;
+      case 'ギズモ': s += FX.afterburn(p) ? 3 : 0; break;
+      case 'ドロテ': s += FX.afterburn(p) ? 4 : 0; break;
+      case 'マルカ': s += p.hand.includes('ポルカ') ? 3 : 0; break;
+      case 'ポルカ': s += p.board.some((u) => u.name === 'マルカ') ? 3 : 0; break;
+      case '老師ハルド': s += 1; break;
+      case '火口の洞守り': s += enemyUnits.length ? 2 : 0; break;
+      case 'ヴェルド': s += enemyTaunts.length ? 5 : 0; break;
+      case '師ベルゼ': s += Math.min(6, enemyUnits.length * 2); break;
+      // ミッドレンジ奇数エルナ
+      case '凶兆のまたたき': s += 1; break;
+      case '使い魔サキュ': s += FX.lookOdd(p) ? 2 : 0; break;
+      case '夜番の観測者': s += FX.lookOdd(p) ? 2 : 0; break;
+      case '姉マイア': s += 1; break;
+      case '相棒ヴァルザ': s += 1; break;
+      case '写し手ヨナ': s += reviveBest(p, 4) * 0.6; break;
+      case '天文台の護り': s += (FX.lookOdd(p) && p.leaderHp < 22) ? 3 : 0; break;
+      case '双つの未来': s += FX.lookOdd(p) ? 5 : 0; break;
+      case '識りすぎたヴァルザ': s += p.grave.includes('相棒ヴァルザ') ? 6 : 0; s += FX.lookOdd(p) ? 3 : 0; break;
+      case '傲慢のノクス': s += FX.lookOdd(p) ? 8 : -12; break;
+      // コントロールアルベル
+      case '傷ついた巡礼者': s -= 2; break;
+      case '修道女キーラ': s += 3; break;
+      case '聖獣キメラ': s += 3; break;
+      case '聖騎士ザキエル': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
+      case '老司祭ドラン': s += 3; break;
+      case '祈る巡礼者': s += enemyUnits.length >= 2 ? 5 : (enemyUnits.length ? 2 : 0); break;
+      case '偽善のミゼリア': s += enemyUnits.length >= 2 ? 5 : 2; break;
+      case '継承の大鐘': s += 6; break;
       default: break;
     }
     return s;
@@ -74,20 +81,29 @@ function cardScore(g, p, name) {
 
   // スペル
   switch (name) {
-    case 'メラ': return burnScore(g, p, 1);
-    case 'メラミ': return burnScore(g, p, 3);
-    case 'メラゾーマ': return burnScore(g, p, 5);
-    case 'アルカナショット': return 2 + (enemyUnits.some((u) => u.hp <= 1) ? 2 : 0);
-    case 'アルカナバースト': {
+    // アグロリーゼ
+    case '火の粉': return burnScore(g, p, 1);
+    case '焔弾': return burnScore(g, p, 3);
+    case '焼き払い': {
+      if (!enemyUnits.length) return -100;
+      const kills = enemyUnits.filter((u) => u.hp <= 2).length;
+      return 1 + kills * 1.5 + (enemyUnits.length >= 2 ? 1 : 0);
+    }
+    case '消えぬ焔':
+      return p.board.length ? 1 + p.board.length * 2.5 : -100;
+    // ミッドレンジ奇数エルナ
+    case '一手先を読む': return 2 + (enemyUnits.some((u) => u.hp <= 1) ? 2 : 0);
+    case '深読み': {
       if (!enemyUnits.length) return -100;
       const dmg = FX.lookOdd(p) ? 6 : 2;
       const kill = enemyUnits.some((u) => u.hp <= dmg);
       return (kill ? 4 + dmg * 0.6 : 1) + 1;
     }
-    case 'いのりのゆびわ': return 2 + (p.leaderHp <= 22 ? 2 : 0) + (p.board.some((u) => u.hp < u.maxhp) ? 1 : 0);
-    case 'ザオ': return reviveBest(p, 2) > 0 ? 2 + reviveBest(p, 2) * 0.3 : -100;
-    case 'ようせいの笛': return p.hand.length <= 5 ? 5 : 2;
-    case 'メガザル': {
+    // コントロールアルベル
+    case '小さな手当て': return 2 + (p.leaderHp <= 22 ? 2 : 0) + (p.board.some((u) => u.hp < u.maxhp) ? 1 : 0);
+    case '間に合わせの蘇生': return reviveBest(p, 2) > 0 ? 2 + reviveBest(p, 2) * 0.3 : -100;
+    case '記録を繰る': return p.hand.length <= 5 ? 5 : 2;
+    case '継ぐ者の儀': {
       const v = reviveBest(p, 3);
       return v > 0 && p.grave.filter((n) => CARD_DB[n].kind === 'unit' && CARD_DB[n].cost <= 3).length >= 2 ? 6 : -100;
     }
@@ -108,14 +124,12 @@ function faceBurnOptions(g, p) {
   const out = [];
   for (const n of new Set(p.hand)) {
     let dmg = 0;
-    if (n === 'メラ') dmg = 1;
-    else if (n === 'メラミ') dmg = 3;
-    else if (n === 'メラゾーマ') dmg = 5;
-    else if (n === 'ベルゼバブ') dmg = 5;
-    else if (n === 'メラゴースト') dmg = 1;
-    else if (n === 'ベビーマジシャン') dmg = Math.min(2, p.spellsInGrave);
-    else if (n === 'マルチェロ') dmg = 4;
-    else if (n === 'キングレオ') dmg = FX.lookOdd(p) ? 4 : 0;
+    if (n === '火の粉') dmg = 1;
+    else if (n === '焔弾') dmg = 3;
+    else if (n === '火の子') dmg = 1;
+    else if (n === '凶兆のまたたき') dmg = 1;
+    else if (n === '偽善のミゼリア') dmg = 4;
+    else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
     if (dmg <= 0) continue;
     const count = p.hand.filter((x) => x === n).length;
     for (let i = 0; i < count; i++) {
@@ -133,11 +147,20 @@ function planLethal(g, p) {
   let mp = p.mp;
   let slots = E.BOARD_MAX - p.board.length;
   const plan = [];
-  // テンションスキル（ゼシカのみ打点）
+  // テンションスキル（リーゼのみ打点）
   let skill = false;
-  if (p.leader === 'ゼシカ') {
+  if (p.leader === 'リーゼ') {
     if (p.tension === 3) { dmg += 2; skill = true; }
     else if (p.tension === 2 && mp >= 1 && !p.tensionRaisedThisTurn) { mp -= 1; dmg += 2; skill = true; }
+  }
+  // 消えぬ焔：味方全体に+2/+0と速攻。酔っていた子も殴れるようになる
+  if (p.hand.includes('消えぬ焔') && E.cardCost(p, '消えぬ焔') <= mp && p.board.length) {
+    mp -= E.cardCost(p, '消えぬ焔');
+    for (const u of p.board) {
+      if (u.frozen || u.attacked || u.atk <= 0) continue;
+      dmg += E.canAttackLeader(u) ? 2 : (u.atk + 2);
+    }
+    plan.push({ name: '消えぬ焔', cost: 0, dmg: 0, isUnit: false });
   }
   for (const o of faceBurnOptions(g, p)) {
     if (o.cost > mp) continue;
@@ -199,11 +222,11 @@ function playPhase(g, p) {
       if (s > bestVal) { bestVal = s; bestIdx = i; bestName = name; }
     }
     if (bestIdx < 0 || bestVal <= 0) break;
-    // ヒートギズモは同ターンにスペルを撃ってから出すと速攻を得る
-    if (bestName === 'ヒートギズモ' && p.spellsThisTurn === 0) {
-      const spellIdx = p.hand.findIndex((n) => CARD_DB[n].kind === 'spell'
-        && ['メラ', 'メラミ', 'メラゾーマ'].includes(n)
-        && E.cardCost(p, n) + 2 <= p.mp);
+    // 残火：同ターンにスペルを撃ってから出すと追加効果が乗る
+    if (['学舎の見習い', 'ギズモ', 'ドロテ'].includes(bestName) && p.spellsThisTurn === 0) {
+      const cost = E.cardCost(p, bestName);
+      const spellIdx = p.hand.findIndex((n) => ['火の粉', '焔弾'].includes(n)
+        && E.cardCost(p, n) + cost <= p.mp);
       if (spellIdx >= 0) {
         E.payAndPlay(g, p, spellIdx, null);
         continue;
@@ -231,7 +254,7 @@ function raiseTensionFirst(g, p) {
   // スキルが今すぐ欲しい場面は最優先で上げる
   // ただし1ターンを丸ごと潰してまで上げない（MPに余裕があるときだけ優先）
   if (p.tension === 2) {
-    if (p.leader === 'ゼシカ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
+    if (p.leader === 'リーゼ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
     if (p.leader === 'アルベル' && p.leaderHp <= 18 && (p.mp >= 3 || p.leaderHp <= 8)) return true;
     if (p.leader === 'エルナ' && p.hand.length <= 4 && p.mp >= 3) return true;
   }
@@ -254,7 +277,7 @@ function tensionPhase(g, p) {
 }
 
 function shouldUseSkill(g, p) {
-  if (p.leader === 'ゼシカ') return true;
+  if (p.leader === 'リーゼ') return true;
   if (p.leader === 'エルナ') return p.hand.length <= 8;
   if (p.leader === 'アルベル') {
     const unitHeal = p.board.reduce((a, u) => a + Math.min(3, u.maxhp - u.hp), 0);
@@ -371,8 +394,8 @@ function takeTurn(g, p) {
   E.startPhase(g, p);
   if (g.over) return;
 
-  // マルク＋ポルクのコンボは先にテンションを上げる
-  if (p.board.some((u) => u.name === 'マルク') && p.hand.includes('ポルク')
+  // マルカ＋ポルカのコンボは先にテンションを上げる
+  if (p.board.some((u) => u.name === 'マルカ') && p.hand.includes('ポルカ')
       && p.tension < 3 && p.mp >= 1 && !p.tensionRaisedThisTurn) {
     p.mp -= 1;
     p.tensionRaisedThisTurn = true;
