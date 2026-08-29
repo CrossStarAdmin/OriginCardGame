@@ -110,7 +110,7 @@ node .claude/skills/simulating-deck-matchups/sim/validate.js
 ### 3-2. 1試合を目視する
 
 ```bash
-node .claude/skills/simulating-deck-matchups/sim/trace.js アグロゼシカ コントロールククール 777
+node .claude/skills/simulating-deck-matchups/sim/trace.js アグロゼシカ コントロールアルベル 777
 ```
 
 シードを変えて2〜3試合ぶん見る。次を確認する。

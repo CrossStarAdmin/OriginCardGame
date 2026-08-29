@@ -144,7 +144,7 @@ case 'ようせいの笛':
 リーダーごとの分岐。`p.leader` で判定する。テンションの消費は関数の最後でまとめてやっている。
 
 ```js
-} else if (p.leader === 'ククール') {
+} else if (p.leader === 'アルベル') {
   for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
   E.healLeader(g, p, 3, p, 'テンションスキル');
 }

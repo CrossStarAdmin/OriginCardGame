@@ -154,7 +154,7 @@ function onSummon(g, p, u) {
       break;
     }
 
-    // ---- ククール ----
+    // ---- アルベル ----
     case 'さまようたましい':
       E.damageUnit(g, u, 2, p, u.name);
       break;
@@ -320,7 +320,7 @@ function useTensionSkill(g, p) {
   E.recPlay(g, p, 'テンションスキル');
   if (p.leader === 'ゼシカ') {
     E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, 'テンションスキル');
-  } else if (p.leader === 'ククール') {
+  } else if (p.leader === 'アルベル') {
     for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
     E.healLeader(g, p, 3, p, 'テンションスキル');
   } else if (p.leader === 'エルナ') {

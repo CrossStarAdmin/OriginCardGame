@@ -5,7 +5,7 @@ const AI = require('./ai.js');
 E.setEffects(FX);
 
 const deckA = process.argv[2] || 'アグロゼシカ';
-const deckB = process.argv[3] || 'コントロールククール';
+const deckB = process.argv[3] || 'コントロールアルベル';
 const seed = parseInt(process.argv[4] || '12345', 10);
 
 const stats = {};
