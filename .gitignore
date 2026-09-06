@@ -1,1 +1,5 @@
 .env
+
+# 完成カードはイラストと枠から再生成できる
+# powershell -ExecutionPolicy Bypass -File "カードフレーム/tools/compose.ps1" -Deck "デッキ名" -Force
+カード/
