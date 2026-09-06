@@ -1,0 +1,37 @@
+{
+  "card": {
+    "name": "夜番の観測者",
+    "deck": "ミッドレンジ奇数エルナ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\ミッドレンジ奇数エルナ\\カード一覧\\05_夜番の観測者.md",
+    "effects": [
+      "ルック：奇数：+1/+1する"
+    ],
+    "className": "占い師",
+    "type": "キャラクター",
+    "count": "3",
+    "cost": "3",
+    "atk": "3",
+    "hp": "3",
+    "look": {
+      "外見": "20代後半の男性。短く整えた黒髪、琥珀色の瞳。天文台の夜番で、防寒の効いた厚手の藍色の外套を羽織り、肩に長い真鍮の望遠鏡を担いでいる。生真面目で口の堅い、落ち着いた雰囲気。",
+      "情景": "天文台のバルコニーに立ち、空を掃くように見渡している。足元に真鍮のランタンが置かれている。",
+      "背景": "明るい星夜。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。",
+      "力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。",
+      "ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。",
+      "目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【外見】20代後半の男性。短く整えた黒髪、琥珀色の瞳。天文台の夜番で、防寒の効いた厚手の藍色の外套を羽織り、肩に長い真鍮の望遠鏡を担いでいる。生真面目で口の堅い、落ち着いた雰囲気。\n【情景】天文台のバルコニーに立ち、空を掃くように見渡している。足元に真鍮のランタンが置かれている。\n【背景】明るい星夜。\n【デッキ共通の見た目】光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。 力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。 ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。 目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1は効果テキストの帯に隠れるので、顔や主役をそこに置かない。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。",
+  "prompt": "Style: Japanese anime cel shading. Clean cel shading layered with soft gradients. Decisive, crisp linework with thick outer contours and thin inner detail lines. Fairly large eyes with meticulously rendered irises and highlights. Minimal, clear shadows on the skin, and glossy highlights on the hair. Vivid, highly saturated colors. Face with a readable expression. Finished quality suitable as key art for a social game.\nAppearance: A man in his late 20s. Neatly trimmed short black hair, amber eyes. An observatory night watchman wearing a thick, cold-resistant indigo cloak, carrying a long brass telescope on his shoulder. A serious, tight-lipped, composed atmosphere.\nScene: Standing on the balcony of an observatory, gazing out as if scanning the sky. A brass lantern is placed at his feet.\nBackground: A bright starry night.\nShared Deck Visuals: The light source is starlight. Base colors are deep indigo and black, with accent colors of pale gold and cold violet. Night sky theme. In bright scenes, starlight itself shines intensely, illuminating the scene with its glow. Warm colors are permitted only for the small flame of a lamp. Do not illuminate with fire or sunlight. The visual representation of power is unified as constellation symbols. Wherever power is active, faintly glowing constellation symbols always appear. Do not use other symbols such as magic circles or crosses. Ally and everyday powers are pale gold; omens and powers after falling to darkness are cold violet. All observation tools (star clocks, telescopes, astrolabes, star charts) are brass. The atmosphere shifts with Valza's fall to darkness. When depicting normal everyday life at the beginning of the story, make it a bright, lovely night sky. Create a romantic scene. When depicting scenes where Valza has fallen to darkness and the town has darkened, make the atmosphere dark and stagnant. Differentiate visually through the eyes. Post-fall Valza-related entities have no eyelids and do not close their eyes. Other cards contrast by having characters looking up or casting their gaze downward.\nComposition: A slightly vertical illustration of a single character. Dynamic composition captured from various angles. Mid-action. Clearly readable silhouette. The subject occupies most of the screen, with the head positioned toward the top.\nCanvas Usage: Fill the frame from edge to edge. Do not depict borders, margins, vignetting, or card backing in the artwork itself. Do not place important elements within 5% of any edge. The bottom quarter of the frame will be hidden by an effect text banner, so do not place the face or the main subject there.\nDo Not Depict: Do not include text, alphabet, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI elements, or status icons. Do not include speech bubbles, comic panels, collages, or split screens. Do not arrange the same character in multiple poses like a reference sheet.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T13:34:34.828Z"
+}

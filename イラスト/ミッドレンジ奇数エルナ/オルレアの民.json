@@ -1,0 +1,35 @@
+{
+  "card": {
+    "name": "オルレアの民",
+    "deck": "ミッドレンジ奇数エルナ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\ミッドレンジ奇数エルナ\\カード一覧\\01_オルレアの民.md",
+    "effects": [],
+    "className": "占い師",
+    "type": "キャラクター",
+    "count": "3",
+    "cost": "1",
+    "atk": "2",
+    "hp": "2",
+    "look": {
+      "外見": "20代前半の女性。つやのある短い黒髪を持つ。顔はとても穏やかで、琥珀色の瞳を持つ。藍色のフード付き外套を着た町の住人。小さな真鍮の星時計を手に持つ。顔立ちも装いも平凡。",
+      "情景": "星時計を掲げ、澄んだ夜空を見上げている。",
+      "背景": "明るくロマンチックな星夜。背景は希望にあふれており、平和な雰囲気。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。",
+      "力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。",
+      "ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。",
+      "目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【外見】20代前半の女性。つやのある短い黒髪を持つ。顔はとても穏やかで、琥珀色の瞳を持つ。藍色のフード付き外套を着た町の住人。小さな真鍮の星時計を手に持つ。顔立ちも装いも平凡。\n【情景】星時計を掲げ、澄んだ夜空を見上げている。\n【背景】明るくロマンチックな星夜。背景は希望にあふれており、平和な雰囲気。\n【デッキ共通の見た目】光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。 力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。 ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。 目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1は効果テキストの帯に隠れるので、顔や主役をそこに置かない。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。",
+  "prompt": "Art Style: Japanese anime cel shading. Clean cel shading layered with soft gradients. Confident and sharp linework, with thick main outlines and fine inner detail lines. Large eyes with carefully detailed irises and highlights. Clear skin with minimal shading, and glossy highlights in the hair. Vivid and highly saturated colors. Readable and expressive face. Finished to the quality of social game key art.\nAppearance: A woman in her early 20s. Glossy short black hair. A very gentle face with amber eyes. A town resident wearing an indigo hooded cloak. Holding a small brass star clock in her hands. Ordinary facial features and attire.\nScene: Holding up the star clock, looking up at the clear night sky.\nBackground: A bright and romantic starry night. The background is filled with hope, with a peaceful atmosphere.\nCommon Deck Visuals: The light source is starlight. Deep indigo and black as the base tones, with accent colors of pale gold and cold violet. Night sky theme. In bright scenes, the starlight itself shines intensely, illuminating the scene with its light. Warm colors are permitted only for small lamp flames. Do not brighten with fire or sunlight. The visual manifestation of power is unified as constellation symbols. Where power is at work, faintly glowing constellation symbols must always appear. Do not use other symbols such as magic circles or crosses. The power of allies and daily life is pale gold, while ominous signs and post-corruption power are cold violet. All observation instruments (star clocks, telescopes, astrolabes, star charts) are brass. The atmosphere changes with Valza's fall to darkness. When expressing the beginning of the story and ordinary daily life, make it a bright, wonderful night sky and a romantic scene. When expressing scenes after Valza's fall where the town becomes dark, make the air dark and stagnant. Distinguish through the eyes. Post-corruption Valza types have no eyelids and do not close their eyes; other cards contrast between looking up and casting eyes downward.\nComposition: Slightly vertical illustration of a single character. Dynamic composition captured from an active angle. In the middle of an action. Clearly readable silhouette. Head positioned toward the top, with the subject occupying most of the frame.\nFrame Usage: Artwork fills the frame edge to edge. Do not draw internal borders, margins, vignetting, or backing paper. Do not place important elements within 5% of any edge. The bottom quarter of the frame will be covered by an effect text banner, so do not place the face or main subject there.\nExcluded Elements: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI elements, or status icons. Do not make it a speech bubble, comic panel, collage, or split screen. Do not arrange multiple poses of the same character like a character design sheet.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T13:07:18.168Z"
+}

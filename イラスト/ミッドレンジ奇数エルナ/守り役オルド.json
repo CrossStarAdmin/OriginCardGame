@@ -1,0 +1,38 @@
+{
+  "card": {
+    "name": "守り役オルド",
+    "deck": "ミッドレンジ奇数エルナ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\ミッドレンジ奇数エルナ\\カード一覧\\06_守り役オルド.md",
+    "effects": [
+      "守護",
+      "召喚時：デッキの上から5枚を見て、好きな順番でデッキの上か下に置く"
+    ],
+    "className": "占い師",
+    "type": "キャラクター",
+    "count": "3",
+    "cost": "3",
+    "atk": "2",
+    "hp": "3",
+    "look": {
+      "外見": "40代の男性。少し白髪交じりの黒色の短い髪を持つ。琥珀色の瞳。星図を打ち出した真鍮と鋼の鎧をまとった、恰幅の良い中年兵士。自分の背丈ほどある大きなタワーシールドを持ち、傷の多い太い手をしている。何があっても動じない、静かで頑固な雰囲気。",
+      "情景": "天文台へ続く石段の下に立ちはだかり、タワーシールドを地に据えて両手で支える。こちらを正面から見据え、微動だにしない。誰も通さないという構え。",
+      "背景": "明るい星夜。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。",
+      "力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。",
+      "ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。",
+      "目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【外見】40代の男性。少し白髪交じりの黒色の短い髪を持つ。琥珀色の瞳。星図を打ち出した真鍮と鋼の鎧をまとった、恰幅の良い中年兵士。自分の背丈ほどある大きなタワーシールドを持ち、傷の多い太い手をしている。何があっても動じない、静かで頑固な雰囲気。\n【情景】天文台へ続く石段の下に立ちはだかり、タワーシールドを地に据えて両手で支える。こちらを正面から見据え、微動だにしない。誰も通さないという構え。\n【背景】明るい星夜。\n【デッキ共通の見た目】光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。 力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。 ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。 目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1は効果テキストの帯に隠れるので、顔や主役をそこに置かない。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。",
+  "prompt": "Art Style: Japanese anime cel shading style. Clean cel shading layered with soft gradients. Decisive, crisp line art with thick main contours and delicate inner details. Relatively large eyes with carefully detailed irises and highlights. Clear skin with minimal shadows, and glossy highlights on the hair. Vivid, highly saturated colors. A face with clearly readable expressions. Finished to a quality suitable for social game key art.\nAppearance: A man in his 40s. Short black hair mixed with a little gray. Amber eyes. A burly, middle-aged soldier wearing brass and steel armor embossed with star charts. Holding a massive tower shield about as tall as himself, with thick, heavily scarred hands. A quiet, stubborn aura that remains completely unshaken no matter what happens.\nScene: Standing firmly blocking the way at the foot of the stone steps leading to an observatory, planting the tower shield onto the ground and supporting it with both hands. Staring directly forward at the viewer, completely motionless. A stance meant to let no one pass.\nBackground: A bright starry night.\nDeck Shared Visuals: The light source is starlight. Deep indigo and black as base tones, with accent colors of pale gold and cold violet. Night sky theme. In bright scenes, the starlight itself shines brilliantly, illuminating the scene with that light. Warm colors are permitted only for small flames of lamps. Do not illuminate with fire or sunlight. The visual expression of power is unified as constellation symbols. Faintly glowing constellation symbols always appear wherever power is active. Do not use other symbols such as magic circles or crosses. The power of allies and daily life is pale gold, while the power of ill omens and the fallen state is cold violet. Observation instruments such as star clocks, telescopes, astrolabes, and star charts are all brass. Change the atmosphere with Valza's fall to darkness. When expressing the beginning of the story and ordinary daily life, make it a bright, wonderful night sky with a romantic scene. When expressing scenes where Valza has fallen to darkness and the town has darkened, make the air dark and stagnant. Differentiate through the eyes: characters affiliated with post-corruption Valza have no eyelids and do not close their eyes, while other cards contrast by looking upward or casting their eyes downward.\nComposition: Slightly vertically elongated illustration of a single character. Dynamic composition captured from an engaging angle. Caught mid-action. Distinct, readable silhouette. Head placed toward the top, with the subject occupying most of the frame.\nScreen Usage: The artwork fills the frame edge to edge. Do not draw borders, margins, vignetting, or card mountings. Do not place important elements within 5 percent of any edge. The bottom fourth of the frame will be hidden by an effect text banner, so do not place faces or the main subject there.\nExcluded Elements: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI components, or status icons. Do not make it speech bubbles, comic panels, collages, or split screens. Do not arrange the same character in multiple poses like a character design sheet.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T13:34:36.730Z"
+}

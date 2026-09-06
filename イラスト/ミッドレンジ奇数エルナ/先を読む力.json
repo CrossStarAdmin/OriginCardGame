@@ -1,0 +1,35 @@
+{
+  "card": {
+    "name": "先を読む力",
+    "deck": "ミッドレンジ奇数エルナ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\ミッドレンジ奇数エルナ\\カード一覧\\04_先を読む力.md",
+    "effects": [
+      "1体に1ダメージを与える。カードを1枚引き、その後手札から1枚をデッキの上に置く"
+    ],
+    "className": "占い師",
+    "type": "スペル",
+    "count": "3",
+    "cost": "1",
+    "look": {
+      "外見": "画面の中で小さく描かれたエルナが手を掲げている。20代前半の女性で、艶のある長い黒髪と切れ長の琥珀色の瞳、紫と金を基調としたワンピースのヴェールをまとう。周りには星座の記号が輪になって展開している。",
+      "情景": "掲げた手から星の力が地面へ走り、エルナの周りの大地が盛り上がって砕けている。砕けた岩と光の柱が画面いっぱいに広がる。技の名前や説明を画面に書き込まない。",
+      "背景": "明るく澄んだ星夜。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。",
+      "力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。",
+      "ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。",
+      "目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1は効果テキストの帯に隠れるので、顔や主役をそこに置かない。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】画面の中で小さく描かれたエルナが手を掲げている。20代前半の女性で、艶のある長い黒髪と切れ長の琥珀色の瞳、紫と金を基調としたワンピースのヴェールをまとう。周りには星座の記号が輪になって展開している。\n【情景】掲げた手から星の力が地面へ走り、エルナの周りの大地が盛り上がって砕けている。砕けた岩と光の柱が画面いっぱいに広がる。技の名前や説明を画面に書き込まない。\n【背景】明るく澄んだ星夜。\n【デッキ共通の見た目】光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。 力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。 ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。 目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。\n【構図】やや縦長の、現象そのもののイラスト。基本的に人物が技を撃っていたり、その技自体が中心になっている。効果そのものが主役で、広がりのある劇的な一瞬として捉える。エネルギーの中心は画面の上半分に置く。",
+  "prompt": "Art Style: Japanese anime cel shading with clean cel painting layered with soft gradients. Clear and confident line art with thick main outlines and delicate inner detail lines. Large eyes with meticulously detailed irises and highlights. Clear skin with minimal shading, and glossy highlights on the hair. Vivid and highly saturated colors. Faces with legible expressions. Quality and finish suitable for social game key art.\nScreen Usage: Fill the image from edge to edge. Do not draw borders, margins, vignetting, or back mounts around the image itself. Do not place important elements within 5% of any edge. Do not place faces or main subjects in the bottom quarter of the screen, as it will be covered by an effect text banner.\nExclusions: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI components, or status icons. Do not create speech bubbles, comic panels, collages, or split screens. Do not arrange the same character in multiple poses like a reference sheet.\nAppearance: Erna is drawn small within the frame, raising her hand. She is a woman in her early twenties with glossy long black hair, sharp amber eyes, wearing a purple and gold one-piece dress with a veil. Constellation symbols are deployed in a ring around her.\nScene: Astral power runs from her raised hand into the ground, causing the earth around Erna to surge upward and shatter. Shattered rocks and pillars of light spread across the entire frame. Do not write skill names or descriptions on the screen.\nBackground: A bright and clear starry night.\nDeck Shared Visuals: The light source is starlight. The base colors are deep indigo and black, with pale gold and cool violet as accent colors. Night sky theme. In bright scenes, starlight itself shines intensely, illuminating the scene with that light. Warm colors are permitted only for small lamp flames. Do not brighten with fire or sunlight. The appearance of magical power is unified using constellation symbols. Faintly glowing constellation symbols always appear where power is at work. Do not use other symbols such as magic circles or crosses. Powers of allies and daily life are pale gold, while ill omens and powers after falling to darkness are cool violet. Observation tools such as star clocks, telescopes, astrolabes, and star charts are all brass. Change the atmosphere with Valza falling to darkness. When expressing the beginning of the story and usual daily life, make it a bright, lovely night sky with a romantic scene. When expressing scenes where Valza has fallen to darkness and the town has darkened, make the air dark and stagnant. Differentiate through the eyes. Characters aligned with Valza after falling to darkness have no eyelids and do not close their eyes. Other cards contrast by having characters looking up or casting their eyes downward.\nComposition: A slightly vertical illustration focused on the phenomenon itself. Basically, a character unleashing a technique, or the technique itself, is at the center. The effect itself is the main subject, captured as an expansive and dramatic moment. Place the center of energy in the upper half of the screen.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T13:44:03.605Z"
+}

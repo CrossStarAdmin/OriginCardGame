@@ -1,0 +1,38 @@
+{
+  "card": {
+    "name": "姉マイア",
+    "deck": "ミッドレンジ奇数エルナ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\ミッドレンジ奇数エルナ\\カード一覧\\07_姉マイア.md",
+    "effects": [
+      "おうえん",
+      "テンションリンク：ルック：奇数：場のキャラクターすべてに1ダメージを与える"
+    ],
+    "className": "占い師",
+    "type": "キャラクター",
+    "count": "3",
+    "cost": "3",
+    "atk": "3",
+    "hp": "3",
+    "look": {
+      "外見": "20代後半の女性。艶のある長い黒髪、琥珀色の瞳。エルナによく似た顔立ちだが、より朗らかで温かい表情をしている。淡い金と白の薄い衣をまとった踊り子の身軽な装い。手には何も持たず、身ひとつで踊る。",
+      "情景": "踊りの動作の途中で両腕を掲げ、流星が降り注ぐ。顔は空ではなく正面を向いている。",
+      "背景": "明るくロマンチックな星夜。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。",
+      "力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。",
+      "ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。",
+      "目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1は効果テキストの帯に隠れるので、顔や主役をそこに置かない。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】20代後半の女性。艶のある長い黒髪、琥珀色の瞳。エルナによく似た顔立ちだが、より朗らかで温かい表情をしている。淡い金と白の薄い衣をまとった踊り子の身軽な装い。手には何も持たず、身ひとつで踊る。\n【情景】踊りの動作の途中で両腕を掲げ、流星が降り注ぐ。顔は空ではなく正面を向いている。\n【背景】明るくロマンチックな星夜。\n【デッキ共通の見た目】光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。 力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。 ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。 目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": "Art style: Japanese anime cel shading. Clean cel shading overlaid with soft gradations. Clear, confident line art with thick outer contours and delicate inner linework. Large eyes with meticulously detailed irises and highlights. Clear skin with minimal shading, glossy highlights on the hair. Vivid and highly saturated colors. An expressive, easily readable face. Finished to the quality level of mobile social game key art.\nCanvas usage: Fill the screen edge to edge. Do not draw borders, margins, vignetting, or mounting mats on the image itself. Do not place critical elements within 5 percent of any edge. The bottom quarter of the screen will be obscured by an effect text band, so do not place the face or main subject there.\nDo not depict: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI elements, or status icons. Do not create speech bubbles, manga panels, collages, or split screens. Do not show the same character in multiple poses like a reference sheet.\nAppearance: A woman in her late twenties. Glossy long black hair, amber eyes. Facial features very similar to Erna, but with a more cheerful and warm expression. Light dancer attire consisting of sheer garments in pale gold and white. Holding nothing in her hands, dancing with only her body.\nScene: Mid-dance with both arms raised overhead as shooting stars rain down. The face is directed forward toward the viewer rather than looking up at the sky.\nBackground: A bright and romantic starry night.\nShared deck aesthetic: The light source is starlight. Deep indigo and black form the base palette, accented with pale gold and cool violet. Night sky theme. In bright scenes, make the starlight itself shine intensely to illuminate the canvas. Warm colors are permitted only for small lamp flames. Do not illuminate with fire or sunlight. Manifestations of power are unified as constellation symbols. Wherever power is active, faintly glowing constellation symbols must appear. Do not use other symbols such as magic circles or crosses. The power of allies and daily life is pale gold, while the power of dark omens and corruption is cool violet. All astronomical instruments (star clocks, telescopes, astrolabes, star charts) are made of brass. The atmosphere shifts with Valza's fall to darkness. When depicting the everyday normal life at the start of the story, make it a bright, wonderful night sky and romantic scene. When depicting scenes where Valza has fallen to darkness and the town has darkened, make the atmosphere dark and stagnant. Differentiate through the eyes: corrupted Valza-related entities have no eyelids and do not close their eyes, while other cards contrast by looking upward or casting their eyes downward.\nComposition: A slightly vertically oriented illustration of a single character. A dynamic composition captured from an engaging angle. Mid-motion. A clearly readable silhouette. The head positioned toward the top of the frame, with the subject occupying most of the canvas.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T13:44:35.418Z"
+}
