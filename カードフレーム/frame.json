@@ -1,0 +1,66 @@
+{
+  "note": "座標は各枠画像の左上を原点としたピクセル。配置は カード/ のサンプル3枚（500x698）を実測し、約2.12倍して求めた",
+  "font": "Yu Gothic UI",
+
+  "キャラクター": {
+    "dir": "キャラクター",
+    "canvas": { "width": 1060, "height": 1484 },
+    "art":  { "x": 44, "y": 33, "width": 982, "height": 1168 },
+    "cost": { "cx": 104, "cy": 131, "size": 76 },
+    "atk":  { "cx": 133, "cy": 1295, "size": 86 },
+    "hp":   { "cx": 927, "cy": 1295, "size": 86 },
+    "effectBox": {
+      "x": 64, "y": 939, "width": 942, "height": 211, "radius": 25,
+      "padX": 22, "padY": 28, "size": 30,
+      "align": "near", "valign": "near",
+      "fill": "#000000", "alpha": 150, "color": "#FFFFFF"
+    },
+    "name": { "x": 265, "y": 1192, "width": 533, "height": 130, "size": 63, "color": "#3B2A14" },
+    "type": { "x": 265, "y": 1334, "width": 533, "height": 76, "size": 26, "color": "#3B2A14" },
+    "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
+    "frames": {
+      "焔術士": "Pyromancer.png",
+      "星詠み": "Astrologer.png",
+      "司祭": "Priest.png"
+    }
+  },
+
+  "スペル": {
+    "dir": "スペル",
+    "canvas": { "width": 1061, "height": 1482 },
+    "art":  { "x": 42, "y": 30, "width": 983, "height": 1199 },
+    "cost": { "cx": 102, "cy": 115, "size": 70 },
+    "effectBox": {
+      "x": 64, "y": 938, "width": 942, "height": 211, "radius": 25,
+      "padX": 22, "padY": 28, "size": 30,
+      "align": "near", "valign": "near",
+      "fill": "#000000", "alpha": 150, "color": "#FFFFFF"
+    },
+    "name": { "x": 135, "y": 1180, "width": 806, "height": 148, "size": 70, "color": "#3B2A14" },
+    "type": { "x": 135, "y": 1345, "width": 806, "height": 60, "size": 26, "color": "#3B2A14" },
+    "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
+    "frames": {
+      "焔術士": "Pyromancer.png",
+      "星詠み": "Astrologer.png",
+      "司祭": "Priest.png"
+    }
+  },
+
+  "リーダー": {
+    "dir": "リーダー",
+    "canvas": { "width": 1061, "height": 1483 },
+    "note": "コストと攻撃力の欄は無い。HPは25固定で、枠に専用欄が無い",
+    "art":        { "x": 42, "y": 24, "width": 979, "height": 1053 },
+    "name":       { "x": 210, "y": 1072, "width": 640, "height": 94, "size": 60, "color": "#FFFFFF" },
+    "skillLabel": { "x": 350, "y": 1194, "width": 360, "height": 48, "size": 30, "color": "#D9B657", "text": "テンションスキル" },
+    "skillName":  { "x": 160, "y": 1248, "width": 740, "height": 64, "size": 46, "color": "#FFFFFF" },
+    "skillText":  { "x": 110, "y": 1315, "width": 840, "height": 92, "size": 28, "color": "#FFFFFF" },
+    "type":       { "x": 110, "y": 1416, "width": 840, "height": 34, "size": 24, "color": "#D9B657", "text": "リーダー" },
+    "style": { "statText": "#FFFFFF", "statOutline": "#0A1A32" },
+    "frames": {
+      "焔術士": "Pyromancer.png",
+      "星詠み": "Astrologer.png",
+      "司祭": "Priest.png"
+    }
+  }
+}
