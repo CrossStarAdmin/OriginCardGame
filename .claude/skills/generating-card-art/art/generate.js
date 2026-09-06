@@ -3,22 +3,43 @@ const fs = require('fs');
 const { parseArgs } = require('./cli.js');
 const { resolveTargets } = require('./targets.js');
 const IMAGE = require('./image.js');
+const { translate, MODEL: TEXT_MODEL } = require('./translate.js');
 
 // 生成済み画像は既定でスキップする。--force で上書き
 function pending(targets, force) {
   return force ? targets : targets.filter((t) => !t.exists);
 }
 
-function writeResult(target, image, opts) {
+// 前回と同じ日本語なら、そのときの英文を使い回す。訳し直すと絵が変わってしまう
+function cachedEnglish(target) {
+  if (!fs.existsSync(target.meta)) return null;
+  try {
+    const meta = JSON.parse(fs.readFileSync(target.meta, 'utf8'));
+    return meta.promptJa === target.promptJa && meta.prompt ? meta.prompt : null;
+  } catch {
+    return null;
+  }
+}
+
+// 翻訳は provider に関わらず Google の文章モデルを使うので、鍵は translate.js 側で解決させる
+async function englishPrompt(target) {
+  const cached = cachedEnglish(target);
+  if (cached) return { prompt: cached, reused: true };
+  return { prompt: await translate(target.promptJa), reused: false };
+}
+
+function writeResult(target, image, prompt, opts) {
   fs.mkdirSync(target.dir, { recursive: true });
   fs.writeFileSync(target.image, image.buffer);
   const meta = {
     card: target.card,
-    prompt: target.prompt,
+    promptJa: target.promptJa,
+    prompt,
     revisedPrompt: image.revisedPrompt,
     provider: opts.provider,
-    style: opts.style || require('./style.js').DEFAULT_PRESET,
+    style: target.preset,
     model: image.model,
+    textModel: TEXT_MODEL,
     aspect: target.aspect,
     generatedAt: new Date().toISOString(),
   };
@@ -33,10 +54,12 @@ async function worker(queue, opts, state) {
     const target = queue.shift();
     const label = `${target.card.deck}/${target.card.name}`;
     try {
-      const image = await IMAGE.generate(opts.provider, target.prompt, { ...request, aspect: target.aspect });
-      writeResult(target, image, opts);
+      const { prompt, reused } = await englishPrompt(target);
+      const image = await IMAGE.generate(opts.provider, prompt, { ...request, aspect: target.aspect });
+      writeResult(target, image, prompt, opts);
       state.done++;
-      console.log(`[${state.done + state.failed}/${state.total}] OK   ${label}`);
+      const note = reused ? '（前回の英文を再利用）' : '（英訳した）';
+      console.log(`[${state.done + state.failed}/${state.total}] OK   ${label} ${note}`);
     } catch (e) {
       state.failed++;
       state.errors.push({ label, message: e.message });
@@ -53,8 +76,9 @@ async function main() {
 
   console.log(`対象 ${targets.length} 枚 / 生成する ${queue.length} 枚（スキップ ${targets.length - queue.length} 枚）`);
   const aspects = [...new Set(targets.map((t) => t.aspect))].join(' ');
-  const styleName = opts.style || require('./style.js').DEFAULT_PRESET;
-  console.log(`${opts.provider} ${model} / 絵柄 ${styleName} / 縦横比 ${aspects} / 並列 ${opts.concurrency} / 出力先 ${opts.out}/`);
+  const styles = [...new Set(targets.map((t) => t.preset))].join(' ');
+  console.log(`${opts.provider} ${model} / 絵柄 ${styles} / 縦横比 ${aspects} / 並列 ${opts.concurrency} / 出力先 ${opts.out}/`);
+  console.log(`日本語プロンプトは ${TEXT_MODEL} で英訳してから送る`);
 
   if (opts.dryRun) {
     for (const t of queue) console.log(`  生成予定: ${t.card.deck}/${t.card.name} (${t.aspect})`);

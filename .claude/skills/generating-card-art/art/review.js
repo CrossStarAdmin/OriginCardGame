@@ -1,9 +1,9 @@
-// 和文と英文の突き合わせ。生成の前にこれを読み、ずれていたら subjects.js / style.json を直す
-// APIは呼ばない
+// 送るプロンプトを区画ごとに表示する。APIは呼ばない
+// 新形式は日本語のまま（送る直前に英訳される）。旧形式は和文と英文の対を並べる
 const { parseArgs } = require('./cli.js');
 const { resolveTargets } = require('./targets.js');
 const { buildReview } = require('./prompt.js');
-const { PRESETS } = require('./style.js');
+const { styleNames } = require('./artrules.js');
 
 function wrap(text, width, indent) {
   const lines = [];
@@ -21,21 +21,20 @@ function main() {
     const c = t.card;
     const stats = c.type === 'キャラクター' ? ` コスト${c.cost} ${c.atk}/${c.hp}` : c.cost ? ` コスト${c.cost}` : '';
     console.log(`\n${'='.repeat(78)}`);
-    console.log(`■ ${c.deck} / ${c.name}（${c.type}・${c.className || '-'}${stats}）  絵柄 ${r.preset}`);
-    if (!r.defined) { undefinedCount++; console.log('  ※ subjects.js に定義が無い。汎用プロンプトになっている'); }
+    console.log(`■ ${c.deck} / ${c.name}（${c.type}・${c.className || '-'}${stats}）  絵柄 ${r.preset}  縦横比 ${t.aspect}`);
+    if (!r.defined) { undefinedCount++; console.log('  ※ カードmdの 外見／情景 が空。絵の指定を書く'); }
     if (c.effects && c.effects.length) console.log(`  効果: ${c.effects.join(' / ')}`);
 
     for (const p of r.parts) {
       console.log(`\n  【${p.label}】`);
-      console.log(wrap(p.jp, 60, '    和 '));
-      console.log(wrap(p.en, 78, '    英 '));
+      console.log(wrap(p.text, 60, '    '));
     }
   }
 
   console.log(`\n${'='.repeat(78)}`);
-  console.log(`${targets.length} 枚を表示（絵柄は ${PRESETS.join(' / ')} から --style で選ぶ）`);
-  if (undefinedCount) console.log(`※ subjects.js に定義が無いカードが ${undefinedCount} 枚ある。生成前に書く`);
-  console.log('和文と英文がずれていたら subjects.js（被写体）か style.json（画風・構図・色・除外）を直す');
+  console.log(`${targets.length} 枚を表示（絵柄は ${styleNames().join(' / ')} から --style で選ぶ）`);
+  if (undefinedCount) console.log(`※ 絵の指定が空のカードが ${undefinedCount} 枚ある。生成前に書く`);
+  console.log('直す場所: 全カード共通=イラスト/共通ルール.md / デッキ=overview.md の見た目のルール / 1枚=カード一覧の該当md');
 }
 
 main();

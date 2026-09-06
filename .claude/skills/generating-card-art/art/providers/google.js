@@ -6,12 +6,14 @@ const BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 const RETRYABLE = new Set([408, 429, 500, 502, 503, 504]);
 // 429でも残高切れは待っても回復しないので、即座に失敗させる
 const FATAL = /credits are depleted|billing|quota .*exceeded for .*billing/i;
-const DEFAULT_MODEL = 'gemini-2.5-flash-image';
+const DEFAULT_MODEL = 'gemini-3-pro-image';
+// 解像度を指定できるのは gemini-3 世代の画像モデルだけ
+const SUPPORTS_IMAGE_SIZE = /^gemini-3/;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const requireKey = () => apiKey(['GEMINI_API_KEY', 'GOOGLE_API_KEY'], 'https://aistudio.google.com/apikey で発行');
 
-function buildRequest(model, prompt, aspect) {
+function buildRequest(model, prompt, aspect, imageSize) {
   if (model.startsWith('imagen-')) {
     return {
       url: `${BASE}/${model}:predict`,
@@ -21,11 +23,13 @@ function buildRequest(model, prompt, aspect) {
       },
     };
   }
+  const imageConfig = { aspectRatio: aspect };
+  if (imageSize && SUPPORTS_IMAGE_SIZE.test(model)) imageConfig.imageSize = imageSize;
   return {
     url: `${BASE}/${model}:generateContent`,
     body: {
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { responseModalities: ['IMAGE'], imageConfig: { aspectRatio: aspect } },
+      generationConfig: { responseModalities: ['IMAGE'], imageConfig },
     },
   };
 }
@@ -48,11 +52,12 @@ async function generate(prompt, options = {}) {
   const {
     model = process.env.GOOGLE_IMAGE_MODEL || DEFAULT_MODEL,
     aspect = '4:5',
+    imageSize = process.env.GOOGLE_IMAGE_SIZE || '2K',
     maxRetries = 4,
     key = requireKey(),
   } = options;
 
-  const { url, body } = buildRequest(model, prompt, aspect);
+  const { url, body } = buildRequest(model, prompt, aspect, imageSize);
   const payload = JSON.stringify(body);
 
   let lastError = null;

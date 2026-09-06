@@ -3,10 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const { loadDecks, listSubjects } = require('./decks.js');
 const { buildPrompt } = require('./prompt.js');
-const { ASPECT, preset } = require('./style.js');
+
+// カード枠のアート窓の比から決めた生成比（カードフレーム/frame.json）
+// 枠を差し替えたら測り直す
+const ASPECT = { 'リーダー': '4:5', 'キャラクター': '4:5', 'スペル': '4:5', '武器': '4:5' };
 
 function resolveTargets(opts) {
-  preset(opts.style); // 存在しないプリセット名なら、ここで止める
   const decks = loadDecks(opts.decks);
   let cards = listSubjects(decks, { includeLeader: opts.includeLeader });
 
@@ -19,11 +21,20 @@ function resolveTargets(opts) {
   return cards.map((card) => {
     const dir = path.join(process.cwd(), opts.out, card.deck);
     const image = path.join(dir, `${card.name}.png`);
-    const { prompt, defined } = buildPrompt(card, opts.style);
-    // 明示指定が無ければ、枠のアート窓に合う比を種類から決める
+    const built = buildPrompt(card, opts.style);
     const aspect = opts.aspect || ASPECT[card.type] || '4:5';
-    return { card, dir, image, meta: path.join(dir, `${card.name}.json`), prompt, defined, aspect, exists: fs.existsSync(image) };
+    return {
+      card,
+      dir,
+      image,
+      meta: path.join(dir, `${card.name}.json`),
+      promptJa: built.promptJa,
+      defined: built.defined,
+      preset: built.preset,
+      aspect,
+      exists: fs.existsSync(image),
+    };
   });
 }
 
-module.exports = { resolveTargets };
+module.exports = { resolveTargets, ASPECT };

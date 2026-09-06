@@ -1,4 +1,4 @@
-// デッキ/*.md からカード定義を読み出す
+// デッキを読み出す。デッキ/<デッキ名>/overview.md ＋ カード一覧/*.md（カード1枚が1ファイル）
 const fs = require('fs');
 const path = require('path');
 
@@ -14,93 +14,144 @@ const FIELD = {
   '種族タグ': 'tag',
 };
 
-// 「- **キー**: 値」と、その下にぶら下がる「  - 値」を拾う
-function parseCardBody(lines) {
-  const card = { effects: [] };
-  let key = null;
-  for (const raw of lines) {
-    const top = /^- \*\*(.+?)\*\*\s*[:：]\s*(.*)$/.exec(raw.trimEnd());
-    if (top) {
-      key = top[1];
-      const value = top[2].trim();
-      if (key === '効果') {
-        if (value && value !== '効果なし') card.effects.push(value);
-      } else if (FIELD[key]) {
-        card[FIELD[key]] = value;
-      }
+const isBlank = (v) => !v || v === '-' || v === '─' || v === '—';
+
+// ---- 新形式 -------------------------------------------------------------
+
+// 「## 見出し」「### 見出し」で本文を切り分ける
+function splitSections(text, marker) {
+  const pattern = new RegExp(`^${marker} (.+)$`);
+  const out = new Map();
+  let title = null;
+  let buffer = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const hit = pattern.exec(raw);
+    if (hit) {
+      if (title) out.set(title, buffer);
+      title = hit[1].trim();
+      buffer = [];
       continue;
     }
-    const sub = /^\s+- (.+)$/.exec(raw.trimEnd());
-    if (sub && key === '効果') card.effects.push(sub[1].trim());
+    if (title) buffer.push(raw);
   }
+  if (title) out.set(title, buffer);
+  return out;
+}
+
+// 「| 項目 | 内容 |」の表を拾う。区切り行と見出し行は捨てる
+function parseTable(lines) {
+  const out = {};
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line.startsWith('|') || /^\|[\s:|-]+\|$/.test(line)) continue;
+    const cells = line.split('|').slice(1, -1).map((c) => c.trim());
+    if (cells.length !== 2) continue;
+    if (cells[0] === '項目') continue;
+    out[cells[0]] = cells[1];
+  }
+  return out;
+}
+
+// 箇条書きなら1項目1行、地の文ならそのまま1行として拾う
+// 番号・箇条書き記号・強調はプロンプトに要らないので落とす
+function parseLines(lines) {
+  return (lines || [])
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .filter((l) => !l.startsWith('|') && !l.startsWith('>') && !l.startsWith('#'))
+    .map((l) => l.replace(/^[-*]\s+/, '').replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim())
+    .filter(Boolean);
+}
+
+function parseCardFile(file, deckName) {
+  const text = fs.readFileSync(file, 'utf8');
+  const title = /^#\s+(.+)$/m.exec(text);
+  if (!title) throw new Error(`カードの見出し「# 名前」が無い: ${file}`);
+
+  const h2 = splitSections(text, '##');
+  const table = parseTable(text.split(/\r?\n/));
+  const art = splitSections((h2.get('絵') || []).join('\n'), '###');
+
+  const card = { name: title[1].trim(), deck: deckName, file, effects: [] };
+  for (const [key, field] of Object.entries(FIELD)) {
+    if (!isBlank(table[key])) card[field] = table[key];
+  }
+
+  const effects = parseLines(h2.get('効果')).filter((l) => l !== '効果なし');
+  // リーダーは「テンションスキル：名前」の行をスキル名として抜き、残りを効果本文にする
+  const skillLine = card.type === 'リーダー' ? effects.find((l) => l.startsWith('テンションスキル')) : null;
+  if (skillLine) {
+    card.skillName = skillLine.replace(/^テンションスキル\s*[:：]\s*/, '').trim();
+    card.effects = effects.filter((l) => l !== skillLine);
+  } else {
+    card.effects = effects;
+  }
+
+  card.look = {
+    外見: parseLines(art.get('外見')).join(''),
+    情景: parseLines(art.get('情景')).join(''),
+    背景: parseLines(art.get('背景')).join(''),
+  };
+  card.hasLook = Boolean(card.look.外見 || card.look.情景);
   return card;
 }
 
-function parseLeader(lines) {
-  const body = lines.map((l) => l.trim()).filter(Boolean);
-  if (!body.length) return null;
-  const skillLine = body.find((l) => l.startsWith('テンションスキル')) || '';
-  const skillIndex = body.indexOf(skillLine);
+function parseOverview(file, deckName) {
+  const text = fs.readFileSync(file, 'utf8');
+  const h2 = splitSections(text, '##');
+  const table = parseTable(text.split(/\r?\n/));
+  const concept = (text.split(/\r?\n/).slice(1).find((l) => l.trim() && !l.startsWith('#')) || '').trim();
+  // 見出し名は「見た目のルール」「見た目の共通ルール」など揺れるので、含むもので拾う
+  const lookKey = [...h2.keys()].find((k) => k.includes('見た目'));
   return {
-    name: body[0],
-    type: 'リーダー',
-    skillName: skillLine.replace(/^テンションスキル\s*[:：]\s*/, ''),
-    effects: skillIndex >= 0 ? body.slice(skillIndex + 1) : [],
+    concept,
+    className: table['クラス'] || null,
+    lookRules: parseLines(h2.get(lookKey)),
   };
 }
 
-function parseDeckFile(file) {
-  const text = fs.readFileSync(file, 'utf8');
-  const lines = text.split(/\r?\n/);
-  const deckName = path.basename(file, '.md');
+function loadDeckFolder(dir) {
+  const deckName = path.basename(dir);
+  const overviewFile = path.join(dir, 'overview.md');
+  const cardsDir = path.join(dir, 'カード一覧');
+  if (!fs.existsSync(overviewFile)) throw new Error(`overview.md が無い: ${dir}`);
+  if (!fs.existsSync(cardsDir)) throw new Error(`カード一覧/ が無い: ${dir}`);
 
-  const deck = { name: deckName, file, concept: '', leader: null, cards: [] };
-  deck.concept = (lines.slice(1).find((l) => l.trim()) || '').trim();
+  const overview = parseOverview(overviewFile, deckName);
+  const files = fs.readdirSync(cardsDir).filter((f) => f.endsWith('.md')).sort();
+  const all = files.map((f) => parseCardFile(path.join(cardsDir, f), deckName));
 
-  let section = null;   // '各種カード' | 'リーダー' | null
-  let cardName = null;
-  let buffer = [];
-
-  const flush = () => {
-    if (section === '各種カード' && cardName) {
-      deck.cards.push({ name: cardName, deck: deckName, ...parseCardBody(buffer) });
-    } else if (section === 'リーダー') {
-      const leader = parseLeader(buffer);
-      if (leader) deck.leader = { ...leader, deck: deckName, className: null };
-    }
-    cardName = null;
-    buffer = [];
+  const deck = {
+    name: deckName,
+    file: overviewFile,
+    format: 'folder',
+    concept: overview.concept,
+    lookRules: overview.lookRules,
+    leader: all.find((c) => c.type === 'リーダー') || null,
+    cards: all.filter((c) => c.type !== 'リーダー'),
   };
-
-  for (const line of lines) {
-    const h2 = /^## (.+)$/.exec(line);
-    if (h2) {
-      flush();
-      section = h2[1].trim();
-      continue;
-    }
-    const h3 = /^### (.+)$/.exec(line);
-    if (h3 && section === '各種カード') {
-      flush();
-      section = '各種カード';
-      cardName = h3[1].trim();
-      continue;
-    }
-    if (h3) { flush(); section = null; continue; }
-    buffer.push(line);
+  // 見た目のルールはデッキ全体に効くので、カード側から引けるようにする
+  for (const card of all) {
+    card.lookRules = deck.lookRules;
+    if (!card.className) card.className = overview.className;
   }
-  flush();
-
-  // リーダーのクラスは所属カードから借りる
-  if (deck.leader) deck.leader.className = deck.cards[0]?.className ?? null;
   return deck;
 }
 
+// ---- 入口 ---------------------------------------------------------------
+
 function loadDecks(names) {
-  const files = fs.readdirSync(DECK_DIR)
-    .filter((f) => f.endsWith('.md'))
-    .map((f) => path.join(DECK_DIR, f));
-  const decks = files.map(parseDeckFile);
+  const entries = fs.readdirSync(DECK_DIR, { withFileTypes: true });
+  // デッキ直下の .md は読まない。1枚のファイルに全カードを詰める旧形式は廃止した
+  const loose = entries.filter((e) => e.isFile() && e.name.endsWith('.md')).map((e) => e.name);
+  if (loose.length) {
+    console.warn(`※ デッキ/ 直下の .md は読み込まない（フォルダに分ける）: ${loose.join(', ')}`);
+  }
+
+  const decks = entries
+    .filter((e) => e.isDirectory())
+    .map((e) => loadDeckFolder(path.join(DECK_DIR, e.name)));
+
   if (!names || names.length === 0) return decks;
   const missing = names.filter((n) => !decks.some((d) => d.name === n));
   if (missing.length) {
@@ -119,4 +170,4 @@ function listSubjects(decks, { includeLeader = true } = {}) {
   return out;
 }
 
-module.exports = { loadDecks, listSubjects, parseDeckFile, DECK_DIR };
+module.exports = { loadDecks, listSubjects, loadDeckFolder, DECK_DIR };
