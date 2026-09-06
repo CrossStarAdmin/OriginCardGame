@@ -1,0 +1,37 @@
+{
+  "card": {
+    "name": "火口の洞守り",
+    "deck": "アグロリーゼ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\アグロリーゼ\\カード一覧\\09_火口の洞守り.md",
+    "effects": [
+      "召喚時：敵キャラクター1体を、次の自分のターン開始時まで動けなくする"
+    ],
+    "className": "焔術士",
+    "type": "キャラクター",
+    "count": "3",
+    "cost": "3",
+    "atk": "3",
+    "hp": "3",
+    "look": {
+      "外見": "火山岩の重厚な鎧を全身にまとった火口の洞の番人。兜の奥は影で顔が見えない。鎧の継ぎ目から熱が漏れている。人の倍ほどの体格。",
+      "情景": "何かを押し止めるため、巨大な玄武岩の板を岩の裂け目に嵌め込んでいる。割れ目から溶岩が光る。",
+      "背景": "燃え始めた町。炎が背後で上がっている。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
+      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
+      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】火山岩の重厚な鎧を全身にまとった火口の洞の番人。兜の奥は影で顔が見えない。鎧の継ぎ目から熱が漏れている。人の倍ほどの体格。\n【情景】何かを押し止めるため、巨大な玄武岩の板を岩の裂け目に嵌め込んでいる。割れ目から溶岩が光る。\n【背景】燃え始めた町。炎が背後で上がっている。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": "Art style: Japanese anime cel shading. Clean cel shading layered with soft gradients. Confident and sharp line art with thick outer contours and delicate inner detail lines. Large eyes with meticulously detailed irises and highlights. Minimal, clean skin shadows, and glossy highlights on the hair. Vivid and highly saturated colors. Faces with readable expressions. Finished to the quality of social game key art.\nCanvas layout: Fill the image from edge to edge. Do not draw borders, margins, vignetting, or mount frames on the image. Keep important elements at least 5% away from all edges. Leave the bottom fourth of the canvas as a quiet background without faces or main subjects (this area will have effect text overlaid later, but do not draw any banners or panels into the image).\nNegative elements: No letters, alphabet, numbers, subtitles, signatures, watermarks, or logos. No card frames, borders, UI elements, or status icons. Do not draw text banners, ribbons, or semi-transparent plates. No speech bubbles, comic panels, collages, or split screens. Do not arrange the same character in multiple poses like a reference sheet.\nAppearance: A warden of the crater cave clad entirely in heavy volcanic rock armor. The face inside the helmet is hidden in shadow and cannot be seen. Heat leaks from the seams of the armor. A massive physique roughly twice the size of a human.\nScene: Fitting a gigantic basalt slab into a fissure in the rock to hold something back. Lava glows from within the crack.\nBackground: A town that has begun to burn. Flames rising in the background.\nDeck common visual rules: The light source is fire. The base palette consists of ember orange, molten red, and soot black, with heat-blown white light as an accent color. No cool colors. Night and fire theme. Visual representations of power are unified as flames and sparks. Flying sparks and drifting ash must appear wherever power is active. Do not use magic circles or runes. Darkens progressively as the town burns: 1 to 2 cost tier is bright fire in an inhabited town; 3 to 4 cost tier is a town beginning to burn; 5 cost tier and above is a charred black night where only flames glow. Differentiate characters by burns: Igna humans have old burn scars somewhere on their skin, scarlet to reddish-brown hair, and amber eyes; Belze and Veld have bodies that are themselves turning into fire.\nComposition: A slightly vertical illustration of a single character. Dynamic composition captured from an engaging angle. Caught mid-action. Clearly readable silhouette. The head is placed toward the top, with the subject occupying most of the frame.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T15:22:28.910Z"
+}

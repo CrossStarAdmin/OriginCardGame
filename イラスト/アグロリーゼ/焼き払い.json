@@ -1,0 +1,35 @@
+{
+  "card": {
+    "name": "焼き払い",
+    "deck": "アグロリーゼ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\アグロリーゼ\\カード一覧\\10_焼き払い.md",
+    "effects": [
+      "敵キャラクター全体に2ダメージを与える"
+    ],
+    "className": "焔術士",
+    "type": "スペル",
+    "count": "3",
+    "cost": "3",
+    "look": {
+      "外見": "師ベルゼが放っている。70代の痩せ細った老焔術士で、長い白髯と深く皺の刻まれた顔。裾の焦げた灰色のローブ。まだ人の形を保っているが、両手の皮膚の下から熾火の光が透け始めている。止められないと分かっている者の、こわばった表情。",
+      "情景": "ベルゼが両腕を広げ、そこから轟音を立てる炎の壁が地表を薙ぎ払う。広い面の火がすべてを呑み込み、瓦礫が影となって吹き上がる。炎の壁が画面いっぱいに広がり、ベルゼはその手前に立っている。",
+      "背景": "燃え始めた町。炎が背後で上がっている。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
+      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
+      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】師ベルゼが放っている。70代の痩せ細った老焔術士で、長い白髯と深く皺の刻まれた顔。裾の焦げた灰色のローブ。まだ人の形を保っているが、両手の皮膚の下から熾火の光が透け始めている。止められないと分かっている者の、こわばった表情。\n【情景】ベルゼが両腕を広げ、そこから轟音を立てる炎の壁が地表を薙ぎ払う。広い面の火がすべてを呑み込み、瓦礫が影となって吹き上がる。炎の壁が画面いっぱいに広がり、ベルゼはその手前に立っている。\n【背景】燃え始めた町。炎が背後で上がっている。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、現象そのもののイラスト。基本的に人物が技を撃っていたり、その技自体が中心になっている。効果そのものが主役で、広がりのある劇的な一瞬として捉える。エネルギーの中心は画面の上半分に置く。",
+  "prompt": "Art style: Japanese anime cell shading with soft gradients overlaid. Crisp, decisive line art, with thick main outlines and fine inner detail lines. Large eyes with meticulously drawn irises and highlights. Clear skin with minimal shadows, glossy highlights on hair. Vivid and highly saturated colors. Faces with readable expressions. Quality suitable as key art for a mobile game.\nUse of frame: The illustration fills the canvas from edge to edge. No borders, no margins, no vignetting, and no mount board within the art itself. Keep critical elements away from the 5% margin around all edges. Keep the bottom quarter of the frame free of faces or the main subject, leaving it as calm background (an area intended for card text overlay, but do not draw any text box or banner into the art).\nWhat not to draw: No text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. No card frames, borders, UI elements, or status icons. Do not draw banners, ribbons, or semi-transparent panels meant for text placement. No speech bubbles, comic panels, collages, or split-screen layouts. Do not show the same character in multiple poses like a reference sheet.\nAppearance: Master Belze is casting the spell. An emaciated male pyromancer in his 70s, with a long white beard and deeply wrinkled face. Gray robes scorched at the hem. Still retaining human form, but the glow of embers is beginning to show through beneath the skin of his hands. A stiffened expression of someone who knows he cannot be stopped.\nScene: Belze spreads his arms wide, unleashing a roaring wall of flame sweeping across the ground. A wide plane of fire engulfs everything, sending rubble blowing upward in silhouette. The wall of fire spans across the entire frame, with Belze standing in front of it.\nBackground: A town that has just begun to burn, with flames rising behind him.\nShared deck aesthetics: The light source is fire. The base palette consists of ember orange, molten red, and soot black, accented with white-hot blinding light. No cool colors are used. The overall theme is night and fire. The manifestation of power is unified as flames and flying sparks. Wherever power is active, dancing sparks and drifting ash are always present. Do not use magic circles or symbols. Darkness progresses as the town burns: bright fire of a still-inhabited town for costs 1-2, a town beginning to burn for costs 3-4, and blackened night where only flames glow for costs 5 and above. Characters are distinguished by burn scars. People of Igna have old burn scars somewhere on their skin, scarlet to reddish-brown hair, and amber eyes. Belze and Veld have bodies that are themselves beginning to turn into fire.\nComposition: Slightly vertically oriented illustration focused on the phenomenon itself. Primarily showing the figure unleashing the technique, with the technique itself at the center. The effect itself is the main subject, captured as an expansive dramatic moment. The center of energy is positioned in the upper half of the frame.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T15:22:43.279Z"
+}

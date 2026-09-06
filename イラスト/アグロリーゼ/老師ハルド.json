@@ -1,0 +1,37 @@
+{
+  "card": {
+    "name": "老師ハルド",
+    "deck": "アグロリーゼ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\アグロリーゼ\\カード一覧\\08_老師ハルド.md",
+    "effects": [
+      "おうえん"
+    ],
+    "className": "焔術士",
+    "type": "キャラクター",
+    "count": "3",
+    "cost": "3",
+    "atk": "2",
+    "hp": "4",
+    "look": {
+      "外見": "60代の男性。白髪交じりの赤茶の髪と豊かな灰色の髭、琥珀色の瞳。がっしりした体格で、焦げた学舎の外套をまとい、節くれだった杖を持つ。両腕に何十年ぶんもの古い火傷の痕。子供を鼓舞し慣れた、頼りがいのある雰囲気。",
+      "情景": "片腕を振り上げて人々を前へ鼓舞し、周囲に暖かい炎の光が噴き上がる。",
+      "背景": "燃え始めた町。炎が背後で上がっている。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
+      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
+      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】60代の男性。白髪交じりの赤茶の髪と豊かな灰色の髭、琥珀色の瞳。がっしりした体格で、焦げた学舎の外套をまとい、節くれだった杖を持つ。両腕に何十年ぶんもの古い火傷の痕。子供を鼓舞し慣れた、頼りがいのある雰囲気。\n【情景】片腕を振り上げて人々を前へ鼓舞し、周囲に暖かい炎の光が噴き上がる。\n【背景】燃え始めた町。炎が背後で上がっている。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": "Art Style: Japanese anime cel shading. Clean cel shading layered with soft gradients. Clear and decisive line art with thick outer contour lines and thin inner details. Large eyes with carefully drawn irises and highlights. Clear skin with minimal shadows, and glossy highlights on the hair. Vivid and highly saturated colors. Faces with readable expressions. Quality suitable as key art for a social game.\nCanvas Layout: Fill the canvas edge to edge. Do not draw framing, margins, vignetting, or backing boards. Do not place important elements within 5% of any edge. Keep the bottom quarter of the screen free of faces or main subjects, leaving it as a calm background (this is the area where effect text will be placed later, but do not draw text bands or panels into the image).\nExcluded Elements: Do not include letters, alphabet, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI elements, or status icons. Do not draw banners, ribbons, or translucent panels meant for text insertion. Do not make it a speech bubble, comic panel, collage, or split screen. Do not arrange the same character in multiple poses like a reference sheet.\nAppearance: A man in his 60s. Reddish-brown hair mixed with gray, a full gray beard, and amber eyes. Sturdy build, wearing a singed academy cloak and holding a gnarled staff. Decades of old burn scars on both arms. A dependable atmosphere of someone accustomed to inspiring children.\nScene: Raising one arm to inspire people forward, with warm firelight erupting around him.\nBackground: A town beginning to burn. Flames rising in the background.\nDeck Visual Theme: Fire is the light source. Base tones are ember orange, molten red, and soot black. Accented with white-hot blown-out light. No cool colors. Night and fire theme. The manifestation of power is unified as flames and sparks. Where power is at work, dancing sparks and drifting ash must always appear. Do not use magic circles or symbols. Darken in the order the town burns: 1-2 cost tier is bright fire in a town where people still live; 3-4 cost tier is a town beginning to burn; 5+ cost is a charred black night where only flames glow. Distinguish characters by burn scars. Humans of Igna have old burn scars somewhere on their skin. Hair ranges from scarlet to reddish-brown, eyes are amber. Berze and Veld have bodies that are beginning to turn into fire themselves.\nComposition: Slightly vertical illustration of a single character. Dynamic composition captured from an active angle. In the middle of an action. Clearly readable silhouette. Head placed toward the top, with the subject occupying most of the screen.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T15:22:32.061Z"
+}

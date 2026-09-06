@@ -1,0 +1,38 @@
+{
+  "card": {
+    "name": "ヴェルド",
+    "deck": "アグロリーゼ",
+    "file": "C:\\Users\\beron\\OneDrive\\Documents\\カードゲーム作成\\デッキ\\アグロリーゼ\\カード一覧\\12_ヴェルド.md",
+    "effects": [
+      "速攻",
+      "召喚時：守護を持つ敵キャラクター1体を破壊する"
+    ],
+    "className": "焔術士",
+    "type": "キャラクター",
+    "count": "2",
+    "cost": "5",
+    "atk": "5",
+    "hp": "2",
+    "look": {
+      "外見": "人より頭ひとつ背の高い、痩身の魔族。ひび割れた黒曜石の肌をしていて、その裂け目が溶岩色に光っている。後方へ流れた2本の角。悪魔のような見た目。上半身には何もまとわず、腰から下だけを焼け焦げた布で覆っている。人を見下している、どこか感嘆すら含んだ微笑み。人ではなく、幼さや愛嬌は一切無い。",
+      "情景": "夕暮れの焼け落ちた町を見下ろしている。その廃墟をまるで芸術作品のように眺めている。",
+      "背景": "町が燃え落ちたあとの夜。炎だけが光っている。"
+    },
+    "hasLook": true,
+    "lookRules": [
+      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
+      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
+      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+    ]
+  },
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】人より頭ひとつ背の高い、痩身の魔族。ひび割れた黒曜石の肌をしていて、その裂け目が溶岩色に光っている。後方へ流れた2本の角。悪魔のような見た目。上半身には何もまとわず、腰から下だけを焼け焦げた布で覆っている。人を見下している、どこか感嘆すら含んだ微笑み。人ではなく、幼さや愛嬌は一切無い。\n【情景】夕暮れの焼け落ちた町を見下ろしている。その廃墟をまるで芸術作品のように眺めている。\n【背景】町が燃え落ちたあとの夜。炎だけが光っている。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": "Art style: Japanese anime coloring. Clean cel shading overlaid with soft gradients. Clear, confident line work with thick primary outlines and thin internal detail lines. Large eyes with carefully detailed irises and highlights. Clear skin with minimal shadows, glossy highlights in the hair. Vivid, highly saturated colors. Expressive, readable face. Finished quality suitable as key art for a mobile social game.\nScreen usage: Fill the entire screen from edge to edge. Do not draw borders, margins, vignetting, or mountings. Do not place important elements within 5% of any edge. Do not place the face or main subject in the lower fourth of the screen, leaving it as a quiet background (this area is reserved for effect text later, but do not draw any banners, strips, or plates in the image).\nElements to exclude: Do not include letters, alphabet characters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI elements, or status icons. Do not draw bands, banners, or translucent plates meant for inserting text. Do not include speech bubbles, manga panels, collages, or split screens. Do not display the same character in multiple poses like a character design sheet.\nAppearance: A slender demon, a head taller than a human. Skin made of cracked obsidian, with fissures glowing in the color of molten lava. Two horns sweeping backwards. A demonic appearance. Bare upper body, wearing only scorched cloth from the waist down. A condescending smile that holds a trace of admiration. Non-human, with no childishness or charm whatsoever.\nScene: Looking down upon a burned-down town at dusk. Gazing at the ruins as if they were a work of art.\nBackground: Nighttime after the town has burned down. Only flames provide light.\nShared deck visuals: Fire is the light source. The base palette consists of ember orange, molten red, and soot black, with heat-blown white light as an accent color. Do not use cool colors. Night and fire theme. Visual effects of power are unified as flames and sparks. Where power is active, dancing sparks and drifting ash must always appear. Do not use magic circles or symbols. The scene darkens in the sequence of the town burning down: 1-2 cost tier is the bright fire of a town still inhabited; 3-4 cost tier is a town beginning to burn; 5 cost or higher is a burnt-out black night where only fire glows. Differentiate characters with burns: humans of Igna have old burn scars somewhere on their skin, with scarlet to reddish-brown hair and amber eyes; Belze and Veldo have bodies that are themselves beginning to turn into fire.\nComposition: A slightly vertical illustration of a single character. A dynamic composition captured from a distinct angle. Mid-action. A clearly readable silhouette. The head is positioned near the top, with the subject occupying most of the frame.",
+  "revisedPrompt": null,
+  "provider": "google",
+  "style": "アニメ",
+  "model": "gemini-3-pro-image",
+  "textModel": "gemini-flash-latest",
+  "aspect": "4:5",
+  "generatedAt": "2026-09-06T15:23:08.255Z"
+}
