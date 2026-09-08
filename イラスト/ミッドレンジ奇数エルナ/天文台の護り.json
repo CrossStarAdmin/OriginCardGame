@@ -27,12 +27,18 @@
     ]
   },
   "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】真鍮と石でできた巨大な鎧の守護者。人の3倍ほどの背丈がある。顔が無く、頭部はのっぺりした石の面。胸に嵌め込まれた真鍮のアストロラーベの環がゆっくり回る。意思を持たない機構であり、人でも生き物でもない。\n【情景】天文台の戸口を塞いで両足を踏ん張り、こちらへ立ちはだかっている。\n【背景】明るい星夜。\n【デッキ共通の見た目】光源は星光。 基調は深い藍と黒、差し色に淡い金と冷たい菫色。夜空をテーマ。明るい場面では星の光そのものを強く輝かせ、その光で画面を照らす。暖色はランプの小さな火だけに許す。炎や日光で明るくしない。 力の見た目は星座の記号で統一する。 力が働いているところには、淡く光る星座の記号が必ず出る。魔法陣や十字などの他の記号は使わない。味方と日常の力は淡い金、凶兆と闇落ち後の力は冷たい菫色。観測の道具（星時計・望遠鏡・アストロラーベ・星図）はすべて真鍮。 ヴァルザの闇落ちで空気を変える。 物語のはじめ、いつもの日常を表現したいときは明るい、素敵な夜空にする。ロマンチックな情景にする。ヴァルザが闇落ちし、町が暗くなったシーンを表現するときは暗く、よどんだ空気にする。 目で描き分ける。 闇落ち後のヴァルザ系は瞼が無く、目を閉じない。ほかのカードは「見上げる」「伏せる」で対比する。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
-  "prompt": "Art Style: Japanese anime cel shading style. Clean cel shading layered with soft gradients. Confident, crisp linework with thick main lines and thin inner details. Large eyes with meticulously drawn irises and highlights. Clear skin with minimal shading, and glossy highlights in the hair. Vivid, highly saturated colors. Faces with readable expressions. A level of finish suitable for social game key art.\nScreen Usage: Fill the frame from edge to edge. Do not draw borders, margins, vignetting, or card mounts around the artwork. Do not place important elements within 5% of any edge. Keep the bottom fourth of the screen free of faces or main subjects, leaving it as quiet background (this area is reserved for effect text later, but do not draw any text bands or plates within the image).\nDo Not Include: No letters, alphabet, numbers, subtitles, signatures, watermarks, or logos. No card frames, borders, UI elements, or status icons. Do not draw bands, banners, or semi-transparent plates for text. No speech bubbles, comic panels, collages, or split screens. Do not show the same character in multiple poses like a character reference sheet.\nAppearance: A colossal armored guardian made of brass and stone, standing about three times the height of a human. It is faceless, with a smooth, blank stone head. A brass astrolabe ring embedded in its chest rotates slowly. It is a mindless mechanism, neither human nor a living creature.\nScene: Blocking the doorway of an observatory with feet planted wide, looming before the viewer.\nBackground: A bright starry night.\nDeck Shared Visuals: The light source is starlight. Deep indigo and black as base colors, with pale gold and cool violet as accent colors. Night sky theme. In bright scenes, the starlight itself shines intensely, illuminating the scene with its glow. Warm colors are permitted only for the small flame of a lamp; do not illuminate with fire or sunlight. The appearance of power is unified through constellation symbols. Faintly glowing constellation symbols always appear wherever power is active; do not use other symbols such as magic circles or crosses. The power of allies and daily life is pale gold, while the power of ill omens and the fallen state is cool violet. Observation tools (star clocks, telescopes, astrolabes, star charts) are all brass. Change the atmosphere depending on Valza's fall to darkness: depict a bright, wonderful, romantic night sky for normal daily life at the start of the story, and a dark, stagnant air for scenes where Valza falls to darkness and the town darkens. Differentiate using the eyes: Valza variants after falling to darkness have no eyelids and do not close their eyes, while other cards contrast by looking upward or casting their eyes down.\nComposition: A slightly vertical illustration of a single character. A dynamic composition captured from varied angles, frozen mid-motion. A clearly readable silhouette. The head is positioned near the top, with the subject occupying most of the frame.",
+  "prompt": null,
   "revisedPrompt": null,
-  "provider": "google",
+  "provider": "manual",
+  "tool": "ChatGPT",
   "style": "アニメ",
-  "model": "gemini-3-pro-image",
-  "textModel": "gemini-flash-latest",
+  "model": null,
+  "textModel": null,
   "aspect": "4:5",
-  "generatedAt": "2026-09-06T14:01:27.064Z"
+  "size": {
+    "w": 1122,
+    "h": 1402
+  },
+  "generatedAt": "2026-09-08T08:32:44.270Z",
+  "note": "外部ツールで作った画像を取り込んだもの。英訳は経由していない"
 }

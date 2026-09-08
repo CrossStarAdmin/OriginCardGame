@@ -50,7 +50,7 @@ function cardScore(g, p, name) {
       case 'ドロテ': s += FX.afterburn(p) ? 4 : 0; break;
       case 'マルカ': s += p.hand.includes('ポルカ') ? 3 : 0; break;
       case 'ポルカ': s += p.board.some((u) => u.name === 'マルカ') ? 3 : 0; break;
-      case '老師ハルド': s += 1; break;
+      case '教授ハルド': s += 1; break;
       case '火口の洞守り': s += enemyUnits.length ? 2 : 0; break;
       case 'ヴェルド': s += enemyTaunts.length ? 5 : 0; break;
       case '師ベルゼ': s += Math.min(6, enemyUnits.length * 2); break;

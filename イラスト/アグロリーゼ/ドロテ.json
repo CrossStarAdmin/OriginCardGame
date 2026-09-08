@@ -14,24 +14,31 @@
     "hp": "4",
     "look": {
       "外見": "18歳の女性。長身で引き締まった体つき。ロングヘアの緋色の髪、髪はまとめずにおろしている。琥珀色の瞳。鎧を身に着けている。両手と肩に火傷の痕。学舎一の剣の秀才だった鋭さが、そのまま獰猛さに変わった雰囲気。",
-      "情景": "上昇気流に髪をなびかせ、全体を炎に包まれた刃を構えて突進する。歩幅の後ろに炎の航跡。",
+      "情景": "自分の背丈ほどある長い両手剣を右手に構えて突進する。刃は根元から切っ先まで金属の形がはっきり見え、その上を炎が覆っている。柄だけを持っているように見せない。上昇気流に髪をなびかせ、歩幅の後ろに炎の航跡を引く。",
       "背景": "町が燃え落ちていく夜。炎だけが光っている。"
     },
     "hasLook": true,
     "lookRules": [
-      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
-      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
-      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
-      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+      "色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。",
+      "イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。",
+      "ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。",
+      "火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。"
     ]
   },
-  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】18歳の女性。長身で引き締まった体つき。ロングヘアの緋色の髪、髪はまとめずにおろしている。琥珀色の瞳。鎧を身に着けている。両手と肩に火傷の痕。学舎一の剣の秀才だった鋭さが、そのまま獰猛さに変わった雰囲気。\n【情景】上昇気流に髪をなびかせ、全体を炎に包まれた刃を構えて突進する。歩幅の後ろに炎の航跡。\n【背景】町が燃え落ちていく夜。炎だけが光っている。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
-  "prompt": "Art Style: Japanese anime cel-shading style. Clean cel shading layered with soft gradients. Confident and distinct line art with thick main contours and thin internal detail lines. Large eyes with meticulously drawn irises and highlights. Clear skin with minimal shading, glossy highlights in the hair. Vivid, highly saturated colors. Expressive and readable facial features. Finished to the quality level of mobile game key art.\nScreen Usage: The artwork fills the canvas edge to edge. Do not draw borders, margins, vignetting, or a backing mount. Do not place important elements within 5% of any edge. The bottom quarter of the frame must remain quiet background without faces or main subjects; this area is reserved for effect text to be overlaid later, but do not draw any banners, plates, or text boxes in the image.\nElements to Exclude: Do not include text, letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI components, or status icons. Do not draw banners, ribbons, or translucent panels meant for text. No speech bubbles, comic panels, collages, or split screens. Do not display multiple poses of the same character like a character design sheet.\nAppearance: An 18-year-old female. Tall with a toned, lean body. Long scarlet hair worn down loose without being tied up. Amber eyes. Wearing armor. Burn scars on both hands and shoulders. An aura of the academy's top sword prodigy whose sharpness has transformed directly into ferocity.\nScene: Hair streaming upward in an updraft, charging forward while readying a blade completely enveloped in flames. A trail of fire left behind her stride.\nBackground: A night where a town is burning to the ground. The only light source is the flames.\nShared Deck Aesthetics: The light source is fire. Base palette of ember orange, molten red, and soot black. Accented with white-hot light from intense heat. Do not use cool colors. The theme is night and fire. Visuals of power are unified as flames and sparks. Wherever power is active, dancing sparks and drifting ash must appear. Do not use magic circles or symbols. The setting darkens according to the progression of the town burning down: 1-2 cost tier is the bright fire of a town where people still live; 3-4 cost tier is a town beginning to burn; 5 cost and higher is a burned-down black night where only fire glows. Differentiated by burn scars: people of Igna have old burn scars somewhere on their skin, hair ranging from scarlet to reddish-brown, and amber eyes; Belze and Veld have bodies that are beginning to turn into fire itself.\nComposition: A slightly vertical illustration of a single character. A dynamic composition captured from an engaging angle in mid-action. Clearly readable silhouette. The head is positioned toward the top of the frame, with the subject occupying most of the screen.",
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】18歳の女性。長身で引き締まった体つき。ロングヘアの緋色の髪、髪はまとめずにおろしている。琥珀色の瞳。鎧を身に着けている。両手と肩に火傷の痕。学舎一の剣の秀才だった鋭さが、そのまま獰猛さに変わった雰囲気。\n【情景】自分の背丈ほどある長い両手剣を右手に構えて突進する。刃は根元から切っ先まで金属の形がはっきり見え、その上を炎が覆っている。柄だけを持っているように見せない。上昇気流に髪をなびかせ、歩幅の後ろに炎の航跡を引く。\n【背景】町が燃え落ちていく夜。炎だけが光っている。\n【デッキ共通の見た目】色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。 イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。 ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。 火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": null,
   "revisedPrompt": null,
-  "provider": "google",
+  "provider": "manual",
+  "tool": "ChatGPT",
   "style": "アニメ",
-  "model": "gemini-3-pro-image",
-  "textModel": "gemini-flash-latest",
+  "model": null,
+  "textModel": null,
   "aspect": "4:5",
-  "generatedAt": "2026-09-06T15:23:05.575Z"
+  "size": {
+    "w": 1024,
+    "h": 1536
+  },
+  "generatedAt": "2026-09-08T01:44:22.709Z",
+  "note": "外部ツールで作った画像を取り込んだもの。英訳は経由していない"
 }

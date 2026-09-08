@@ -88,7 +88,7 @@ function onSummon(g, p, u) {
     case 'ポルカ':
       if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
       break;
-    case '老師ハルド':
+    case '教授ハルド':
       E.raiseTension(g, p, 1);
       break;
     case '火口の洞守り': {

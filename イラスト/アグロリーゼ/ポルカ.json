@@ -16,23 +16,30 @@
     "look": {
       "外見": "12歳の双子の姉。ショートヘアの赤茶の髪、琥珀色の瞳。おてんばで、戦いがあるとすぐに前に出る。マルカがいると勇気が出て、より前寄りになる。マルカと対になる姿。",
       "情景": "両手から炎を引きながら走って跳び出す。勇気に満ちた目をしていて、画面の外にいる先生へ立ち向かおうとしている。先生は画面に描かない。",
-      "背景": "まだ人が住んでいる頃の町。明るい火の色。"
+      "背景": "町が平和な頃。希望にあふれている。"
     },
     "hasLook": true,
     "lookRules": [
-      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
-      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
-      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
-      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+      "色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。",
+      "イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。",
+      "ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。",
+      "火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。"
     ]
   },
-  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】12歳の双子の姉。ショートヘアの赤茶の髪、琥珀色の瞳。おてんばで、戦いがあるとすぐに前に出る。マルカがいると勇気が出て、より前寄りになる。マルカと対になる姿。\n【情景】両手から炎を引きながら走って跳び出す。勇気に満ちた目をしていて、画面の外にいる先生へ立ち向かおうとしている。先生は画面に描かない。\n【背景】まだ人が住んでいる頃の町。明るい火の色。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
-  "prompt": "Art Style: Japanese anime cel shading style. Clean cel shading overlaid with soft gradients. Confident and sharp line art, with thick main contour lines and thin interior detail lines. Large eyes with meticulously drawn irises and highlights. Clear skin with minimal shadows, glossy highlights on hair. Vivid, highly saturated colors. Legible and expressive facial expression. Level of finish suitable for mobile social game key art.\nCanvas Use: Fill the image edge to edge. Do not draw any borders, margins, vignetting, or mount paper. Do not place important elements within 5% of any edge. Keep the lower quarter of the screen as quiet background without faces or the main subject (this area is for effect text to be overlaid later, but do not draw any banners, strips, or plates in the image).\nProhibited Elements: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI components, or status icons. Do not draw banners, strips, or semi-transparent plates for text overlay. Do not make speech bubbles, manga panels, collages, or split screens. Do not display the same character in multiple poses like a design sheet.\nAppearance: A 12-year-old twin older sister. Short reddish-brown hair, amber eyes. A tomboy who immediately steps forward when a battle occurs. Gains courage and moves further to the front when Maruka is present. Designed as a pair with Maruka.\nScene: Running and leaping forward while trailing flames from both hands. Eyes filled with courage, confronting a teacher who is off-screen. Do not draw the teacher on the screen.\nBackground: A town from the time when people still lived there. Bright fire colors.\nCommon Deck Appearance: The light source is fire. Base palette consists of ember orange, molten red, and soot black, accented with heat-blown white light. Do not use cool colors. Night and conflagration theme. Visual manifestation of power is unified as flames and sparks. Dancing sparks and drifting ash must appear wherever power is being exerted. Do not use magic circles or symbols. Gets darker in the order of the town burning down. The 1 to 2 cost range is the bright fire of a town where people still live. The 3 to 4 cost range is a town beginning to burn. The 5 cost and higher range is a burnt-down black night where only flames glow. Differentiate by burn marks. People of Igna have old burn scars somewhere on their skin. Hair is scarlet to reddish-brown, eyes are amber. Belze and Veld have bodies that are beginning to turn into fire themselves.\nComposition: Slightly vertically-oriented illustration of a single character. Dynamic composition captured from an active angle. Mid-action movement. Clearly readable silhouette. Head positioned toward the top, with the subject occupying most of the screen.",
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】12歳の双子の姉。ショートヘアの赤茶の髪、琥珀色の瞳。おてんばで、戦いがあるとすぐに前に出る。マルカがいると勇気が出て、より前寄りになる。マルカと対になる姿。\n【情景】両手から炎を引きながら走って跳び出す。勇気に満ちた目をしていて、画面の外にいる先生へ立ち向かおうとしている。先生は画面に描かない。\n【背景】町が平和な頃。希望にあふれている。\n【デッキ共通の見た目】色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。 イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。 ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。 火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": null,
   "revisedPrompt": null,
-  "provider": "google",
+  "provider": "manual",
+  "tool": "ChatGPT",
   "style": "アニメ",
-  "model": "gemini-3-pro-image",
-  "textModel": "gemini-flash-latest",
+  "model": null,
+  "textModel": null,
   "aspect": "4:5",
-  "generatedAt": "2026-09-06T15:21:51.712Z"
+  "size": {
+    "w": 1024,
+    "h": 1536
+  },
+  "generatedAt": "2026-09-08T01:44:22.713Z",
+  "note": "外部ツールで作った画像を取り込んだもの。英訳は経由していない"
 }

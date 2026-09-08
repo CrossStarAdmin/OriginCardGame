@@ -17,19 +17,26 @@
     },
     "hasLook": true,
     "lookRules": [
-      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
-      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
-      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
-      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+      "色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。",
+      "イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。",
+      "ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。",
+      "火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。"
     ]
   },
-  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】16歳の女性。少し傷んだ、ポニーテールの緋色の髪、鋭い琥珀色の瞳。学生。実用的な革の装備の上に、焦げた黒と深紅のマントを羽織る。下はスカート。剥き出しの前腕に古い火傷の痕。据わった鋭い目つき。\n【情景】燃える街路に立ち、腰から上を大きく捉える。掲げた片手を炎が包み、火の粉が脇を流れていく。自分が焼いているものから目を逸らさない。\n【背景】町が燃えている最中。炎が画面を照らし、空気は熱で歪んでいる。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、リーダーキャラクター1人のイラスト。全身を捉えた堂々たる構図。読み取りやすいシルエット。頭を上寄せにして、画面の大部分を人物が占める。",
-  "prompt": "Art Style: Japanese anime cel shading. Clean cel shading overlaid with soft gradients. Decisive, crisp line art with thick main contours and thin internal details. Relatively large eyes with carefully detailed irises and highlights. Clear skin with minimal shading, glossy highlights on hair. Vivid, highly saturated colors. Face with readable expression. Quality worthy of social game key art.\nCanvas Usage: The artwork fills the canvas from edge to edge. Do not depict borders, margins, vignetting, or backing mount of the artwork itself. Do not place important elements within 5% of any edge. Do not place faces or the main subject in the bottom quarter of the screen, leaving it as a quiet background (this is an area where effect text will be overlaid later, but do not draw the band or panel into the image).\nExcluded Elements: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI components, or status icons. Do not draw bands, banners, or translucent panels for placing text. Do not make speech bubbles, manga panels, collages, or split screens. Do not arrange the same character in multiple poses like a reference sheet.\nAppearance: 16-year-old female. Slightly damaged scarlet hair in a ponytail, sharp amber eyes. Student. Wearing a scorched black and deep crimson cloak over practical leather gear. Skirt on the bottom. Old burn scars on bare forearms. Fixed, sharp gaze.\nScene: Standing in a burning street, captured prominently from the waist up. Flames engulf one raised hand, with sparks drifting past her side. She does not look away from what she is burning.\nBackground: In the middle of the town burning. Flames illuminate the screen, and the air is distorted by heat.\nDeck Visual Theme: The light source is fire. Base tones of ember orange, molten red, and soot black. Accents of blown-out white hot light. Do not use cool colors. Night and fire theme. The appearance of power is unified with flames and sparks. Wherever power is at work, dancing sparks and drifting ash must appear. Do not use magic circles or symbols. Darkens in the order of the town burning down. 1-2 cost tier is the bright fire of a town where people still live. 3-4 cost tier is a town that has begun to burn. 5+ cost tier is a burned-down black night where only flames glow. Differentiate by burns. People of Igna have old burn scars somewhere on their skin. Hair is scarlet to reddish-brown, eyes are amber. Belze and Veld have bodies that are themselves beginning to turn into fire.\nComposition: Slightly vertical illustration of one leader character. Imposing composition capturing the full body. Easily readable silhouette. Head aligned toward the top, with the figure occupying most of the screen.",
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】16歳の女性。少し傷んだ、ポニーテールの緋色の髪、鋭い琥珀色の瞳。学生。実用的な革の装備の上に、焦げた黒と深紅のマントを羽織る。下はスカート。剥き出しの前腕に古い火傷の痕。据わった鋭い目つき。\n【情景】燃える街路に立ち、腰から上を大きく捉える。掲げた片手を炎が包み、火の粉が脇を流れていく。自分が焼いているものから目を逸らさない。\n【背景】町が燃えている最中。炎が画面を照らし、空気は熱で歪んでいる。\n【デッキ共通の見た目】色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。 イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。 ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。 火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。\n【構図】やや縦長の、リーダーキャラクター1人のイラスト。全身を捉えた堂々たる構図。読み取りやすいシルエット。頭を上寄せにして、画面の大部分を人物が占める。",
+  "prompt": null,
   "revisedPrompt": null,
-  "provider": "google",
+  "provider": "manual",
+  "tool": "ChatGPT",
   "style": "アニメ",
-  "model": "gemini-3-pro-image",
-  "textModel": "gemini-flash-latest",
+  "model": null,
+  "textModel": null,
   "aspect": "4:5",
-  "generatedAt": "2026-09-06T15:21:15.945Z"
+  "size": {
+    "w": 1024,
+    "h": 1536
+  },
+  "generatedAt": "2026-09-08T07:36:13.578Z",
+  "note": "外部ツールで作った画像を取り込んだもの。英訳は経由していない"
 }

@@ -9,7 +9,7 @@ const CARD_DB = {
   'ポルカ':         { kind: 'unit', cost: 2, atk: 3, hp: 1 },
   'ギズモ':         { kind: 'unit', cost: 2, atk: 2, hp: 2 },
   '焔弾':           { kind: 'spell', cost: 2, dmg: 3 },
-  '老師ハルド':     { kind: 'unit', cost: 3, atk: 2, hp: 4 },
+  '教授ハルド':     { kind: 'unit', cost: 3, atk: 2, hp: 4 },
   '火口の洞守り':   { kind: 'unit', cost: 3, atk: 3, hp: 3 },
   '焼き払い':       { kind: 'spell', cost: 3 },
   'ドロテ':         { kind: 'unit', cost: 4, atk: 4, hp: 4 },
@@ -56,7 +56,7 @@ const DECKS = {
     leader: 'リーゼ',
     list: {
       '学舎の見習い': 3, '火の子': 3, '火の粉': 3, 'マルカ': 3,
-      'ポルカ': 3, 'ギズモ': 3, '焔弾': 3, '老師ハルド': 3,
+      'ポルカ': 3, 'ギズモ': 3, '焔弾': 3, '教授ハルド': 3,
       '火口の洞守り': 3, '焼き払い': 3, 'ドロテ': 3, 'ヴェルド': 2,
       '消えぬ焔': 3, '師ベルゼ': 2,
     },
