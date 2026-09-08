@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FILE = path.join(process.cwd(), 'イラスト', '共通ルール.md');
+const FILE = path.join(__dirname, '..', 'イラスト', '共通ルール.md');
 
 // 「### 見出し」ごとに本文をまとめる。表と箇条書きの行は指定文ではないので落とす
 function sectionsOf(lines) {

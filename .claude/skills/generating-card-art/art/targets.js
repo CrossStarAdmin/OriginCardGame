@@ -1,12 +1,11 @@
 // 生成対象の解決と、出力先パスの決定
 const fs = require('fs');
 const path = require('path');
-const { loadDecks, listSubjects } = require('./decks.js');
-const { buildPrompt } = require('./prompt.js');
 
-// カード枠のアート窓の比から決めた生成比（カードフレーム/frame.json）
-// 枠を差し替えたら測り直す
-const ASPECT = { 'リーダー': '4:5', 'キャラクター': '4:5', 'スペル': '4:5', '武器': '4:5' };
+const CORE = path.join(__dirname, '..', '..', '..', '..', 'システム');
+const { loadDecks, listSubjects } = require(path.join(CORE, 'decks.js'));
+const { buildPrompt } = require(path.join(CORE, 'prompt.js'));
+const { aspectOf } = require(path.join(CORE, 'frame.js'));
 
 function resolveTargets(opts) {
   const decks = loadDecks(opts.decks);
@@ -22,7 +21,7 @@ function resolveTargets(opts) {
     const dir = path.join(process.cwd(), opts.out, card.deck);
     const image = path.join(dir, `${card.name}.png`);
     const built = buildPrompt(card, opts.style);
-    const aspect = opts.aspect || ASPECT[card.type] || '4:5';
+    const aspect = opts.aspect || aspectOf(card.type);
     return {
       card,
       dir,
@@ -37,4 +36,4 @@ function resolveTargets(opts) {
   });
 }
 
-module.exports = { resolveTargets, ASPECT };
+module.exports = { resolveTargets };

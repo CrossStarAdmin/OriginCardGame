@@ -1,9 +1,10 @@
 // 送るプロンプトを区画ごとに表示する。APIは呼ばない
-// 新形式は日本語のまま（送る直前に英訳される）。旧形式は和文と英文の対を並べる
+// プロンプトは日本語のまま表示する（送る直前に英訳される）
+const CORE = require('path').join(__dirname, '..', '..', '..', '..', 'システム');
 const { parseArgs } = require('./cli.js');
 const { resolveTargets } = require('./targets.js');
-const { buildReview } = require('./prompt.js');
-const { styleNames } = require('./artrules.js');
+const { buildReview } = require(CORE + '/prompt.js');
+const { styleNames } = require(CORE + '/artrules.js');
 
 function wrap(text, width, indent) {
   const lines = [];

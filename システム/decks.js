@@ -2,7 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DECK_DIR = path.join(process.cwd(), 'デッキ');
+// システム/ の1つ上がプロジェクトルート。どこから実行しても同じ場所を指す
+const DECK_DIR = path.join(__dirname, '..', 'デッキ');
 
 const FIELD = {
   'クラス': 'className',

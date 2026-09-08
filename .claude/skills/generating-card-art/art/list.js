@@ -1,7 +1,8 @@
 // 生成対象と生成済み状況の一覧。APIは呼ばない
 const { parseArgs } = require('./cli.js');
+const CORE = require('path').join(__dirname, '..', '..', '..', '..', 'システム');
 const { resolveTargets } = require('./targets.js');
-const { styleNames } = require('./artrules.js');
+const { styleNames } = require(CORE + '/artrules.js');
 
 function main() {
   const opts = parseArgs(process.argv.slice(2));
