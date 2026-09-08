@@ -3,3 +3,7 @@
 # 完成カードはイラストと枠から再生成できる
 # powershell -ExecutionPolicy Bypass -File "カードフレーム/tools/compose.ps1" -Deck "デッキ名" -Force
 カード/
+
+# 取り込み用の一時置き場。README以外は管理しない
+取り込み/*
+!取り込み/README.md
