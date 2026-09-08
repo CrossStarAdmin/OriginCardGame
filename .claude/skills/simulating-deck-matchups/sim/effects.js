@@ -360,11 +360,12 @@ function castSpell(g, p, name, target) {
 }
 
 // ---- テンションスキル ----
-function useTensionSkill(g, p) {
+// target は人間が対象を選ぶとき用。省略時はAIのヒューリスティックで選ぶ
+function useTensionSkill(g, p, target) {
   const foe = g.opp(p);
   E.recPlay(g, p, 'テンションスキル');
   if (p.leader === 'リーゼ') {
-    E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, 'テンションスキル');
+    E.dealTo(g, target || chooseDamageTarget(g, p, 2), 2, p, 'テンションスキル');
   } else if (p.leader === 'アルベル') {
     for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
     E.healLeader(g, p, 3, p, 'テンションスキル');

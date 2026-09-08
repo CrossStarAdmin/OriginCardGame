@@ -83,6 +83,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0; background: var(--plane); color: var(--ink);
     font-family: var(--body); font-size: 14px; line-height: 1.7;
@@ -252,7 +253,107 @@
 
   footer { border-top: 1px solid var(--rule); padding-top: 18px; font-size: 12px; color: var(--ink-3); display: flex; flex-direction: column; gap: 5px; }
   footer code { font-family: var(--data); font-size: 11.5px; color: var(--ink-2); }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  /* ---- mode switch ---- */
+  .modes { display: flex; gap: 8px; }
+  .mode {
+    flex: 1; text-align: left; cursor: pointer; font-family: var(--body);
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 4px;
+    padding: 11px 16px; color: var(--ink-3); font-size: 15px; font-weight: 500;
+    border-bottom: 3px solid transparent;
+  }
+  .mode[aria-selected="true"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); box-shadow: var(--shadow); }
+  .mode span { display: block; font-size: 11.5px; font-weight: 400; color: var(--ink-3); }
+
+  /* ---- arena ---- */
+  #board { display: grid; grid-template-columns: minmax(0, 1fr) 288px; gap: 18px; align-items: start; }
+  @media (max-width: 940px) { #board { grid-template-columns: 1fr; } }
+  .arena {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 4px;
+    box-shadow: var(--shadow); padding: 14px 16px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .side { display: flex; flex-direction: column; gap: 10px; }
+  .lane {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    min-height: 104px; padding: 8px; border-radius: 3px; background: var(--sunk);
+  }
+  .lane:empty::after { content: '（キャラクターなし）'; color: var(--ink-3); font-size: 12px; padding-left: 4px; }
+  .hand { display: flex; gap: 8px; flex-wrap: wrap; min-height: 128px; padding-top: 4px; }
+
+  .midline {
+    display: flex; align-items: center; gap: 12px;
+    border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong);
+    padding: 7px 2px; min-height: 42px;
+  }
+  .turnbadge {
+    font-family: var(--data); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 2px; background: var(--ink); color: var(--plane); font-weight: 600;
+  }
+  .turnbadge.foe { background: var(--ink-3); }
+  .prompt { font-size: 13px; color: var(--ink-2); flex: 1; }
+  .prompt strong { color: var(--ink); }
+
+  /* ---- HUD ---- */
+  .hud { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 12.5px; }
+  .hud .who { font-weight: 700; display: flex; align-items: center; gap: 7px; }
+  .hud .hp { font-family: var(--data); font-weight: 600; font-size: 21px; line-height: 1; }
+  .hud .hp small { font-size: 11px; color: var(--ink-3); font-weight: 400; }
+  .pips { display: inline-flex; gap: 3px; align-items: center; }
+  .pip { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--rule-strong); }
+  .pip.on { background: var(--pos); border-color: var(--pos); }
+  .pip.t.on { background: var(--edited); border-color: var(--edited); }
+  .hud .lbl { color: var(--ink-3); font-size: 11px; font-family: var(--data); }
+  .hud .cnt { font-family: var(--data); }
+  .actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding-top: 4px; }
+
+  /* ---- cards ---- */
+  .unit, .hcard {
+    position: relative; border: 1px solid var(--rule-strong); border-radius: 3px;
+    background: var(--surface); display: flex; flex-direction: column; text-align: left;
+    font-family: var(--body); color: var(--ink); padding: 6px 7px; cursor: default;
+  }
+  .unit { width: 84px; min-height: 92px; border-left: 3px solid var(--accent); }
+  .hcard { width: 96px; min-height: 118px; border-top: 3px solid var(--accent); padding-top: 7px; }
+  .u-name { font-size: 10.5px; line-height: 1.35; font-weight: 500; word-break: break-all; flex: 1; }
+  .u-foot { display: flex; justify-content: space-between; align-items: flex-end; font-family: var(--data); font-weight: 600; font-size: 14px; }
+  .u-foot .hp-lo { color: var(--neg); }
+  .u-kw { display: flex; gap: 2px; flex-wrap: wrap; margin-bottom: 3px; min-height: 13px; }
+  .u-kw i {
+    font-style: normal; font-size: 8.5px; line-height: 1.4; padding: 0 3px; border-radius: 2px;
+    background: var(--accent); color: #fff; font-weight: 700;
+  }
+  .cost {
+    position: absolute; top: -7px; right: -7px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--ink); color: var(--plane); font-family: var(--data); font-weight: 600;
+    font-size: 12px; display: flex; align-items: center; justify-content: center;
+  }
+  .hcard .kindtag { font-family: var(--data); font-size: 8.5px; color: var(--ink-3); }
+
+  .unit.sick { opacity: .55; }
+  .unit.ready { cursor: pointer; box-shadow: 0 0 0 2px color-mix(in oklab, var(--pos) 55%, transparent); }
+  .unit.sel { cursor: pointer; box-shadow: 0 0 0 3px var(--pos); }
+  .targetable { cursor: crosshair; box-shadow: 0 0 0 3px var(--neg); }
+  .hcard.playable { cursor: pointer; }
+  .hcard.playable:hover { transform: translateY(-3px); transition: transform .1s ease; }
+  .hcard.unplayable { opacity: .45; }
+  .unit:focus-visible, .hcard:focus-visible, .heroslot:focus-visible { outline: 2px solid var(--pos); outline-offset: 2px; }
+
+  .heroslot {
+    border: 1px dashed var(--rule-strong); border-radius: 3px; padding: 4px 10px;
+    background: transparent; font-family: var(--body); font-size: 11.5px; color: var(--ink-3);
+  }
+  .heroslot.targetable { border-style: solid; color: var(--ink); }
+
+  /* ---- log ---- */
+  .logpane { background: var(--surface); border: 1px solid var(--hairline); border-radius: 4px; box-shadow: var(--shadow); }
+  .loglist { max-height: 520px; overflow-y: auto; padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 7px; }
+  .logline { font-size: 12px; line-height: 1.6; color: var(--ink-2); border-bottom: 1px solid var(--rule); padding-bottom: 7px; }
+  .logline:last-child { border-bottom: none; }
+  .logline .tn { font-family: var(--data); font-size: 10px; color: var(--ink-3); letter-spacing: .06em; display: block; }
+  .logline.mine { color: var(--ink); }
+  .logline.hit { color: var(--neg); font-weight: 500; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } .hcard.playable:hover { transform: none; } }
 </style>
 
 <div class="shell">
@@ -264,6 +365,12 @@
     <p class="lede">カードのコスト・攻撃力・HP・投入枚数・キーワードをその場で書き換えて、3デッキ総当たりを回す。乱数の種は固定なので、<strong>同じ戦数なら毎回まったく同じ試合が再現される</strong>——数字の差はカードの差だけになる。</p>
   </header>
 
+  <div class="modes" role="tablist">
+    <button class="mode" id="m-bench" role="tab" aria-selected="true">調整卓<span>数値をいじって勝率を出す</span></button>
+    <button class="mode" id="m-play" role="tab" aria-selected="false">対戦<span>いじった数値のままAIと打つ</span></button>
+  </div>
+
+  <div id="view-bench">
   <div class="bar">
     <div class="field">
       <label for="n">戦数（1マッチあたり）</label>
@@ -330,6 +437,84 @@
       </div>
     </div>
   </div>
+  </div><!-- /view-bench -->
+
+  <!-- ============ 対戦 ============ -->
+  <div id="view-play" hidden>
+    <div class="panel" id="setup">
+      <div class="panel-head">
+        <h2>対戦の設定</h2>
+        <span class="hint">調整卓でいじった数値がそのまま出る</span>
+      </div>
+      <div class="panel-body">
+        <div class="preset-row" style="align-items:flex-end">
+          <div class="field"><label for="p-mydeck">あなた</label><select id="p-mydeck"></select></div>
+          <div class="field"><label for="p-aideck">相手（AI）</label><select id="p-aideck"></select></div>
+          <div class="field"><label for="p-first">手番</label>
+            <select id="p-first">
+              <option value="1">先攻</option>
+              <option value="0">後攻（テンション2・聖水2つ）</option>
+              <option value="r" selected>おまかせ</option>
+            </select>
+          </div>
+          <button class="btn" id="p-start" style="min-height:36px">対戦を始める</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="board" hidden>
+      <div class="arena">
+        <div class="side foe">
+          <div class="hud" id="foe-hud"></div>
+          <div class="lane" id="foe-lane"></div>
+        </div>
+
+        <div class="midline">
+          <span id="turnbadge" class="turnbadge">—</span>
+          <span id="prompt" class="prompt"></span>
+          <button class="btn ghost sm" id="cancel" hidden>選択をやめる</button>
+        </div>
+
+        <div class="side me">
+          <div class="lane" id="my-lane"></div>
+          <div class="hand" id="my-hand"></div>
+          <div class="hud" id="my-hud"></div>
+          <div class="actions">
+            <button class="btn ghost sm" id="a-tension">テンションを上げる</button>
+            <button class="btn ghost sm" id="a-skill">スキルを使う</button>
+            <button class="btn ghost sm" id="a-holy">聖水を使う</button>
+            <div class="bar-spacer"></div>
+            <button class="btn" id="a-end">ターンを終える</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="logpane">
+        <div class="panel-head" style="border-radius:4px 4px 0 0">
+          <h2 style="font-size:15px">経過</h2>
+          <button class="btn ghost sm" id="a-again">やり直す</button>
+        </div>
+        <div class="loglist" id="log"></div>
+      </aside>
+    </div>
+
+    <div class="panel" id="over" hidden>
+      <div class="panel-body" style="text-align:center; padding:26px 18px">
+        <p id="over-msg" style="font-family:var(--display); font-size:26px; font-weight:700"></p>
+        <p id="over-sub" class="dbmsg" style="margin:6px 0 16px"></p>
+        <button class="btn" id="a-rematch">もう一度</button>
+      </div>
+    </div>
+
+    <p class="note-inline" style="padding-left:0">
+      <strong>カードにカーソルを合わせると効果が読める。</strong>
+      簡易版なので、次の判断はAIに任せている：<strong>マリガン</strong>、<strong>召喚時効果の対象</strong>（火の子の1ダメージなど）、<strong>エルナのスキルで手札に加える1枚</strong>。
+      スペルの対象とリーゼの業火は自分で選べる。<br>
+      なお効果テキストは<strong>デッキファイルから取り込んだ表示用</strong>で、実際の挙動は <code>sim/effects.js</code> の実装。
+      <strong>コントロールアルベルは実装がデッキファイルに追いついておらず、表示と挙動が食い違う</strong>（記録を繰る・聖獣キメラ・祈る巡礼者・継ぐ者の儀、および聖鳥リフルエルが旧「継承の大鐘」のまま）。
+      アルベルの数字はこの点を踏まえて読むこと。
+    </p>
+  </div>
 
   <footer>
     <p>シミュレーター本体は <code>.claude/skills/simulating-deck-matchups/sim/</code> から取り込んだもの。効果の実装・AIのプレイ方針・ルール解釈はそちらと同一。</p>
@@ -340,6 +525,9 @@
 <script>
 /* ===================== シミュレーター本体（sim/ から取り込み） ===================== */
 /*__SIM__*/
+
+/* カードの効果テキスト（デッキファイルの「## 効果」節から取り込み） */
+/*__TEXT__*/
 
 /* ===================== 実行ハーネス（run.js / mirror.js と同じ手順） ===================== */
 const CARD_DB = CardsMod.CARD_DB;
@@ -860,6 +1048,443 @@ function renderPresets(docs) {
     } catch (e) {
       dbmsg.textContent = '保存できなかった：' + (e && e.code ? e.code : e);
     }
+  });
+})();
+
+/* ===================== 対戦モード ===================== */
+/* スペルの対象。ここに無いスペルは対象を取らない（castSpell が target を見ない） */
+const SPELL_TARGET = {
+  '火の粉': 'enemy-any',
+  '焔弾': 'enemy-any',
+  '先を読む力': 'enemy-any',
+  '深読み': 'enemy-unit',
+  '小さな手当て': 'ally-any',
+};
+
+let M = null;
+function el(id) { return document.getElementById(id); }
+
+function colorOf(deckName) { return deckColor(Math.max(0, DECK_NAMES.indexOf(deckName))); }
+
+function logLine(text, cls) {
+  M.log.unshift({ text: text, cls: cls || '', turn: M.g.turn });
+  if (M.log.length > 60) M.log.pop();
+}
+
+function drawLog() {
+  const host = el('log');
+  host.innerHTML = '';
+  for (const l of M.log) {
+    const d = document.createElement('div');
+    d.className = 'logline ' + l.cls;
+    d.innerHTML = '<span class="tn">手番 ' + l.turn + '</span>' + l.text.replace(/\n/g, '<br>');
+    host.appendChild(d);
+  }
+}
+
+function newMatch(myDeck, aiDeck, meFirst) {
+  const maxHp = Math.max(5, Math.min(60, parseInt(el('hp').value, 10) || 25));
+  EngineMod.setLeaderHp(maxHp);
+
+  const stats = {};
+  const g = new EngineMod.Game(meFirst ? myDeck : aiDeck, meFirst ? aiDeck : myDeck,
+    (Math.random() * 2147483647) | 0, stats, 0);
+  g.playedThisGame = [];
+  // 同型でも統計が混ざらないように、統計キーと表示名を分ける
+  g.players.forEach((p, i) => { p.displayName = p.deckName; p.deckName = p.deckName + '#' + i; });
+  for (const p of g.players) { EngineMod.draw(g, p, 5); AiMod.mulligan(g, p); }
+  g.players[1].tension = 2;
+  g.players[1].holy = 2;
+
+  M = {
+    g: g,
+    me: g.players[meFirst ? 0 : 1],
+    ai: g.players[meFirst ? 1 : 0],
+    maxHp: maxHp,
+    myColor: colorOf(myDeck),
+    aiColor: colorOf(aiDeck),
+    phase: 'idle', sel: null, pending: null, log: [],
+  };
+  el('setup').hidden = true;
+  el('over').hidden = true;
+  el('board').hidden = false;
+  logLine(meFirst ? 'あなたの先攻で開始' : 'あなたの後攻で開始（テンション2・聖水2つ）', 'mine');
+  if (meFirst) beginMyTurn(); else runAiTurn();
+}
+
+/* ---- 手番の進行 ---- */
+function beginMyTurn() {
+  const g = M.g;
+  if (g.over) return finish();
+  if (g.turn >= EngineMod.TURN_CAP) { g.over = true; g.winner = 'draw'; return finish(); }
+  g.turn++;
+  g.turnPlayer = M.me.idx;
+  EngineMod.startPhase(g, M.me);
+  if (g.over) return finish();
+  M.phase = 'me'; M.sel = null; M.pending = null;
+  drawBoard();
+}
+
+function endMyTurn() {
+  if (M.phase !== 'me') return;
+  M.sel = null; M.pending = null;
+  EngineMod.endPhase(M.g, M.me);
+  if (M.g.over) return finish();
+  M.phase = 'ai';
+  drawBoard();
+  setTimeout(runAiTurn, 450);
+}
+
+function snapshotForLog() {
+  const s = M.g.stats[M.ai.deckName] || {};
+  const played = {};
+  for (const k of Object.keys(s)) played[k] = s[k].played;
+  return { played: played, myHp: M.me.leaderHp, myBoard: M.me.board.map(function (u) { return u.name; }) };
+}
+
+function multisetLost(before, after) {
+  const rest = after.slice();
+  const gone = [];
+  for (const n of before) {
+    const i = rest.indexOf(n);
+    if (i >= 0) rest.splice(i, 1); else gone.push(n);
+  }
+  return gone;
+}
+
+function runAiTurn() {
+  const g = M.g;
+  if (g.over) return finish();
+  if (g.turn >= EngineMod.TURN_CAP) { g.over = true; g.winner = 'draw'; return finish(); }
+  const before = snapshotForLog();
+  g.turn++;
+  g.turnPlayer = M.ai.idx;
+  AiMod.takeTurn(g, M.ai);
+
+  const s = g.stats[M.ai.deckName] || {};
+  const played = [];
+  for (const k of Object.keys(s)) {
+    const d = s[k].played - (before.played[k] || 0);
+    for (let i = 0; i < d; i++) played.push(k);
+  }
+  const dmg = before.myHp - M.me.leaderHp;
+  const lost = multisetLost(before.myBoard, M.me.board.map(function (u) { return u.name; }));
+  const parts = [];
+  if (played.length) parts.push('使った：' + played.join('、'));
+  if (lost.length) parts.push('あなたのキャラが倒れた：' + lost.join('、'));
+  if (dmg > 0) parts.push('あなたのリーダーに ' + dmg + ' ダメージ');
+  logLine('相手の手番　' + (parts.length ? parts.join('\n') : '動きなし'), dmg > 0 ? 'hit' : '');
+
+  if (g.over) return finish();
+  beginMyTurn();
+}
+
+function afterAction() {
+  if (M.g.over) return finish();
+  drawBoard();
+}
+
+function finish() {
+  M.phase = 'over'; M.sel = null; M.pending = null;
+  const g = M.g;
+  let msg, sub;
+  if (g.winner === 'draw') { msg = '引き分け'; sub = '決着がつかなかった'; }
+  else if (g.players[g.winner] === M.me) { msg = 'あなたの勝ち'; sub = '手番' + g.turn + 'で決着'; }
+  else { msg = 'あなたの負け'; sub = '手番' + g.turn + 'で決着'; }
+  if (M.me.fatigueLoss || M.ai.fatigueLoss) sub += '（山札切れ）';
+  el('over-msg').textContent = msg;
+  el('over-sub').textContent = sub;
+  el('over').hidden = false;
+  logLine(msg, 'mine');
+  drawBoard();
+}
+
+/* ---- 対象 ---- */
+function targetList(need) {
+  const out = [];
+  if (need === 'enemy-any' || need === 'enemy-unit') {
+    for (const u of M.ai.board) out.push({ type: 'unit', u: u });
+    if (need === 'enemy-any') out.push({ type: 'leader', p: M.ai });
+  } else if (need === 'ally-any') {
+    for (const u of M.me.board) out.push({ type: 'unit', u: u });
+    out.push({ type: 'leader', p: M.me });
+  }
+  return out;
+}
+function isTargetable(need, kind, obj) {
+  for (const t of targetList(need)) {
+    if (kind === 'unit' && t.type === 'unit' && t.u === obj) return true;
+    if (kind === 'leader' && t.type === 'leader' && t.p === obj) return true;
+  }
+  return false;
+}
+function targetName(t) { return t.type === 'leader' ? (t.p === M.me ? '自分のリーダー' : '相手のリーダー') : t.u.name; }
+
+function pickTarget(t) {
+  const p = M.pending;
+  if (!p) return;
+  if (p.kind === 'card') {
+    const name = M.me.hand[p.handIdx];
+    EngineMod.payAndPlay(M.g, M.me, p.handIdx, t);
+    logLine('あなた：' + name + ' → ' + targetName(t), 'mine');
+  } else {
+    EffectsMod.useTensionSkill(M.g, M.me, t);
+    logLine('あなた：テンションスキル → ' + targetName(t), 'mine');
+  }
+  M.pending = null;
+  afterAction();
+}
+
+/* ---- 自分の行動 ---- */
+function tryPlayCard(i) {
+  if (M.phase !== 'me' || M.pending) return;
+  const name = M.me.hand[i];
+  const d = CARD_DB[name];
+  if (EngineMod.cardCost(M.me, name) > M.me.mp) return;
+  if (d.kind === 'unit' && EngineMod.boardFull(M.me)) return;
+  const need = d.kind === 'spell' ? SPELL_TARGET[name] : null;
+  if (need && targetList(need).length) {
+    M.pending = { kind: 'card', handIdx: i, need: need };
+    drawBoard();
+    return;
+  }
+  EngineMod.payAndPlay(M.g, M.me, i, null);
+  logLine('あなた：' + name + ' を使った', 'mine');
+  afterAction();
+}
+
+function clickMyUnit(u) {
+  if (M.phase !== 'me') return;
+  if (M.pending) {
+    if (isTargetable(M.pending.need, 'unit', u)) pickTarget({ type: 'unit', u: u });
+    return;
+  }
+  if (!EngineMod.canAttackUnit(u) && !EngineMod.canAttackLeader(u)) return;
+  M.sel = (M.sel === u) ? null : u;
+  drawBoard();
+}
+
+function clickFoeUnit(t) {
+  if (M.phase !== 'me') return;
+  if (M.pending) {
+    if (isTargetable(M.pending.need, 'unit', t)) pickTarget({ type: 'unit', u: t });
+    return;
+  }
+  const u = M.sel;
+  if (!u || !EngineMod.canAttackUnit(u)) return;
+  if (EngineMod.hasTaunt(M.ai) && !t.kw.has('守護')) return;
+  EngineMod.attackUnit(M.g, M.me, u, t);
+  logLine('あなた：' + u.name + ' が ' + t.name + ' を攻撃', 'mine');
+  M.sel = null;
+  afterAction();
+}
+
+function clickHero(p) {
+  if (M.phase !== 'me') return;
+  if (M.pending) {
+    if (isTargetable(M.pending.need, 'leader', p)) pickTarget({ type: 'leader', p: p });
+    return;
+  }
+  if (p !== M.ai) return;
+  const u = M.sel;
+  if (!u || !EngineMod.canAttackLeader(u)) return;
+  if (EngineMod.hasTaunt(M.ai)) return;
+  EngineMod.attackLeader(M.g, M.me, u);
+  logLine('あなた：' + u.name + ' が相手リーダーを攻撃', 'mine');
+  M.sel = null;
+  afterAction();
+}
+
+function doTension() {
+  const me = M.me;
+  if (M.phase !== 'me' || M.pending || me.tensionRaisedThisTurn || me.tension >= 3 || me.mp < 1) return;
+  me.mp -= 1;
+  me.tensionRaisedThisTurn = true;
+  EngineMod.raiseTension(M.g, me, 1);
+  logLine('あなた：テンションを上げた（' + me.tension + '）', 'mine');
+  afterAction();
+}
+
+function doSkill() {
+  const me = M.me;
+  if (M.phase !== 'me' || M.pending || me.tension < 3) return;
+  if (me.leader === 'リーゼ' && targetList('enemy-any').length) {
+    M.pending = { kind: 'skill', need: 'enemy-any' };
+    drawBoard();
+    return;
+  }
+  EffectsMod.useTensionSkill(M.g, me);
+  logLine('あなた：テンションスキルを使った', 'mine');
+  afterAction();
+}
+
+function doHoly() {
+  const me = M.me;
+  if (M.phase !== 'me' || M.pending || !me.holy || me.holyUsedThisTurn) return;
+  me.holy--;
+  me.holyUsedThisTurn = true;
+  me.mp += 1;
+  logLine('あなた：聖水を使った（MP+1）', 'mine');
+  afterAction();
+}
+
+/* ---- 盤面の描画 ---- */
+function hudHtml(p, isMine) {
+  const mp = [];
+  for (let i = 1; i <= Math.max(p.maxMp, 1); i++) mp.push('<i class="pip' + (i <= p.mp ? ' on' : '') + '"></i>');
+  const tn = [];
+  for (let i = 1; i <= 3; i++) tn.push('<i class="pip t' + (i <= p.tension ? ' on' : '') + '"></i>');
+  return '<span class="who"><i class="rail" style="background:' + (isMine ? M.myColor : M.aiColor) + '"></i>' +
+    (isMine ? 'あなた' : '相手') +
+    '<span style="font-weight:400;color:var(--ink-3)">' + p.displayName + '</span></span>' +
+    '<span class="hp">' + Math.max(0, p.leaderHp) + '<small> / ' + M.maxHp + '</small></span>' +
+    '<span class="lbl">MP</span><span class="pips">' + mp.join('') + '</span>' +
+    '<span class="lbl">テンション</span><span class="pips">' + tn.join('') + '</span>' +
+    '<span class="lbl">手札</span><span class="cnt">' + p.hand.length + '</span>' +
+    '<span class="lbl">山札</span><span class="cnt">' + p.deck.length + '</span>' +
+    (p.holy ? '<span class="lbl">聖水</span><span class="cnt">' + p.holy + '</span>' : '') +
+    '<button type="button" class="heroslot" id="' + (isMine ? 'my-hero' : 'foe-hero') + '">' +
+    (isMine ? '自分のリーダー' : 'リーダー') + '</button>';
+}
+
+function cardTip(name) {
+  const d = CARD_DB[name];
+  const head = name + '（コスト' + d.cost + (d.kind === 'unit' ? '／' + d.atk + '・' + d.hp : '／スペル') + '）';
+  return CARD_TEXT[name] ? head + '\n' + CARD_TEXT[name] : head;
+}
+
+function unitEl(u, isMine) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'unit';
+  b.title = cardTip(u.name);
+  b.style.setProperty('--accent', isMine ? M.myColor : M.aiColor);
+  const chips = Array.from(u.kw);
+  if (u.frozen) chips.push('動けない');
+  b.innerHTML =
+    '<div class="u-kw">' + chips.map(function (k) { return '<i>' + k + '</i>'; }).join('') + '</div>' +
+    '<div class="u-name">' + u.name + '</div>' +
+    '<div class="u-foot"><span>' + u.atk + '</span>' +
+    '<span class="' + (u.hp < u.maxhp ? 'hp-lo' : '') + '">' + u.hp + '</span></div>';
+
+  if (M.pending) {
+    if (isTargetable(M.pending.need, 'unit', u)) b.classList.add('targetable');
+  } else if (isMine) {
+    if (M.sel === u) b.classList.add('sel');
+    else if (EngineMod.canAttackUnit(u) || EngineMod.canAttackLeader(u)) b.classList.add('ready');
+    else b.classList.add('sick');
+  } else if (M.sel && EngineMod.canAttackUnit(M.sel)) {
+    if (!EngineMod.hasTaunt(M.ai) || u.kw.has('守護')) b.classList.add('targetable');
+  }
+  b.addEventListener('click', function () { isMine ? clickMyUnit(u) : clickFoeUnit(u); });
+  return b;
+}
+
+function handEl(name, i) {
+  const d = CARD_DB[name];
+  const cost = EngineMod.cardCost(M.me, name);
+  const playable = M.phase === 'me' && !M.pending && cost <= M.me.mp &&
+    !(d.kind === 'unit' && EngineMod.boardFull(M.me));
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'hcard ' + (playable ? 'playable' : 'unplayable');
+  b.title = cardTip(name);
+  b.style.setProperty('--accent', M.myColor);
+  b.innerHTML = '<span class="cost">' + cost + '</span>' +
+    '<div class="u-kw">' + (d.kw || []).map(function (k) { return '<i>' + k + '</i>'; }).join('') + '</div>' +
+    '<div class="u-name">' + name + '</div>' +
+    '<span class="kindtag">' + (d.kind === 'unit' ? 'キャラクター' : 'スペル') + '</span>' +
+    (d.kind === 'unit' ? '<div class="u-foot"><span>' + d.atk + '</span><span>' + d.hp + '</span></div>' : '');
+  if (playable) b.addEventListener('click', function () { tryPlayCard(i); });
+  return b;
+}
+
+function drawBoard() {
+  const me = M.me, ai = M.ai;
+
+  el('foe-hud').innerHTML = hudHtml(ai, false);
+  el('my-hud').innerHTML = hudHtml(me, true);
+
+  const foeHero = el('foe-hero');
+  foeHero.addEventListener('click', function () { clickHero(ai); });
+  if (M.pending && isTargetable(M.pending.need, 'leader', ai)) foeHero.classList.add('targetable');
+  else if (!M.pending && M.sel && EngineMod.canAttackLeader(M.sel) && !EngineMod.hasTaunt(ai)) foeHero.classList.add('targetable');
+
+  const myHero = el('my-hero');
+  myHero.addEventListener('click', function () { clickHero(me); });
+  if (M.pending && isTargetable(M.pending.need, 'leader', me)) myHero.classList.add('targetable');
+
+  const fl = el('foe-lane'); fl.innerHTML = '';
+  for (const u of ai.board) fl.appendChild(unitEl(u, false));
+  const ml = el('my-lane'); ml.innerHTML = '';
+  for (const u of me.board) ml.appendChild(unitEl(u, true));
+
+  const h = el('my-hand'); h.innerHTML = '';
+  me.hand.forEach(function (n, i) { h.appendChild(handEl(n, i)); });
+
+  const badge = el('turnbadge');
+  badge.textContent = M.phase === 'me' ? 'あなたの手番' : (M.phase === 'over' ? '決着' : '相手の手番');
+  badge.className = 'turnbadge' + (M.phase === 'me' ? '' : ' foe');
+
+  const prompt = el('prompt');
+  const cancel = el('cancel');
+  cancel.hidden = true;
+  if (M.phase === 'over') prompt.textContent = '「もう一度」で新しい対戦を始められる。';
+  else if (M.pending) {
+    prompt.innerHTML = '<strong>対象を選んでください</strong>（赤い枠のどれか）';
+    cancel.hidden = false;
+  } else if (M.phase === 'me') {
+    if (M.sel) { prompt.innerHTML = '<strong>' + M.sel.name + '</strong> の攻撃先を選ぶ' + (EngineMod.hasTaunt(ai) ? '（相手に守護がいるので守護から）' : ''); cancel.hidden = false; }
+    else prompt.textContent = '手札を出す／キャラクターを選んで攻撃する／ターンを終える';
+  } else prompt.textContent = '相手が考えています…';
+
+  const isMe = M.phase === 'me' && !M.pending;
+  el('a-tension').disabled = !(isMe && !me.tensionRaisedThisTurn && me.tension < 3 && me.mp >= 1);
+  el('a-skill').disabled = !(isMe && me.tension >= 3);
+  el('a-holy').disabled = !(isMe && me.holy > 0 && !me.holyUsedThisTurn);
+  el('a-holy').hidden = !me.holy && !me.holyUsedThisTurn;
+  el('a-end').disabled = M.phase !== 'me';
+
+  drawLog();
+}
+
+/* ---- 画面の切り替えと配線 ---- */
+function setMode(play) {
+  el('view-bench').hidden = play;
+  el('view-play').hidden = !play;
+  el('m-bench').setAttribute('aria-selected', String(!play));
+  el('m-play').setAttribute('aria-selected', String(play));
+}
+
+(function wirePlay() {
+  const my = el('p-mydeck'), foe = el('p-aideck');
+  DECK_NAMES.forEach(function (d, i) {
+    my.appendChild(new Option(d, d));
+    foe.appendChild(new Option(d, d));
+  });
+  my.value = DECK_NAMES[0];
+  foe.value = DECK_NAMES[1] || DECK_NAMES[0];
+
+  el('m-bench').addEventListener('click', function () { setMode(false); });
+  el('m-play').addEventListener('click', function () { setMode(true); });
+
+  el('p-start').addEventListener('click', function () {
+    const f = el('p-first').value;
+    const meFirst = f === 'r' ? Math.random() < 0.5 : f === '1';
+    newMatch(my.value, foe.value, meFirst);
+  });
+  el('cancel').addEventListener('click', function () {
+    M.pending = null; M.sel = null; drawBoard();
+  });
+  el('a-tension').addEventListener('click', doTension);
+  el('a-skill').addEventListener('click', doSkill);
+  el('a-holy').addEventListener('click', doHoly);
+  el('a-end').addEventListener('click', endMyTurn);
+  el('a-again').addEventListener('click', function () {
+    el('board').hidden = true; el('over').hidden = true; el('setup').hidden = false;
+  });
+  el('a-rematch').addEventListener('click', function () {
+    el('board').hidden = true; el('over').hidden = true; el('setup').hidden = false;
   });
 })();
 

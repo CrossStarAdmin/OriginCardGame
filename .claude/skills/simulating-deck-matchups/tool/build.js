@@ -5,6 +5,7 @@ const path = require('path');
 const SIM = process.argv[2];
 const TEMPLATE = process.argv[3];
 const OUT = process.argv[4];
+const DECK_ROOT = process.argv[5] || null; // 効果テキストの取り込み元（省略可）
 
 function read(name) { return fs.readFileSync(path.join(SIM, name), 'utf8'); }
 
@@ -57,9 +58,38 @@ const bundle = [
   wrap('AiMod', ai),
 ].join('\n');
 
+// ---- 効果テキスト：デッキファイルの「## 効果」節を取り込む ----
+function collectCardText(root) {
+  const out = {};
+  if (!root || !fs.existsSync(root)) return out;
+  for (const deck of fs.readdirSync(root)) {
+    const dir = path.join(root, deck, 'カード一覧');
+    if (!fs.existsSync(dir)) continue;
+    for (const file of fs.readdirSync(dir)) {
+      if (!file.endsWith('.md')) continue;
+      const src = fs.readFileSync(path.join(dir, file), 'utf8');
+      const name = (src.match(/^#\s+(.+?)\s*$/m) || [])[1];
+      if (!name) continue;
+      const body = (src.match(/^##\s*効果\s*$([\s\S]*?)^##\s/m) || [])[1];
+      if (!body) continue;
+      const text = body.split('\n')
+        .map((l) => l.replace(/^\s*[-*]\s*/, '').trim())
+        .filter((l) => l.length)
+        .join('\n');
+      if (text && text !== '効果なし') out[name] = text;
+    }
+  }
+  return out;
+}
+const cardText = collectCardText(DECK_ROOT);
+console.log('効果テキスト ' + Object.keys(cardText).length + '件を取り込み');
+
 const tpl = fs.readFileSync(TEMPLATE, 'utf8');
 must(tpl.indexOf('/*__SIM__*/') >= 0, 'テンプレートに /*__SIM__*/ が無い');
-const html = tpl.replace('/*__SIM__*/', bundle);
+must(tpl.indexOf('/*__TEXT__*/') >= 0, 'テンプレートに /*__TEXT__*/ が無い');
+const html = tpl
+  .replace('/*__SIM__*/', bundle)
+  .replace('/*__TEXT__*/', 'const CARD_TEXT = ' + JSON.stringify(cardText, null, 0) + ';');
 
 fs.writeFileSync(OUT, html, 'utf8');
 console.log('OK ' + OUT + ' / ' + Math.round(html.length / 1024) + 'KB');
