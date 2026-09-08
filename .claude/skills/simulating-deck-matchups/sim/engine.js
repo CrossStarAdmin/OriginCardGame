@@ -63,6 +63,7 @@ class Player {
     this.spellsInGrave = 0;
     this.spellDiscount = 0;
     this.spellsThisTurn = 0;
+    this.afterburnAlways = false; // 師ベルゼ：このバトル中ずっと残火状態
     this.tensionRaisedThisTurn = false;
     this.holy = 0;
     this.holyUsedThisTurn = false;
@@ -264,7 +265,8 @@ function cardCost(p, name) {
   const d = CARD_DB[name];
   let c = d.cost;
   if (d.kind === 'spell') c = Math.max(0, c - p.spellDiscount);
-  return c;
+  if (EFFECTS && EFFECTS.handCostDelta) c += EFFECTS.handCostDelta(p, name);
+  return Math.max(0, c);
 }
 
 function payAndPlay(g, p, handIdx, target) {

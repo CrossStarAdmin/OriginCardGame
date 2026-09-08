@@ -8,7 +8,16 @@ function lookOdd(p) { const c = topCost(p); return c !== null && c % 2 === 1; }
 function lookEven(p) { const c = topCost(p); return c !== null && c % 2 === 0; }
 
 // ---- 残火：このターンに自分がスペルを使っていたか（場に出たとき1回だけ判定）----
-function afterburn(p) { return p.spellsThisTurn > 0; }
+function afterburn(p) { return p.afterburnAlways || p.spellsThisTurn > 0; }
+
+// スペル自身の残火判定。payAndPlay が先に spellsThisTurn を増やすので、自分自身は数えない
+function afterburnSpell(p) { return p.afterburnAlways || p.spellsThisTurn > 1; }
+
+// 手札で働く：残火ならギズモのコストを-1（デッキ/アグロリーゼ 06_ギズモ）
+function handCostDelta(p, name) {
+  if (name === 'ギズモ' && afterburn(p)) return -1;
+  return 0;
+}
 
 // ---- 対象選択 ----
 function threat(u) { return u.atk * 2 + u.hp + (u.kw.has('守護') ? 4 : 0); }
@@ -79,11 +88,8 @@ function onSummon(g, p, u) {
     case '学舎の見習い':
       if (afterburn(p)) u.atk += 1;
       break;
-    case 'ギズモ':
-      if (afterburn(p)) u.kw.add('速攻');
-      break;
     case 'ドロテ':
-      if (afterburn(p)) { u.atk += 2; u.kw.add('速攻'); }
+      if (afterburn(p)) { u.atk += 1; u.kw.add('速攻'); }
       break;
     case 'ポルカ':
       if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
@@ -109,12 +115,22 @@ function onSummon(g, p, u) {
       break;
     }
     case '師ベルゼ':
+      p.afterburnAlways = true;
       for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
       break;
 
     // ---- ミッドレンジ奇数エルナ ----
+    case 'オルレアの民':
+      if (lookOdd(p)) u.atk += 1;
+      break;
     case '凶兆のまたたき':
-      E.dealTo(g, chooseDamageTarget(g, p, 1), 1, p, u.name);
+      if (lookOdd(p)) E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, u.name);
+      break;
+    case '相棒ヴァルザ':
+      if (lookOdd(p)) {
+        const t = chooseDamageTarget(g, p, 3, { faceOk: false });
+        if (t) E.dealTo(g, t, 3, p, u.name);
+      }
       break;
     case '使い魔サキュ':
       if (lookOdd(p)) E.draw(g, p, 1);
@@ -141,8 +157,8 @@ function onSummon(g, p, u) {
     case '天文台の護り':
       if (lookOdd(p)) E.healLeader(g, p, 4, p, u.name);
       break;
-    case '双つの未来':
-      if (lookOdd(p) && !u.token) E.putUnit(g, p, '双つの未来', { trigger: false, token: true });
+    case '双子の星占いエマ&エリ':
+      if (lookOdd(p) && !u.token) E.putUnit(g, p, '双子の星占いエマ&エリ', { trigger: false, token: true });
       break;
     case '識りすぎたヴァルザ':
       if (p.grave.includes('相棒ヴァルザ')) u.kw.add('速攻');
@@ -214,7 +230,7 @@ function onDeath(g, p, u) {
       p.deck = E.shuffle(p.deck, g.rng);
     }
   } else if (u.name === '師ベルゼ' && !u.token) {
-    for (const x of p.board) x.atk += 1;
+    E.damageLeader(g, g.opp(p), 5, p, u.name);
   }
 }
 
@@ -271,14 +287,22 @@ function castSpell(g, p, name, target) {
     case '焔弾': E.dealTo(g, target || chooseDamageTarget(g, p, 3), 3, p, name); break;
     case '焼き払い':
       for (const x of foe.board.slice()) E.damageUnit(g, x, 2, p, name);
+      E.damageLeader(g, foe, 1, p, name);
       E.cleanup(g);
       break;
-    case '消えぬ焔':
-      for (const x of p.board) { x.atk += 1; x.kw.add('速攻'); }
+    // 全体＝敵味方すべてのリーダーとキャラクター（ルール/06_キーワード能力の記法）
+    case '消えぬ焔': {
+      const dmg = afterburnSpell(p) ? 4 : 3;
+      for (const x of foe.board.slice()) E.damageUnit(g, x, dmg, p, name);
+      for (const x of p.board.slice()) E.damageUnit(g, x, dmg, p, name);
+      E.damageLeader(g, foe, dmg, p, name);
+      p.leaderHp -= dmg;
+      E.checkLeaders(g);
       break;
+    }
 
     // ---- ミッドレンジ奇数エルナ ----
-    case '一手先を読む': {
+    case '先を読む力': {
       E.dealTo(g, target || chooseDamageTarget(g, p, 1), 1, p, name);
       E.draw(g, p, 1);
       if (g.over) return;
@@ -368,5 +392,6 @@ function useTensionSkill(g, p) {
 
 module.exports = {
   onSummon, onDeath, onTurnStart, onTurnEnd, onTensionLink, onLeaderHealed,
-  castSpell, useTensionSkill, chooseDamageTarget, threat, best, lookOdd, lookEven, topCost, afterburn,
+  castSpell, useTensionSkill, chooseDamageTarget, threat, best, lookOdd, lookEven, topCost,
+  afterburn, afterburnSpell, handCostDelta,
 };
