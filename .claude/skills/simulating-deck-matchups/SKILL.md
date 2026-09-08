@@ -13,6 +13,7 @@ description: デッキ同士を自動対戦させ、勝率・エースカード�
 | 場所 | 中身 |
 |---|---|
 | `sim/` | シミュレーター本体。`cards.js` `effects.js` `ai.js` `engine.js` と実行スクリプト |
+| [tool/README.md](tool/README.md) | ブラウザで数値をいじって回す「カード調整卓」の作り方と、保存された調整の読み戻し方 |
 | [reference/adding-cards.md](reference/adding-cards.md) | カード・デッキを実装する手順とコードの型 |
 | [reference/reading-results.md](reference/reading-results.md) | 指標の定義、バイアス、報告に書くこと |
 | [reference/rule-interpretations.md](reference/rule-interpretations.md) | カードテキストが曖昧な箇所の決定済み一覧 |

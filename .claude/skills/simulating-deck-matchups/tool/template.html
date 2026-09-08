@@ -1,0 +1,876 @@
+<title>カード調整卓</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Old+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --plane:        #f3f2f7;
+    --surface:      #fcfcfe;
+    --sunk:         #eceaf2;
+    --ink:          #14131a;
+    --ink-2:        #55535f;
+    --ink-3:        #85828f;
+    --rule:         #e2e0ea;
+    --rule-strong:  #c8c5d3;
+    --hairline:     rgba(20, 19, 26, 0.10);
+    --field:        #ffffff;
+
+    --deck-0:       #c4551f;
+    --deck-1:       #6d4fd3;
+    --deck-2:       #0e9384;
+
+    --pos:          #2a78d6;
+    --neg:          #d03b3b;
+    --edited:       #b8860b;
+    --edited-wash:  rgba(184, 134, 11, 0.09);
+
+    --shadow: 0 1px 2px rgba(20,19,26,.05), 0 8px 24px -16px rgba(20,19,26,.35);
+
+    --display: "Zen Old Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+    --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+    --data: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --plane:        #0b0b10;
+      --surface:      #16161e;
+      --sunk:         #1e1e28;
+      --ink:          #f4f3f8;
+      --ink-2:        #b3b0c0;
+      --ink-3:        #85828f;
+      --rule:         #272730;
+      --rule-strong:  #3a3946;
+      --hairline:     rgba(244, 243, 248, 0.12);
+      --field:        #1e1e28;
+
+      --deck-0:       #de6a33;
+      --deck-1:       #8a75e4;
+      --deck-2:       #1fa48f;
+
+      --pos:          #3987e5;
+      --neg:          #e66767;
+      --edited:       #e0b341;
+      --edited-wash:  rgba(224, 179, 65, 0.12);
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --plane:        #0b0b10;
+    --surface:      #16161e;
+    --sunk:         #1e1e28;
+    --ink:          #f4f3f8;
+    --ink-2:        #b3b0c0;
+    --ink-3:        #85828f;
+    --rule:         #272730;
+    --rule-strong:  #3a3946;
+    --hairline:     rgba(244, 243, 248, 0.12);
+    --field:        #1e1e28;
+
+    --deck-0:       #de6a33;
+    --deck-1:       #8a75e4;
+    --deck-2:       #1fa48f;
+
+    --pos:          #3987e5;
+    --neg:          #e66767;
+    --edited:       #e0b341;
+    --edited-wash:  rgba(224, 179, 65, 0.12);
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--plane); color: var(--ink);
+    font-family: var(--body); font-size: 14px; line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .num { font-family: var(--data); font-variant-numeric: tabular-nums; }
+
+  .shell { max-width: 1400px; margin: 0 auto; padding: 32px 24px 80px; display: flex; flex-direction: column; gap: 26px; }
+
+  /* ---- masthead ---- */
+  .top { display: flex; flex-direction: column; gap: 12px; }
+  .eyebrow { font-family: var(--data); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+  h1 { font-size: clamp(28px, 4vw, 38px); line-height: 1.2; letter-spacing: .02em; }
+  .top-rule { height: 3px; background: linear-gradient(90deg, var(--deck-0) 0 34%, var(--deck-1) 34% 67%, var(--deck-2) 67% 100%); }
+  .lede { color: var(--ink-2); max-width: 74ch; }
+
+  /* ---- control bar ---- */
+  .bar {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 22px;
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 4px;
+    padding: 16px 20px; box-shadow: var(--shadow);
+  }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field > label { font-size: 11px; letter-spacing: .08em; color: var(--ink-3); font-family: var(--data); text-transform: uppercase; }
+  select, input[type="number"] {
+    font-family: var(--data); font-size: 14px; color: var(--ink);
+    background: var(--field); border: 1px solid var(--rule-strong); border-radius: 3px;
+    padding: 7px 9px; min-height: 36px;
+  }
+  select:focus-visible, input:focus-visible, button:focus-visible {
+    outline: 2px solid var(--pos); outline-offset: 1px;
+  }
+  .btn {
+    font-family: var(--body); font-weight: 700; font-size: 14px;
+    border-radius: 3px; padding: 9px 20px; min-height: 38px; cursor: pointer;
+    border: 1px solid var(--ink); background: var(--ink); color: var(--plane);
+    transition: opacity .12s ease;
+  }
+  .btn:hover:not(:disabled) { opacity: .85; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ink-2); border-color: var(--rule-strong); font-weight: 500; }
+  .btn.sm { font-size: 12px; padding: 5px 11px; min-height: 28px; }
+  .bar-spacer { flex: 1 1 auto; }
+  .runstate { font-family: var(--data); font-size: 12px; color: var(--ink-3); }
+
+  /* ---- layout ---- */
+  .cols { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 26px; align-items: start; }
+  @media (max-width: 1060px) { .cols { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--hairline); border-radius: 4px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .panel-head {
+    padding: 15px 18px; border-bottom: 1px solid var(--rule);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .panel-head h2 { font-size: 17px; }
+  .panel-head .hint { font-size: 12px; color: var(--ink-3); }
+  .panel-body { padding: 16px 18px; }
+
+  /* ---- deck tabs ---- */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--rule); }
+  .tab {
+    flex: 1; text-align: center; padding: 11px 8px 10px; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--ink-3);
+    background: transparent; border: none; border-bottom: 3px solid transparent;
+    font-family: var(--body);
+  }
+  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 700; }
+  .tab .cnt { font-family: var(--data); font-size: 11px; display: block; color: var(--ink-3); font-weight: 400; }
+  .tab .cnt.bad { color: var(--neg); font-weight: 600; }
+
+  /* ---- card editor ---- */
+  .cards { display: flex; flex-direction: column; }
+  .chead, .crow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 50px 50px 50px 50px 188px 28px;
+    gap: 8px; align-items: center;
+  }
+  .chead {
+    padding: 10px 18px; border-bottom: 1px solid var(--rule-strong);
+    font-family: var(--data); font-size: 10.5px; letter-spacing: .06em; color: var(--ink-3); text-transform: uppercase;
+  }
+  .chead span:not(:first-child) { text-align: center; }
+  .crow { padding: 7px 18px; border-bottom: 1px solid var(--rule); }
+  .crow.edited { background: var(--edited-wash); }
+  .cname { font-size: 13px; display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .cname .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cname .kind {
+    font-family: var(--data); font-size: 9.5px; padding: 1px 5px; border-radius: 2px;
+    border: 1px solid var(--rule-strong); color: var(--ink-3); flex: none;
+  }
+  .crow input[type="number"] {
+    width: 100%; text-align: center; padding: 5px 2px; min-height: 30px; font-size: 13px;
+    -moz-appearance: textfield;
+  }
+  .crow input[type="number"]::-webkit-outer-spin-button,
+  .crow input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .crow input:disabled { background: var(--sunk); color: var(--ink-3); border-style: dashed; }
+  .kws { display: flex; gap: 3px; flex-wrap: wrap; }
+  .kw {
+    font-size: 10.5px; font-family: var(--body); padding: 2px 6px; border-radius: 2px; cursor: pointer;
+    border: 1px solid var(--rule-strong); background: transparent; color: var(--ink-3);
+    line-height: 1.5;
+  }
+  .kw[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  .revert {
+    border: none; background: transparent; color: var(--edited); cursor: pointer;
+    font-size: 14px; padding: 2px 4px; line-height: 1; visibility: hidden;
+  }
+  .crow.edited .revert { visibility: visible; }
+
+  .warn {
+    margin: 12px 18px 0; padding: 9px 12px; border-radius: 3px; font-size: 12.5px;
+    background: color-mix(in oklab, var(--neg) 12%, transparent); color: var(--ink);
+    border: 1px solid color-mix(in oklab, var(--neg) 35%, transparent);
+  }
+  .note-inline { padding: 12px 18px 16px; font-size: 12px; color: var(--ink-3); line-height: 1.65; }
+
+  /* ---- results ---- */
+  .empty { padding: 42px 18px; text-align: center; color: var(--ink-3); font-size: 13px; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .tile {
+    border: 1px solid var(--hairline); border-left: 3px solid var(--accent);
+    border-radius: 3px; padding: 12px 13px; display: flex; flex-direction: column; gap: 1px;
+    background: var(--sunk);
+  }
+  .tile .who { font-size: 11.5px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tile .big { font-family: var(--data); font-weight: 600; font-size: 27px; line-height: 1.15; }
+  .tile .d { font-family: var(--data); font-size: 11.5px; }
+  .up { color: var(--pos); } .down { color: var(--neg); } .flat { color: var(--ink-3); }
+
+  .sub { font-family: var(--data); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin: 20px 0 8px; }
+  .scroller { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+  th, td { padding: 7px 9px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  thead th { font-size: 10.5px; font-weight: 500; color: var(--ink-3); border-bottom: 1px solid var(--rule-strong); }
+  td.n { font-family: var(--data); font-variant-numeric: tabular-nums; }
+  tbody tr:last-child td { border-bottom: none; }
+  .mx td { text-align: center; }
+  .mx thead th { text-align: center; }
+  .mx tbody th { text-align: left; font-weight: 500; font-size: 12px; border-bottom: 1px solid var(--rule); }
+  .mx .cellv { font-family: var(--data); font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .mx .cellp { font-family: var(--data); font-size: 10px; color: var(--ink-2); }
+  .mx td.pos { background: color-mix(in oklab, var(--pos) calc(var(--a) * 1%), transparent); }
+  .mx td.neg { background: color-mix(in oklab, var(--neg) calc(var(--a) * 1%), transparent); }
+  .swatch { display: inline-block; width: 3px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 7px; }
+
+  /* ---- presets ---- */
+  .presets { display: flex; flex-direction: column; gap: 8px; }
+  .preset {
+    display: flex; align-items: center; gap: 10px; padding: 8px 11px;
+    border: 1px solid var(--rule); border-radius: 3px; background: var(--sunk);
+  }
+  .preset .pn { flex: 1; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preset .pm { font-family: var(--data); font-size: 11px; color: var(--ink-3); flex: none; }
+  .preset-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .preset-row input[type="text"] {
+    flex: 1; min-width: 160px; font-family: var(--body); font-size: 13px; color: var(--ink);
+    background: var(--field); border: 1px solid var(--rule-strong); border-radius: 3px; padding: 8px 10px; min-height: 36px;
+  }
+  .dbmsg { font-size: 12px; color: var(--ink-3); }
+
+  footer { border-top: 1px solid var(--rule); padding-top: 18px; font-size: 12px; color: var(--ink-3); display: flex; flex-direction: column; gap: 5px; }
+  footer code { font-family: var(--data); font-size: 11.5px; color: var(--ink-2); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="shell">
+
+  <header class="top">
+    <p class="eyebrow">Card balance workbench</p>
+    <h1>カード調整卓</h1>
+    <div class="top-rule"></div>
+    <p class="lede">カードのコスト・攻撃力・HP・投入枚数・キーワードをその場で書き換えて、3デッキ総当たりを回す。乱数の種は固定なので、<strong>同じ戦数なら毎回まったく同じ試合が再現される</strong>——数字の差はカードの差だけになる。</p>
+  </header>
+
+  <div class="bar">
+    <div class="field">
+      <label for="n">戦数（1マッチあたり）</label>
+      <select id="n">
+        <option value="300">300戦（速い）</option>
+        <option value="1000" selected>1000戦（標準）</option>
+        <option value="3000">3000戦（精密・十数秒かかる）</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="hp">リーダーHP</label>
+      <input type="number" id="hp" value="25" min="5" max="60" step="1" style="width:88px">
+    </div>
+    <button class="btn" id="run">対戦を回す</button>
+    <button class="btn ghost" id="reset">全部もとに戻す</button>
+    <div class="bar-spacer"></div>
+    <span class="runstate" id="runstate">まだ回していない</span>
+  </div>
+
+  <div class="cols">
+
+    <!-- ============ editor ============ -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>カードをいじる</h2>
+        <span class="hint">変えた行は色が付く</span>
+      </div>
+      <div class="tabs" id="tabs" role="tablist"></div>
+      <div id="warn"></div>
+      <div class="chead">
+        <span>カード</span><span>コスト</span><span>攻</span><span>HP</span><span>枚数</span><span style="text-align:left">キーワード</span><span></span>
+      </div>
+      <div class="cards" id="cards"></div>
+      <p class="note-inline">
+        いじれるのは<strong>数値とキーワードだけ</strong>。「召喚時：敵1体に1ダメージ」のような効果テキストはシミュレーター側に書き込まれているので、ここからは変えられない。効果そのものを変えたいときは、デッキファイルを直してから私に実装を頼んでほしい。
+      </p>
+    </div>
+
+    <!-- ============ results ============ -->
+    <div style="display:flex; flex-direction:column; gap:26px">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>結果</h2>
+          <span class="hint" id="reshint">現在のデッキ定義との差で表示</span>
+        </div>
+        <div class="panel-body" id="results">
+          <p class="empty">「対戦を回す」を押すと、ここに勝率が出る。<br>初回は比較用の基準値も一緒に回すので少し長くかかる。</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h2>調整を保存する</h2>
+          <span class="hint">Claude が読み戻せる</span>
+        </div>
+        <div class="panel-body">
+          <div class="preset-row">
+            <input type="text" id="pname" placeholder="調整の名前（例：ギズモ2コスト戻し）" maxlength="60">
+            <button class="btn sm" id="save" style="min-height:36px">保存</button>
+          </div>
+          <p class="dbmsg" id="dbmsg" style="margin-top:10px">保存領域を確認しています…</p>
+          <div class="presets" id="presets" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>シミュレーター本体は <code>.claude/skills/simulating-deck-matchups/sim/</code> から取り込んだもの。効果の実装・AIのプレイ方針・ルール解釈はそちらと同一。</p>
+    <p>保存した調整は Claude から読み戻せる。「調整卓の〈名前〉をデッキファイルに反映して」と頼めば、実際の <code>カード一覧/*.md</code> に落とし込める。</p>
+  </footer>
+</div>
+
+<script>
+/* ===================== シミュレーター本体（sim/ から取り込み） ===================== */
+/*__SIM__*/
+
+/* ===================== 実行ハーネス（run.js / mirror.js と同じ手順） ===================== */
+const CARD_DB = CardsMod.CARD_DB;
+const DECKS = CardsMod.DECKS;
+EngineMod.setEffects(EffectsMod);
+
+function playGame(deckA, deckB, seed, stats, gameId) {
+  const g = new EngineMod.Game(deckA, deckB, seed, stats, gameId);
+  g.playedThisGame = [];
+  for (const p of g.players) { EngineMod.draw(g, p, 5); AiMod.mulligan(g, p); }
+  g.players[1].tension = 2;
+  g.players[1].holy = 2;
+  let tp = 0;
+  while (!g.over && g.turn < EngineMod.TURN_CAP) {
+    g.turn++;
+    g.turnPlayer = tp;
+    AiMod.takeTurn(g, g.players[tp]);
+    tp = 1 - tp;
+  }
+  if (!g.over) { g.over = true; g.winner = 'draw'; }
+  return g;
+}
+
+function runMatch(deckA, deckB, n, seed0) {
+  const stats = {};
+  const res = { a: deckA, b: deckB, n, aWins: 0, bWins: 0, draws: 0,
+    aWinsFirst: 0, aGamesFirst: 0, bWinsFirst: 0, bGamesFirst: 0, turnsTotal: 0 };
+  for (let i = 0; i < n; i++) {
+    const aFirst = i % 2 === 0;
+    const g = playGame(aFirst ? deckA : deckB, aFirst ? deckB : deckA, seed0 + i * 7919, stats, i);
+    let winnerDeck = null;
+    if (g.winner === 'draw') res.draws++;
+    else winnerDeck = g.players[g.winner].deckName;
+    if (winnerDeck === deckA) res.aWins++;
+    else if (winnerDeck === deckB) res.bWins++;
+    if (aFirst) { res.aGamesFirst++; if (winnerDeck === deckA) res.aWinsFirst++; }
+    else { res.bGamesFirst++; if (winnerDeck === deckB) res.bWinsFirst++; }
+    res.turnsTotal += g.turn;
+    for (const [dn, cn] of g.playedThisGame) {
+      const s = stats[dn][cn];
+      s.games++;
+      if (winnerDeck === dn) s.wins++;
+      s.seen = false;
+    }
+  }
+  res.stats = stats;
+  return res;
+}
+
+function runMirror(deck, n) {
+  const stats = {};
+  let first = 0, turns = 0;
+  for (let i = 0; i < n; i++) {
+    const g = playGame(deck, deck, 5000 + i * 3571, stats, i);
+    if (g.winner === 0) first++;
+    turns += g.turn;
+    for (const [dn, cn] of g.playedThisGame) stats[dn][cn].seen = false;
+  }
+  return { first: first / n, turns: turns / n };
+}
+
+/* 総当たり一式。run.js と同じ組み合わせ順・同じ種を使う */
+function runAll(n) {
+  const names = Object.keys(DECKS);
+  const pairs = [];
+  for (let i = 0; i < names.length; i++)
+    for (let j = i + 1; j < names.length; j++) pairs.push([names[i], names[j]]);
+
+  const matches = pairs.map(([a, b], i) => runMatch(a, b, n, 1000 + i * 100003));
+  const totals = {};
+  const cards = {};
+  for (const d of names) { totals[d] = { w: 0, g: 0 }; cards[d] = {}; }
+  for (const m of matches) {
+    totals[m.a].w += m.aWins; totals[m.a].g += m.n;
+    totals[m.b].w += m.bWins; totals[m.b].g += m.n;
+    for (const [dn, byCard] of Object.entries(m.stats)) {
+      for (const [cn, v] of Object.entries(byCard)) {
+        const t = cards[dn][cn] || (cards[dn][cn] = { faceDmg: 0, kills: 0, heal: 0, games: 0, wins: 0 });
+        t.faceDmg += v.faceDmg; t.kills += v.kills; t.heal += v.heal; t.games += v.games; t.wins += v.wins;
+      }
+    }
+  }
+  const mirrors = {};
+  for (const d of names) mirrors[d] = runMirror(d, n);
+
+  const cardRows = {};
+  for (const d of names) {
+    const g = totals[d].g;
+    const base = g ? totals[d].w / g : 0;
+    cardRows[d] = Object.entries(cards[d]).map(([name, v]) => ({
+      name,
+      contrib: v.faceDmg / g + (v.kills / g) * 3 + (v.heal / g) * 0.8,
+      useRate: v.games / g,
+      wr: v.games ? v.wins / v.games : 0,
+      delta: (v.games ? v.wins / v.games : 0) - base,
+    })).sort((x, y) => y.contrib - x.contrib);
+  }
+
+  return { names, matches, totals, mirrors, cardRows, n };
+}
+
+/* ===================== 編集状態 ===================== */
+const KEYWORDS = ['守護', '突進', '速攻', '必殺', '貫通'];
+const DECK_NAMES = Object.keys(DECKS);
+
+/* 取り込み時点の定義を基準値として控える */
+const BASE_CARDS = JSON.parse(JSON.stringify(CARD_DB));
+const BASE_LISTS = JSON.parse(JSON.stringify(
+  Object.fromEntries(DECK_NAMES.map((d) => [d, DECKS[d].list]))));
+
+let activeDeck = 0;
+let lastResult = null;
+const baselineCache = {};
+
+function deckColor(i) { return 'var(--deck-' + i + ')'; }
+
+function cardIsEdited(name) {
+  const a = CARD_DB[name], b = BASE_CARDS[name];
+  if (a.cost !== b.cost || a.atk !== b.atk || a.hp !== b.hp) return true;
+  const ka = (a.kw || []).slice().sort().join(',');
+  const kb = (b.kw || []).slice().sort().join(',');
+  return ka !== kb;
+}
+function countIsEdited(deck, name) {
+  return DECKS[deck].list[name] !== BASE_LISTS[deck][name];
+}
+function rowIsEdited(deck, name) { return cardIsEdited(name) || countIsEdited(deck, name); }
+
+function anyEdits() {
+  return DECK_NAMES.some((d) => Object.keys(DECKS[d].list).some((n) => rowIsEdited(d, n)))
+    || Number(document.getElementById('hp').value) !== 25;
+}
+
+function deckTotal(deck) {
+  return Object.values(DECKS[deck].list).reduce((a, b) => a + b, 0);
+}
+
+function revertRow(deck, name) {
+  const b = BASE_CARDS[name];
+  CARD_DB[name].cost = b.cost;
+  CARD_DB[name].atk = b.atk;
+  CARD_DB[name].hp = b.hp;
+  if (b.kw) CARD_DB[name].kw = b.kw.slice(); else delete CARD_DB[name].kw;
+  DECKS[deck].list[name] = BASE_LISTS[deck][name];
+  render();
+}
+
+function resetAll() {
+  for (const [name, b] of Object.entries(BASE_CARDS)) {
+    CARD_DB[name].cost = b.cost;
+    CARD_DB[name].atk = b.atk;
+    CARD_DB[name].hp = b.hp;
+    if (b.kw) CARD_DB[name].kw = b.kw.slice(); else delete CARD_DB[name].kw;
+  }
+  for (const d of DECK_NAMES) {
+    for (const n of Object.keys(BASE_LISTS[d])) DECKS[d].list[n] = BASE_LISTS[d][n];
+  }
+  document.getElementById('hp').value = 25;
+  EngineMod.setLeaderHp(25);
+  render();
+}
+
+/* ===================== 描画：エディタ ===================== */
+function renderTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = '';
+  DECK_NAMES.forEach((d, i) => {
+    const total = deckTotal(d);
+    const b = document.createElement('button');
+    b.className = 'tab';
+    b.setAttribute('role', 'tab');
+    b.setAttribute('aria-selected', String(i === activeDeck));
+    b.style.setProperty('--accent', deckColor(i));
+    b.innerHTML = '<span>' + d + '</span><span class="cnt' + (total === 40 ? '' : ' bad') + '">' + total + '枚</span>';
+    b.addEventListener('click', () => { activeDeck = i; render(); });
+    el.appendChild(b);
+  });
+}
+
+function numInput(value, min, max, onChange, disabled) {
+  const inp = document.createElement('input');
+  inp.type = 'number';
+  inp.value = value;
+  inp.min = min; inp.max = max; inp.step = 1;
+  if (disabled) inp.disabled = true;
+  inp.addEventListener('change', () => {
+    let v = parseInt(inp.value, 10);
+    if (isNaN(v)) v = min;
+    v = Math.max(min, Math.min(max, v));
+    inp.value = v;
+    onChange(v);
+    render();
+  });
+  return inp;
+}
+
+function renderCards() {
+  const deck = DECK_NAMES[activeDeck];
+  const host = document.getElementById('cards');
+  host.innerHTML = '';
+  for (const name of Object.keys(DECKS[deck].list)) {
+    const d = CARD_DB[name];
+    const isUnit = d.kind === 'unit';
+    const row = document.createElement('div');
+    row.className = 'crow' + (rowIsEdited(deck, name) ? ' edited' : '');
+    row.style.setProperty('--accent', deckColor(activeDeck));
+
+    const nm = document.createElement('div');
+    nm.className = 'cname';
+    nm.innerHTML = '<span class="nm">' + name + '</span><span class="kind">' + (isUnit ? 'キャラ' : 'スペル') + '</span>';
+    row.appendChild(nm);
+
+    row.appendChild(numInput(d.cost, 0, 12, (v) => { d.cost = v; }));
+    row.appendChild(numInput(isUnit ? d.atk : 0, 0, 20, (v) => { d.atk = v; }, !isUnit));
+    row.appendChild(numInput(isUnit ? d.hp : 0, 1, 20, (v) => { d.hp = v; }, !isUnit));
+    row.appendChild(numInput(DECKS[deck].list[name], 0, 3, (v) => { DECKS[deck].list[name] = v; }));
+
+    const kws = document.createElement('div');
+    kws.className = 'kws';
+    if (isUnit) {
+      for (const k of KEYWORDS) {
+        const has = (d.kw || []).indexOf(k) >= 0;
+        const b = document.createElement('button');
+        b.className = 'kw';
+        b.type = 'button';
+        b.textContent = k;
+        b.setAttribute('aria-pressed', String(has));
+        b.addEventListener('click', () => {
+          const cur = (d.kw || []).slice();
+          const idx = cur.indexOf(k);
+          if (idx >= 0) cur.splice(idx, 1); else cur.push(k);
+          d.kw = cur;
+          render();
+        });
+        kws.appendChild(b);
+      }
+    }
+    row.appendChild(kws);
+
+    const rv = document.createElement('button');
+    rv.className = 'revert';
+    rv.type = 'button';
+    rv.title = name + ' をもとに戻す';
+    rv.setAttribute('aria-label', name + ' をもとに戻す');
+    rv.textContent = '↺';
+    rv.addEventListener('click', () => revertRow(deck, name));
+    row.appendChild(rv);
+
+    host.appendChild(row);
+  }
+
+  const deckTot = deckTotal(deck);
+  const w = document.getElementById('warn');
+  w.innerHTML = deckTot === 40 ? ''
+    : '<p class="warn">' + deck + ' が ' + deckTot + '枚 になっている（ルールは40枚）。このままでも回せるが、山札切れの起きやすさが変わるので数字は参考程度に。</p>';
+}
+
+/* ===================== 描画：結果 ===================== */
+function pct(x) { return (x * 100).toFixed(1); }
+function signed(x) { return (x >= 0 ? '+' : '') + x.toFixed(1); }
+function deltaClass(x) { return Math.abs(x) < 0.05 ? 'flat' : (x > 0 ? 'up' : 'down'); }
+
+function matchLookup(result, a, b) {
+  for (const m of result.matches) {
+    if (m.a === a && m.b === b) return { win: m.aWins / m.n, first: m.aWinsFirst / m.aGamesFirst,
+      second: (m.aWins - m.aWinsFirst) / (m.n - m.aGamesFirst), turns: m.turnsTotal / m.n };
+    if (m.b === a && m.a === b) return { win: m.bWins / m.n, first: m.bWinsFirst / m.bGamesFirst,
+      second: (m.bWins - m.bWinsFirst) / (m.n - m.bGamesFirst), turns: m.turnsTotal / m.n };
+  }
+  return null;
+}
+
+function renderResults() {
+  const host = document.getElementById('results');
+  if (!lastResult) return;
+  const { cur, base } = lastResult;
+  const names = cur.names;
+  const parts = [];
+
+  /* 総合 */
+  parts.push('<div class="tiles">');
+  names.forEach((d, i) => {
+    const c = cur.totals[d].w / cur.totals[d].g;
+    const b = base.totals[d].w / base.totals[d].g;
+    const dd = (c - b) * 100;
+    parts.push(
+      '<div class="tile" style="--accent:' + deckColor(i) + '">' +
+      '<span class="who">' + d + '</span>' +
+      '<span class="big">' + pct(c) + '<span style="font-size:15px">%</span></span>' +
+      '<span class="d ' + deltaClass(dd) + '">' + signed(dd) + ' <span style="color:var(--ink-3)">／ 基準 ' + pct(b) + '%</span></span>' +
+      '</div>');
+  });
+  parts.push('</div>');
+
+  /* マッチアップ */
+  parts.push('<p class="sub">マッチアップ（行が列に勝った割合。小さい数字は基準値）</p>');
+  parts.push('<div class="scroller"><table class="mx"><thead><tr><th></th>');
+  names.forEach((d) => parts.push('<th>vs ' + d.replace('コントロール', '').replace('ミッドレンジ', '').replace('アグロ', '') + '</th>'));
+  parts.push('</tr></thead><tbody>');
+  names.forEach((row, ri) => {
+    parts.push('<tr><th><span class="swatch" style="background:' + deckColor(ri) + '"></span>' + row + '</th>');
+    names.forEach((col) => {
+      if (row === col) { parts.push('<td style="color:var(--ink-3)">—</td>'); return; }
+      const c = matchLookup(cur, row, col);
+      const b = matchLookup(base, row, col);
+      const dev = c.win * 100 - 50;
+      const a = Math.min(35, Math.round(Math.abs(dev) / 20 * 35));
+      parts.push('<td class="' + (dev >= 0 ? 'pos' : 'neg') + '" style="--a:' + a + '" ' +
+        'title="先攻 ' + pct(c.first) + '% ／ 後攻 ' + pct(c.second) + '%">' +
+        '<div class="cellv">' + pct(c.win) + '</div>' +
+        '<div class="cellp">基準 ' + pct(b.win) + '</div></td>');
+    });
+    parts.push('</tr>');
+  });
+  parts.push('</tbody></table></div>');
+
+  /* ミラー */
+  parts.push('<p class="sub">ミラーの先攻勝率（先攻有利の基準線）と決着の速さ</p>');
+  parts.push('<div class="scroller"><table><thead><tr><th>デッキ</th><th>先攻勝率</th><th>基準</th><th>平均手番</th><th>基準</th></tr></thead><tbody>');
+  names.forEach((d, i) => {
+    const c = cur.mirrors[d], b = base.mirrors[d];
+    parts.push('<tr><td><span class="swatch" style="background:' + deckColor(i) + '"></span>' + d + '</td>' +
+      '<td class="n">' + pct(c.first) + '%</td>' +
+      '<td class="n" style="color:var(--ink-3)">' + pct(b.first) + '%</td>' +
+      '<td class="n">' + c.turns.toFixed(1) + '</td>' +
+      '<td class="n" style="color:var(--ink-3)">' + b.turns.toFixed(1) + '</td></tr>');
+  });
+  parts.push('</tbody></table></div>');
+
+  /* カード別（表示中のデッキ） */
+  const deck = names[activeDeck];
+  parts.push('<p class="sub">' + deck + ' のカード別（貢献度順）</p>');
+  parts.push('<div class="scroller"><table><thead><tr><th>カード</th><th>貢献度</th><th>基準比</th><th>使用率</th><th>使用時勝率</th><th>勝率差</th></tr></thead><tbody>');
+  const baseByName = {};
+  for (const r of base.cardRows[deck]) baseByName[r.name] = r;
+  for (const r of cur.cardRows[deck]) {
+    const b = baseByName[r.name];
+    const dc = b ? r.contrib - b.contrib : null;
+    parts.push('<tr><td>' + r.name + '</td>' +
+      '<td class="n">' + r.contrib.toFixed(2) + '</td>' +
+      '<td class="n ' + (dc === null ? 'flat' : deltaClass(dc * 10)) + '">' + (dc === null ? '—' : (dc >= 0 ? '+' : '') + dc.toFixed(2)) + '</td>' +
+      '<td class="n">' + (r.useRate * 100).toFixed(0) + '%</td>' +
+      '<td class="n">' + pct(r.wr) + '%</td>' +
+      '<td class="n ' + deltaClass(r.delta * 100) + '">' + signed(r.delta * 100) + '</td></tr>');
+  }
+  parts.push('</tbody></table></div>');
+
+  host.innerHTML = parts.join('');
+}
+
+function render() {
+  renderTabs();
+  renderCards();
+  renderResults();
+  document.getElementById('reset').disabled = !anyEdits();
+}
+
+/* ===================== 実行 ===================== */
+function snapshotEdits() {
+  const cards = {};
+  for (const [name, d] of Object.entries(CARD_DB)) {
+    if (!cardIsEdited(name)) continue;
+    cards[name] = { cost: d.cost, atk: d.atk, hp: d.hp, kw: (d.kw || []).slice() };
+  }
+  const lists = {};
+  for (const d of DECK_NAMES) {
+    for (const n of Object.keys(DECKS[d].list)) {
+      if (countIsEdited(d, n)) {
+        lists[d] = lists[d] || {};
+        lists[d][n] = DECKS[d].list[n];
+      }
+    }
+  }
+  return { cards, lists, leaderHp: Number(document.getElementById('hp').value) };
+}
+
+function applyEdits(edits) {
+  resetAll();
+  if (!edits) return;
+  for (const [name, v] of Object.entries(edits.cards || {})) {
+    if (!CARD_DB[name]) continue;
+    CARD_DB[name].cost = v.cost;
+    if (CARD_DB[name].kind === 'unit') { CARD_DB[name].atk = v.atk; CARD_DB[name].hp = v.hp; }
+    CARD_DB[name].kw = (v.kw || []).slice();
+  }
+  for (const [d, list] of Object.entries(edits.lists || {})) {
+    if (!DECKS[d]) continue;
+    for (const [n, c] of Object.entries(list)) if (n in DECKS[d].list) DECKS[d].list[n] = c;
+  }
+  const hp = edits.leaderHp || 25;
+  document.getElementById('hp').value = hp;
+  EngineMod.setLeaderHp(hp);
+  render();
+}
+
+function withBaseline(fn) {
+  /* 基準値は「取り込み時点の定義・リーダーHP25」で回す */
+  const edits = snapshotEdits();
+  resetAll();
+  EngineMod.setLeaderHp(25);
+  const out = fn();
+  applyEditsQuiet(edits);
+  return out;
+}
+
+function applyEditsQuiet(edits) {
+  for (const [name, v] of Object.entries(edits.cards || {})) {
+    if (!CARD_DB[name]) continue;
+    CARD_DB[name].cost = v.cost;
+    if (CARD_DB[name].kind === 'unit') { CARD_DB[name].atk = v.atk; CARD_DB[name].hp = v.hp; }
+    CARD_DB[name].kw = (v.kw || []).slice();
+  }
+  for (const [d, list] of Object.entries(edits.lists || {})) {
+    for (const [n, c] of Object.entries(list)) DECKS[d].list[n] = c;
+  }
+  document.getElementById('hp').value = edits.leaderHp;
+  EngineMod.setLeaderHp(edits.leaderHp);
+}
+
+function doRun() {
+  const n = parseInt(document.getElementById('n').value, 10);
+  const hp = parseInt(document.getElementById('hp').value, 10);
+  const btn = document.getElementById('run');
+  const state = document.getElementById('runstate');
+  btn.disabled = true;
+  state.textContent = '回しています…';
+
+  setTimeout(() => {
+    const t0 = performance.now();
+    const needBaseline = !baselineCache[n];
+    if (needBaseline) baselineCache[n] = withBaseline(() => runAll(n));
+    EngineMod.setLeaderHp(hp);
+    const cur = runAll(n);
+    const ms = Math.round(performance.now() - t0);
+    lastResult = { cur, base: baselineCache[n] };
+    // 1回の runAll は 総当たり3マッチ + ミラー3本 ＝ 6n 試合
+    const total = 6 * n * (needBaseline ? 2 : 1);
+    state.textContent = total.toLocaleString() + '戦を ' + ms + 'ms で完了'
+      + (needBaseline ? '（うち半分は基準値。次からは半分の時間）' : '');
+    btn.disabled = false;
+    render();
+  }, 20);
+}
+
+/* ===================== 保存（db） ===================== */
+let DB = null;
+const dbmsg = document.getElementById('dbmsg');
+
+function renderPresets(docs) {
+  const host = document.getElementById('presets');
+  host.innerHTML = '';
+  if (!docs.length) { host.innerHTML = '<p class="dbmsg">まだ保存された調整はない。</p>'; return; }
+  for (const doc of docs) {
+    const d = doc.data();
+    const el = document.createElement('div');
+    el.className = 'preset';
+    const cardCount = Object.keys(d.cards || {}).length;
+    const listCount = Object.values(d.lists || {}).reduce((a, o) => a + Object.keys(o).length, 0);
+    el.innerHTML = '<span class="pn">' + (d.name || '(名前なし)') + '</span>' +
+      '<span class="pm">' + cardCount + '枚' + (listCount ? ' ／ 枚数' + listCount : '') + '</span>';
+    const load = document.createElement('button');
+    load.className = 'btn ghost sm';
+    load.textContent = '読み込む';
+    load.addEventListener('click', () => applyEdits(d));
+    const del = document.createElement('button');
+    del.className = 'btn ghost sm';
+    del.textContent = '削除';
+    del.addEventListener('click', async () => {
+      try { await DB.collection('presets').doc(doc.id).delete(); }
+      catch (e) { dbmsg.textContent = '削除できなかった：' + (e && e.message ? e.message : e); }
+    });
+    el.appendChild(load);
+    el.appendChild(del);
+    host.appendChild(el);
+  }
+}
+
+(async function initDb() {
+  try {
+    DB = await claude.use('db');
+  } catch (e) { DB = null; }
+  if (!DB) {
+    dbmsg.textContent = 'この表示では保存機能が使えない。カードの編集と対戦はそのまま使える。';
+    document.getElementById('save').disabled = true;
+    document.getElementById('pname').disabled = true;
+    return;
+  }
+  dbmsg.textContent = '保存した調整は、Claude が読み戻して実際のデッキファイルに反映できる。';
+  DB.collection('presets').orderBy('savedAt', 'desc').limit(30).onSnapshot(
+    (snap) => renderPresets(snap.docs),
+    (e) => { dbmsg.textContent = '保存一覧を読めなかった：' + e.code; }
+  );
+  document.getElementById('save').addEventListener('click', async () => {
+    const nameEl = document.getElementById('pname');
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+    const edits = snapshotEdits();
+    if (!Object.keys(edits.cards).length && !Object.keys(edits.lists).length && edits.leaderHp === 25) {
+      dbmsg.textContent = 'まだ何も変えていないので保存するものがない。';
+      return;
+    }
+    const body = {
+      name: name,
+      savedAt: new Date().toISOString(),
+      cards: edits.cards,
+      lists: edits.lists,
+      leaderHp: edits.leaderHp,
+    };
+    if (lastResult) {
+      body.winRates = Object.fromEntries(lastResult.cur.names.map(
+        (d) => [d, Number((lastResult.cur.totals[d].w / lastResult.cur.totals[d].g * 100).toFixed(1))]));
+      body.games = lastResult.cur.n;
+    }
+    try {
+      await DB.collection('presets').add(body);
+      nameEl.value = '';
+      dbmsg.textContent = '「' + name + '」を保存した。';
+    } catch (e) {
+      dbmsg.textContent = '保存できなかった：' + (e && e.code ? e.code : e);
+    }
+  });
+})();
+
+/* ===================== 起動 ===================== */
+document.getElementById('run').addEventListener('click', doRun);
+document.getElementById('reset').addEventListener('click', resetAll);
+document.getElementById('hp').addEventListener('change', () => {
+  const v = Math.max(5, Math.min(60, parseInt(document.getElementById('hp').value, 10) || 25));
+  document.getElementById('hp').value = v;
+  EngineMod.setLeaderHp(v);
+  render();
+});
+render();
+</script>
