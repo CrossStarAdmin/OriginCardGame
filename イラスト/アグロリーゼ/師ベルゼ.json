@@ -14,25 +14,32 @@
     "atk": "4",
     "hp": "5",
     "look": {
-      "外見": "70代の男性。痩せ細った老焔術士で、長い白髯と深く皺の刻まれた顔。裾の焦げた灰色のローブ。体そのものが火に変わりかけていて、肌の下から熾火の光が透けている。望まぬ炎が両手から溢れ出す中、抑えきれない悲嘆の表情。",
-      "情景": "自分では止められない火災旋風の中心に立ち、両腕を広げる。背後で自らの町が白く燃えている。",
-      "背景": "町が燃え落ちたあとの夜。彼自身が画面で最も強い光源。"
+      "外見": "60代後半の男性。痩せ細った老焔術士で、長い白髯と深く皺の刻まれた顔。勇敢な魔導士。裾の焦げた灰色のローブ。悲劇の中に自分でもわからない怒りが混じっている表情。",
+      "情景": "ひたすら町を燃やし続けている。自分では止められない火災旋風の中心に立ち、両腕を広げる。背後で自らの町が赤く燃えている。",
+      "背景": "町が燃え落ちてる最中の夜。彼自身が出す炎が画面で最も強い光源。"
     },
     "hasLook": true,
     "lookRules": [
-      "光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。",
-      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。",
-      "町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。",
-      "火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。"
+      "色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。",
+      "イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。",
+      "力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。",
+      "ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。",
+      "火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。"
     ]
   },
-  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】70代の男性。痩せ細った老焔術士で、長い白髯と深く皺の刻まれた顔。裾の焦げた灰色のローブ。体そのものが火に変わりかけていて、肌の下から熾火の光が透けている。望まぬ炎が両手から溢れ出す中、抑えきれない悲嘆の表情。\n【情景】自分では止められない火災旋風の中心に立ち、両腕を広げる。背後で自らの町が白く燃えている。\n【背景】町が燃え落ちたあとの夜。彼自身が画面で最も強い光源。\n【デッキ共通の見た目】光源は炎。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。夜と火事をテーマ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉と流れる灰が必ず出る。魔法陣や記号は使わない。 町が焼けていく順に暗くする。 1〜2コスト帯はまだ人が住んでいる町の明るい火。3〜4コスト帯は燃え始めた町。5コスト以上は焼け落ちた黒い夜で、炎だけが光る。 火傷で描き分ける。 イグナの人間は肌のどこかに古い火傷の痕がある。髪は緋色から赤茶、瞳は琥珀色。ベルゼとヴェルドは体そのものが火に変わりかけている。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
-  "prompt": "Art style: Japanese anime cel shading. Clean cel shading layered with soft gradients. Decisive and sharp line work, with thick main contour lines and thin internal detail lines. Relatively large eyes with carefully detailed irises and highlights. Minimal and clear skin shadows, with glossy highlights in the hair. Vivid, highly saturated colors. A face with clearly readable expressions. Finished to the quality suitable for social game key art.\nScreen usage: The artwork fills the screen edge to edge. Do not draw picture borders, margins, vignetting, or mounting mats. Do not place anything important within 5 percent of any edge. Keep the bottom quarter of the screen free of faces or the main subject, leaving it as quiet background (this is an area where effect text will be overlaid later, but do not draw any text banners or plates in the image).\nThings not to depict: Do not include text, alphabet letters, numbers, subtitles, signatures, watermarks, or logos. Do not include card frames, borders, UI elements, or status icons. Do not draw banners, ribbons, or translucent plates meant for placing text. Do not use speech bubbles, manga panels, collages, or split-screen layouts. Do not line up the same character in multiple poses like a reference sheet.\nAppearance: A man in his 70s. An emaciated old pyromancer with a long white beard and a deeply wrinkled face. A gray robe with scorched hems. His body itself is turning into fire, the light of glowing embers shining through from beneath his skin. An expression of uncontrollable grief as unwanted flames overflow from both of his hands.\nScene: Standing in the center of a fire whirl that he cannot stop, spreading both arms. Behind him, his own town burns in blinding white flames.\nBackground: Night after the town has burned to the ground. He himself is the strongest light source in the scene.\nShared deck visual style: The light source is fire. Base tone of ember orange, molten red, and soot black. Accent color of heat-induced overexposed white light. Do not use cool colors. Themed around night and fires. The visual manifestation of power is unified as flames and sparks. Wherever power is active, dancing sparks and drifting ash always appear. Do not use magic circles or symbols. Darkens in order of the town burning down: 1-2 cost tier has bright fires of an inhabited town; 3-4 cost tier has a town beginning to burn; 5+ cost tier has a blackened night after burning down, where only flames glow. Differentiated by burn marks: people of Igna have old burn scars somewhere on their skin, with scarlet to reddish-brown hair and amber eyes; Belze and Veld have bodies that are themselves turning into fire.\nComposition: A slightly vertically elongated illustration of a single character. A dynamic composition captured from an engaging angle, mid-action. A clearly legible silhouette. With the head positioned toward the top, the subject occupies most of the frame.",
+  "promptJa": "【絵柄】日本のアニメ塗り。綺麗なセル塗りに柔らかいグラデーションを重ねる。迷いのない鮮明な線画で、主線を太く、内側の描き込みを細くする。瞳は大きめに、虹彩とハイライトを丁寧に描き込む。肌の陰は少なく澄ませ、髪には艶のハイライトを入れる。鮮やかで彩度の高い色。表情が読み取れる顔。ソーシャルゲームのキーアートとして通用する完成度にする。\n【画面の使い方】絵は画面の端から端まで埋める。絵自身の縁取り・余白・周辺減光・台紙は描かない。どの端からも5%以内に重要なものを置かない。画面の下4分の1には顔や主役を置かず、静かな背景のままにする（あとで効果テキストが重なる領域だが、その帯や板を絵の中に描いてはいけない）。\n【描かせないもの】文字・アルファベット・数字・字幕・署名・透かし・ロゴを入れない。カード枠・縁・UI部品・ステータスのアイコンを入れない。文字を入れるための帯・バナー・半透明の板を描かない。吹き出し・漫画のコマ・コラージュ・画面分割にしない。設定資料集のように同じキャラクターを複数のポーズで並べない。\n【外見】60代後半の男性。痩せ細った老焔術士で、長い白髯と深く皺の刻まれた顔。勇敢な魔導士。裾の焦げた灰色のローブ。悲劇の中に自分でもわからない怒りが混じっている表情。\n【情景】ひたすら町を燃やし続けている。自分では止められない火災旋風の中心に立ち、両腕を広げる。背後で自らの町が赤く燃えている。\n【背景】町が燃え落ちてる最中の夜。彼自身が出す炎が画面で最も強い光源。\n【デッキ共通の見た目】色は炎の色。 基調は熾火の橙、溶けた赤、煤の黒。差し色に熱で白く飛んだ光。冷たい色は使わない。 イグナの人間は火を怖がらない。 炎を前にしても身を引かず、顔を背けず、目を細めない。まっすぐ見ている。子供でも同じ。 力の見た目は炎と火の粉で統一する。 力が働いているところには、舞う火の粉が出る。魔法陣や記号は使わない。放たれた炎は収まる気配がなく、画面の外へ広がり続けているように描く。 ベルゼの暴走で時代が変わる。 暴走の前、まだ町が平和な時代を描くときは昼。火山のふもとの町が地熱の湯気と鍛冶の炉で賑わい、町の至る所で炎の灯台が燃えている。人々は笑っていて、暖かく穏やかな雰囲気にする。暴走のあと、町が焼けていく時代を描くときは夜。炎だけが町を照らし、人は絶望を感じつつ、それでもこの厄災に立ち向かおうとしている。焼け落ちが進むほど画面を暗くする。 火傷でベルゼの暴走の悲壮感を表す。 ベルゼの暴走前には一部人物を除き誰にも火傷はない。ベルゼの暴走で人には初めて火傷ができる。火傷によって、事件の悲壮感を表す。\n【構図】やや縦長の、キャラクターひとりのイラスト。様々な角度から捉えた動きのある構図。動作の途中。はっきり読み取れるシルエット。頭を上寄せにして、画面の大部分を被写体が占める。",
+  "prompt": null,
   "revisedPrompt": null,
-  "provider": "google",
+  "provider": "manual",
+  "tool": "ChatGPT",
   "style": "アニメ",
-  "model": "gemini-3-pro-image",
-  "textModel": "gemini-flash-latest",
+  "model": null,
+  "textModel": null,
   "aspect": "4:5",
-  "generatedAt": "2026-09-06T15:23:40.645Z"
+  "size": {
+    "w": 1024,
+    "h": 1536
+  },
+  "generatedAt": "2026-09-08T01:13:23.955Z",
+  "note": "外部ツールで作った画像を取り込んだもの。英訳は経由していない"
 }
