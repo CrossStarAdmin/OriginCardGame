@@ -7,3 +7,6 @@
 # 取り込み用の一時置き場。README以外は管理しない
 取り込み/*
 !取り込み/README.md
+
+# 熟練環境の学習結果。何度でも作り直せて、大きくなる
+.claude/skills/simulating-mastered-meta/out/
