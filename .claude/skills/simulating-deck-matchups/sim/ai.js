@@ -46,34 +46,38 @@ function cardScore(g, p, name) {
       // アグロリーゼ
       case '火の子': s += 1; break;
       case '学舎の見習い': s += FX.afterburn(p) ? 2 : 0; break;
-      case 'ギズモ': s += FX.afterburn(p) ? 3 : 0; break;
-      case 'ドロテ': s += FX.afterburn(p) ? 4 : 0; break;
+      case 'ドロテ': s += FX.afterburn(p) ? 3 : 0; break;
       case 'マルカ': s += p.hand.includes('ポルカ') ? 3 : 0; break;
       case 'ポルカ': s += p.board.some((u) => u.name === 'マルカ') ? 3 : 0; break;
       case '教授ハルド': s += 1; break;
       case '火口の洞守り': s += enemyUnits.length ? 2 : 0; break;
       case 'ヴェルド': s += enemyTaunts.length ? 5 : 0; break;
-      case '師ベルゼ': s += Math.min(6, enemyUnits.length * 2); break;
+      // 召喚時の全体3点＋死亡時の顔5点＋以降ずっと残火ON
+      case '師ベルゼ': s += 4 + Math.min(6, enemyUnits.filter((u) => u.hp <= 3).length * 2); break;
       // ミッドレンジ奇数エルナ
-      case '凶兆のまたたき': s += 1; break;
+      case 'オルレアの民': s += FX.lookOdd(p) ? 1 : 0; break;
+      case '凶兆のまたたき': s += FX.lookOdd(p) ? 2 : 0; break;
       case '使い魔サキュ': s += FX.lookOdd(p) ? 2 : 0; break;
       case '夜番の観測者': s += FX.lookOdd(p) ? 2 : 0; break;
       case '姉マイア': s += 1; break;
-      case '相棒ヴァルザ': s += 1; break;
+      case '相棒ヴァルザ': s += (FX.lookOdd(p) && enemyUnits.length) ? 3 : 1; break;
       case '写し手ヨナ': s += reviveBest(p, 4) * 0.6; break;
       case '天文台の護り': s += (FX.lookOdd(p) && p.leaderHp < 22) ? 3 : 0; break;
-      case '双つの未来': s += FX.lookOdd(p) ? 5 : 0; break;
+      case '双子の星占いエマ&エリ': s += FX.lookOdd(p) ? 5 : 0; break;
       case '識りすぎたヴァルザ': s += p.grave.includes('相棒ヴァルザ') ? 6 : 0; s += FX.lookOdd(p) ? 3 : 0; break;
       case '傲慢のノクス': s += FX.lookOdd(p) ? 8 : -12; break;
       // コントロールアルベル
+      case '癒しの人形': s += 1; break;
       case '傷ついた巡礼者': s -= 2; break;
-      case '修道女キーラ': s += 3; break;
-      case '聖獣キメラ': s += 3; break;
+      case '長屋の病人': s += enemyUnits.length ? 2 : 1; break;
+      case '怪我をした修道女キーラ': s += 3; break;
+      case '聖獣キメラ': s += 2 + (enemyUnits.length ? 1 : 0); break;
       case '聖騎士ザキエル': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
       case '老司祭ドラン': s += 3; break;
-      case '祈る巡礼者': s += enemyUnits.length >= 2 ? 5 : (enemyUnits.length ? 2 : 0); break;
-      case '偽善のミゼリア': s += enemyUnits.length >= 2 ? 5 : 2; break;
-      case '継承の大鐘': s += 6; break;
+      case '怒れる聖職者アン': s += enemyUnits.length >= 2 ? 6 : (enemyUnits.length ? 3 : 0); break;
+      // 死のパレードを持ってきて、そのまま0コストで撃てる
+      case '偽善のミゼリア': s += 2 + (reviveBest(p, 3) > 0 ? 4 : 0); break;
+      case '聖鳥リフルエル': s += 8; break;
       default: break;
     }
     return s;
@@ -85,14 +89,22 @@ function cardScore(g, p, name) {
     case '火の粉': return burnScore(g, p, 1);
     case '焔弾': return burnScore(g, p, 3);
     case '焼き払い': {
-      if (!enemyUnits.length) return -100;
+      if (foe.leaderHp <= 1) return 100;
       const kills = enemyUnits.filter((u) => u.hp <= 2).length;
       return 1 + kills * 1.5 + (enemyUnits.length >= 2 ? 1 : 0);
     }
-    case '消えぬ焔':
-      return p.board.length ? 1 + p.board.length * 2.5 : -100;
+    case '消えぬ焔': {
+      // 敵味方すべてを焼く。自分の盤面と顔も巻き込む
+      const d = FX.afterburn(p) ? 4 : 3;
+      if (foe.leaderHp <= d && p.leaderHp > d) return 100;
+      if (p.leaderHp <= d) return -100;
+      const kills = enemyUnits.filter((u) => u.hp <= d).length;
+      const loss = p.board.filter((u) => u.hp <= d).length;
+      // 何も倒せないなら顔を撃ち合うだけなので撃たない
+      return (kills > 0 ? 1 : -3) + kills * 3 - loss * 3;
+    }
     // ミッドレンジ奇数エルナ
-    case '一手先を読む': return 2 + (enemyUnits.some((u) => u.hp <= 1) ? 2 : 0);
+    case '先を読む力': return 2 + (enemyUnits.some((u) => u.hp <= 1) ? 2 : 0);
     case '深読み': {
       if (!enemyUnits.length) return -100;
       const dmg = FX.lookOdd(p) ? 6 : 2;
@@ -101,11 +113,15 @@ function cardScore(g, p, name) {
     }
     // コントロールアルベル
     case '小さな手当て': return 2 + (p.leaderHp <= 22 ? 2 : 0) + (p.board.some((u) => u.hp < u.maxhp) ? 1 : 0);
-    case '間に合わせの蘇生': return reviveBest(p, 2) > 0 ? 2 + reviveBest(p, 2) * 0.3 : -100;
-    case '記録を繰る': return p.hand.length <= 5 ? 5 : 2;
-    case '継ぐ者の儀': {
-      const v = reviveBest(p, 3);
-      return v > 0 && p.grave.filter((n) => CARD_DB[n].kind === 'unit' && CARD_DB[n].cost <= 3).length >= 2 ? 6 : -100;
+    case '禁術・蘇生': return reviveBest(p, 2) > 0 ? 2 + reviveBest(p, 2) * 0.3 : -100;
+    case '記録を繰る': {
+      if (foe.leaderHp <= 4) return 100;
+      const kill = enemyUnits.some((u) => u.hp <= 4);
+      return 3 + (kill ? 3 : 0) + (p.hand.length <= 5 ? 1 : 0);
+    }
+    case '死のパレード': {
+      const n = p.grave.filter((x) => CARD_DB[x].kind === 'unit' && CARD_DB[x].cost <= 3).length;
+      return n >= 2 ? 5 + reviveBest(p, 3) * 0.4 : -100;
     }
     default: return 0;
   }
@@ -127,8 +143,10 @@ function faceBurnOptions(g, p) {
     if (n === '火の粉') dmg = 1;
     else if (n === '焔弾') dmg = 3;
     else if (n === '火の子') dmg = 1;
-    else if (n === '凶兆のまたたき') dmg = 1;
-    else if (n === '偽善のミゼリア') dmg = 4;
+    else if (n === '焼き払い') dmg = 1;
+    else if (n === '先を読む力') dmg = 1;
+    else if (n === '記録を繰る') dmg = 4;
+    else if (n === '凶兆のまたたき') dmg = FX.lookOdd(p) ? 2 : 0;
     else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
     if (dmg <= 0) continue;
     const count = p.hand.filter((x) => x === n).length;
@@ -153,14 +171,17 @@ function planLethal(g, p) {
     if (p.tension === 3) { dmg += 2; skill = true; }
     else if (p.tension === 2 && mp >= 1 && !p.tensionRaisedThisTurn) { mp -= 1; dmg += 2; skill = true; }
   }
-  // 消えぬ焔：味方全体に+2/+0と速攻。酔っていた子も殴れるようになる
-  if (p.hand.includes('消えぬ焔') && E.cardCost(p, '消えぬ焔') <= mp && p.board.length) {
-    mp -= E.cardCost(p, '消えぬ焔');
-    for (const u of p.board) {
-      if (u.frozen || u.attacked || u.atk <= 0) continue;
-      dmg += E.canAttackLeader(u) ? 2 : (u.atk + 2);
+  // 消えぬ焔：敵味方すべてに3(4)ダメージ。自分の盤面も焼けるので、殴れなくなるぶんを引く
+  if (p.hand.includes('消えぬ焔')) {
+    const burn = FX.afterburn(p) ? 4 : 3;
+    const cost = E.cardCost(p, '消えぬ焔');
+    let lost = 0;
+    for (const u of p.board) if (u.hp <= burn && E.canAttackLeader(u)) lost += u.atk;
+    if (cost <= mp && p.leaderHp > burn && burn > lost) {
+      mp -= cost;
+      dmg += burn - lost;
+      plan.push({ name: '消えぬ焔', cost: 0, dmg: 0, isUnit: false });
     }
-    plan.push({ name: '消えぬ焔', cost: 0, dmg: 0, isUnit: false });
   }
   for (const o of faceBurnOptions(g, p)) {
     if (o.cost > mp) continue;
@@ -223,8 +244,9 @@ function playPhase(g, p) {
     }
     if (bestIdx < 0 || bestVal <= 0) break;
     // 残火：同ターンにスペルを撃ってから出すと追加効果が乗る
-    if (['学舎の見習い', 'ギズモ', 'ドロテ'].includes(bestName) && p.spellsThisTurn === 0) {
-      const cost = E.cardCost(p, bestName);
+    if (['学舎の見習い', 'ギズモ', 'ドロテ'].includes(bestName) && !FX.afterburn(p)) {
+      // ギズモはスペルを撃つとコストが1下がる
+      const cost = E.cardCost(p, bestName) - (bestName === 'ギズモ' ? 1 : 0);
       const spellIdx = p.hand.findIndex((n) => ['火の粉', '焔弾'].includes(n)
         && E.cardCost(p, n) + cost <= p.mp);
       if (spellIdx >= 0) {

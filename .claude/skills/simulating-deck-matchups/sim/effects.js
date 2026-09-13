@@ -8,7 +8,16 @@ function lookOdd(p) { const c = topCost(p); return c !== null && c % 2 === 1; }
 function lookEven(p) { const c = topCost(p); return c !== null && c % 2 === 0; }
 
 // ---- 残火：このターンに自分がスペルを使っていたか（場に出たとき1回だけ判定）----
-function afterburn(p) { return p.spellsThisTurn > 0; }
+// 師ベルゼを出したあとはバトル終了までON
+function afterburn(p) { return p.afterburnAlways || p.spellsThisTurn > 0; }
+// スペル自身の残火は、そのスペルより前に別のスペルを撃っている必要がある
+function afterburnForSpell(p) { return p.afterburnAlways || p.spellsThisTurn > 1; }
+
+// ---- 手札にある間のコスト修正（ギズモ：手札で働く）----
+function handCostMod(p, name) {
+  if (name === 'ギズモ' && afterburn(p)) return 1;
+  return 0;
+}
 
 // ---- 対象選択 ----
 function threat(u) { return u.atk * 2 + u.hp + (u.kw.has('守護') ? 4 : 0); }
@@ -66,7 +75,16 @@ function reviveFromGrave(g, p, maxCost, opts) {
 }
 
 // 「聖徒」タグ持ちをサーチするときの優先度（アルベル）
-const SEITO_PRIORITY = { '聖騎士ザキエル': 100, '祈る巡礼者': 80, '老司祭ドラン': 70, '修道女キーラ': 30 };
+const SEITO_PRIORITY = {
+  '聖騎士ザキエル': 100, '怒れる聖職者アン': 80, '老司祭ドラン': 70, '怪我をした修道女キーラ': 30,
+};
+
+// 味方1体の回復先を選ぶ（減っているキャラクター優先、いなければリーダー）
+function chooseHealTarget(g, p) {
+  const hurt = p.board.filter((u) => u.hp < u.maxhp);
+  if (hurt.length) return { type: 'unit', u: hurt.slice().sort((a, b) => (b.maxhp - b.hp) - (a.maxhp - a.hp))[0] };
+  return { type: 'leader', p };
+}
 
 // ---- 召喚時 ----
 function onSummon(g, p, u) {
@@ -79,11 +97,8 @@ function onSummon(g, p, u) {
     case '学舎の見習い':
       if (afterburn(p)) u.atk += 1;
       break;
-    case 'ギズモ':
-      if (afterburn(p)) u.kw.add('速攻');
-      break;
     case 'ドロテ':
-      if (afterburn(p)) { u.atk += 2; u.kw.add('速攻'); }
+      if (afterburn(p)) { u.atk += 1; u.kw.add('速攻'); }
       break;
     case 'ポルカ':
       if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
@@ -109,12 +124,16 @@ function onSummon(g, p, u) {
       break;
     }
     case '師ベルゼ':
+      p.afterburnAlways = true;
       for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
       break;
 
     // ---- ミッドレンジ奇数エルナ ----
+    case 'オルレアの民':
+      if (lookOdd(p)) u.atk += 1;
+      break;
     case '凶兆のまたたき':
-      E.dealTo(g, chooseDamageTarget(g, p, 1), 1, p, u.name);
+      if (lookOdd(p)) E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, u.name);
       break;
     case '使い魔サキュ':
       if (lookOdd(p)) E.draw(g, p, 1);
@@ -132,6 +151,12 @@ function onSummon(g, p, u) {
     case '姉マイア':
       E.raiseTension(g, p, 1);
       break;
+    case '相棒ヴァルザ':
+      if (lookOdd(p)) {
+        const t = chooseDamageTarget(g, p, 3, { faceOk: false });
+        if (t) E.dealTo(g, t, 3, p, u.name);
+      }
+      break;
     case '写し手ヨナ': {
       const odd = lookOdd(p);
       reviveFromGrave(g, p, 4);
@@ -141,8 +166,10 @@ function onSummon(g, p, u) {
     case '天文台の護り':
       if (lookOdd(p)) E.healLeader(g, p, 4, p, u.name);
       break;
-    case '双つの未来':
-      if (lookOdd(p) && !u.token) E.putUnit(g, p, '双つの未来', { trigger: false, token: true });
+    case '双子の星占いエマ&エリ':
+      if (lookOdd(p) && !u.token) {
+        E.putUnit(g, p, '双子の星占いエマ&エリ', { trigger: false, token: true });
+      }
       break;
     case '識りすぎたヴァルザ':
       if (p.grave.includes('相棒ヴァルザ')) u.kw.add('速攻');
@@ -161,8 +188,17 @@ function onSummon(g, p, u) {
     }
 
     // ---- コントロールアルベル ----
+    case '癒しの人形': {
+      const t = chooseHealTarget(g, p);
+      if (t.type === 'unit') E.healUnit(g, t.u, 1, p, u.name);
+      else E.healLeader(g, p, 1, p, u.name);
+      break;
+    }
     case '傷ついた巡礼者':
       E.damageUnit(g, u, 2, p, u.name);
+      break;
+    case '聖獣キメラ':
+      E.healLeader(g, p, 2, p, u.name);
       break;
     case '聖騎士ザキエル': {
       if (foe.board.length) {
@@ -182,18 +218,25 @@ function onSummon(g, p, u) {
       p.deck = E.shuffle(p.deck, g.rng);
       break;
     }
-    case '祈る巡礼者':
-      for (const x of foe.board.slice()) E.damageUnit(g, x, 2, p, u.name);
-      for (const x of p.board) E.healUnit(g, x, 2, p, u.name);
+    case '怒れる聖職者アン':
+      for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      for (const x of p.board) E.healUnit(g, x, 3, p, u.name);
       break;
-    case '偽善のミゼリア':
-      for (const x of foe.board.slice()) E.damageUnit(g, x, 4, p, u.name);
-      E.damageLeader(g, foe, 4, p, u.name);
+    case '偽善のミゼリア': {
+      const idx = p.deck.indexOf('死のパレード');
+      if (idx >= 0) {
+        p.hand.push(p.deck.splice(idx, 1)[0]);
+        p.deck = E.shuffle(p.deck, g.rng);
+      }
+      p.spellDiscount = 99; // ターン終了時まで、次に使うスペルのコストを0にする
       break;
-    case '継承の大鐘': {
-      const idx = searchDeck(p, (n) => CARD_DB[n].tag === '聖徒' && CARD_DB[n].cost <= 5,
-        (n) => SEITO_PRIORITY[n] || 0);
-      if (idx >= 0 && !E.boardFull(p)) {
+    }
+    case '聖鳥リフルエル': {
+      for (let i = 0; i < 2; i++) {
+        if (E.boardFull(p)) break;
+        const idx = searchDeck(p, (n) => CARD_DB[n].tag === '聖徒' && CARD_DB[n].cost <= 5,
+          (n) => SEITO_PRIORITY[n] || 0);
+        if (idx < 0) break;
         const name = p.deck.splice(idx, 1)[0];
         E.putUnit(g, p, name, { trigger: true });
       }
@@ -207,14 +250,21 @@ function onSummon(g, p, u) {
 
 // ---- 死亡時 ----
 function onDeath(g, p, u) {
-  if (u.name === '相棒ヴァルザ' && !u.token) {
+  if (u.token) return;
+  if (u.name === '相棒ヴァルザ') {
     const idx = p.deck.indexOf('識りすぎたヴァルザ');
     if (idx >= 0) {
       p.hand.push(p.deck.splice(idx, 1)[0]);
       p.deck = E.shuffle(p.deck, g.rng);
     }
-  } else if (u.name === '師ベルゼ' && !u.token) {
-    for (const x of p.board) x.atk += 1;
+  } else if (u.name === '師ベルゼ') {
+    E.damageLeader(g, g.opp(p), 5, p, u.name);
+  } else if (u.name === '長屋の病人') {
+    const foe = g.opp(p);
+    if (foe.board.length) E.damageUnit(g, best(foe.board), 3, p, u.name);
+  } else if (u.name === '聖獣キメラ') {
+    const foe = g.opp(p);
+    if (foe.board.length) E.damageUnit(g, best(foe.board), 2, p, u.name);
   }
 }
 
@@ -224,9 +274,7 @@ function onTurnStart(g, p) { /* 該当カードなし */ }
 function onTurnEnd(g, p) {
   for (const u of p.board.slice()) {
     if (g.over) return;
-    if (u.name === '癒しの人形ホミ') E.healLeader(g, p, 1, p, u.name);
-    else if (u.name === '長屋の病人') E.healUnit(g, u, 1, p, u.name);
-    else if (u.name === '修道女キーラ') {
+    if (u.name === '怪我をした修道女キーラ') {
       for (const x of p.board) E.healUnit(g, x, 1, p, u.name);
       E.healLeader(g, p, 1, p, u.name);
     }
@@ -252,15 +300,7 @@ function onTensionLink(g, p, u) {
 }
 
 // ---- リーダー回復時 ----
-function onLeaderHealed(g, p) {
-  const chimera = p.board.filter((u) => u.name === '聖獣キメラ');
-  if (!chimera.length) return;
-  for (const b of chimera) {
-    const t = chooseDamageTarget(g, p, 2);
-    E.dealTo(g, t, 2, p, b.name);
-  }
-  E.cleanup(g);
-}
+function onLeaderHealed(g, p) { /* 該当カードなし */ }
 
 // ---- スペル ----
 function castSpell(g, p, name, target) {
@@ -271,14 +311,22 @@ function castSpell(g, p, name, target) {
     case '焔弾': E.dealTo(g, target || chooseDamageTarget(g, p, 3), 3, p, name); break;
     case '焼き払い':
       for (const x of foe.board.slice()) E.damageUnit(g, x, 2, p, name);
+      E.damageLeader(g, foe, 1, p, name);
       E.cleanup(g);
       break;
-    case '消えぬ焔':
-      for (const x of p.board) { x.atk += 1; x.kw.add('速攻'); }
+    case '消えぬ焔': {
+      // 「全体」＝敵味方すべてのリーダーとキャラクター（ルール/06）
+      const dmg = afterburnForSpell(p) ? 4 : 3;
+      for (const x of foe.board.slice()) E.damageUnit(g, x, dmg, p, name);
+      for (const x of p.board.slice()) E.damageUnit(g, x, dmg, p, name);
+      E.damageLeader(g, foe, dmg, p, name);
+      p.leaderHp -= dmg;
+      E.checkLeaders(g);
       break;
+    }
 
     // ---- ミッドレンジ奇数エルナ ----
-    case '一手先を読む': {
+    case '先を読む力': {
       E.dealTo(g, target || chooseDamageTarget(g, p, 1), 1, p, name);
       E.draw(g, p, 1);
       if (g.over) return;
@@ -308,29 +356,24 @@ function castSpell(g, p, name, target) {
 
     // ---- コントロールアルベル ----
     case '小さな手当て': {
-      if (target && target.type === 'unit') E.healUnit(g, target.u, 2, p, name);
+      const t = target || chooseHealTarget(g, p);
+      if (t.type === 'unit') E.healUnit(g, t.u, 2, p, name);
       else E.healLeader(g, p, 2, p, name);
       E.draw(g, p, 1);
       break;
     }
-    case '間に合わせの蘇生':
-      reviveFromGrave(g, p, 2, { hpOne: true });
+    case '禁術・蘇生':
+      reviveFromGrave(g, p, 2);
       break;
     case '記録を繰る':
-      E.draw(g, p, 2);
+      E.dealTo(g, target || chooseDamageTarget(g, p, 4), 4, p, name);
+      E.cleanup(g);
+      E.draw(g, p, 1);
       break;
-    case '継ぐ者の儀': {
-      let sacked = null;
-      if (p.board.length) {
-        const worst = p.board.slice().sort((a, b) => threat(a) - threat(b))[0];
-        sacked = worst.name;
-        worst.hp = 0;
-        E.cleanup(g);
-      }
-      reviveFromGrave(g, p, 3, { exclude: sacked });
-      reviveFromGrave(g, p, 3, { exclude: sacked });
+    case '死のパレード':
+      reviveFromGrave(g, p, 3);
+      reviveFromGrave(g, p, 3);
       break;
-    }
     default: break;
   }
 }
@@ -368,5 +411,6 @@ function useTensionSkill(g, p) {
 
 module.exports = {
   onSummon, onDeath, onTurnStart, onTurnEnd, onTensionLink, onLeaderHealed,
-  castSpell, useTensionSkill, chooseDamageTarget, threat, best, lookOdd, lookEven, topCost, afterburn,
+  castSpell, useTensionSkill, chooseDamageTarget, threat, best,
+  lookOdd, lookEven, topCost, afterburn, afterburnForSpell, handCostMod,
 };
