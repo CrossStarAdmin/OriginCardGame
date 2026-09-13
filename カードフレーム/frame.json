@@ -1,14 +1,20 @@
 {
   "note": "座標は各枠画像の左上を原点としたピクセル。配置は カード/ のサンプル3枚（500x698）を実測し、約2.12倍して求めた",
-  "font": "Yu Gothic UI",
+  "fontFiles": ["fonts/KaiseiTokumin-ExtraBold.ttf", "fonts/ZenOldMincho-Black.ttf", "fonts/MPLUS1p-Bold.ttf"],
+  "fonts": {
+    "name":  { "family": "Kaisei Tokumin ExtraBold", "style": "Regular" },
+    "stat":  { "family": "Kaisei Tokumin ExtraBold", "style": "Regular" },
+    "label": { "family": "Zen Old Mincho Black", "style": "Regular" },
+    "text":  { "family": "M PLUS 1p", "style": "Bold" }
+  },
 
   "キャラクター": {
     "dir": "キャラクター",
     "canvas": { "width": 1060, "height": 1484 },
     "art":  { "x": 44, "y": 33, "width": 982, "height": 1168 },
-    "cost": { "cx": 104, "cy": 131, "size": 76 },
-    "atk":  { "cx": 133, "cy": 1295, "size": 86 },
-    "hp":   { "cx": 927, "cy": 1295, "size": 86 },
+    "cost": { "cx": 104, "cy": 131, "size": 86 },
+    "atk":  { "cx": 133, "cy": 1295, "size": 98 },
+    "hp":   { "cx": 927, "cy": 1295, "size": 98 },
     "effectBox": {
       "x": 64, "y": 939, "width": 942, "height": 211, "radius": 25,
       "padX": 22, "padY": 28, "size": 30,
@@ -21,7 +27,8 @@
     "frames": {
       "焔術士": "Pyromancer.png",
       "占い師": "Astrologer.png",
-      "司祭": "Priest.png"
+      "司祭": "Priest.png",
+      "魔族": "Demon.png"
     }
   },
 
@@ -29,7 +36,7 @@
     "dir": "スペル",
     "canvas": { "width": 1061, "height": 1482 },
     "art":  { "x": 42, "y": 30, "width": 983, "height": 1199 },
-    "cost": { "cx": 102, "cy": 115, "size": 70 },
+    "cost": { "cx": 102, "cy": 115, "size": 80 },
     "effectBox": {
       "x": 64, "y": 938, "width": 942, "height": 211, "radius": 25,
       "padX": 22, "padY": 28, "size": 30,
@@ -42,7 +49,8 @@
     "frames": {
       "焔術士": "Pyromancer.png",
       "占い師": "Astrologer.png",
-      "司祭": "Priest.png"
+      "司祭": "Priest.png",
+      "魔族": "Demon.png"
     }
   },
 
@@ -60,7 +68,8 @@
     "frames": {
       "焔術士": "Pyromancer.png",
       "占い師": "Astrologer.png",
-      "司祭": "Priest.png"
+      "司祭": "Priest.png",
+      "魔族": "Demon.png"
     }
   }
 }

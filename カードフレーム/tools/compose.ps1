@@ -1,21 +1,46 @@
 ﻿# イラストとカード枠を合成して完成カードを作る
 # 配置は カード/ のサンプルに合わせている（効果テキストは絵の上の半透明板、パネル下段は種族タグか種類）
-# 使い方: powershell -ExecutionPolicy Bypass -File カードフレーム/tools/compose.ps1 [-Deck 名] [-Card 名] [-Force]
+# 使い方: powershell -ExecutionPolicy Bypass -File カードフレーム/tools/compose.ps1 [-Deck 名] [-Card 名] [-Force] [-Config 設定.json]
 param(
   [string]$Deck,
   [string]$Card,
   [switch]$Force,
   [string]$ArtDir = 'イラスト',
   [string]$OutDir = 'カード',
-  [string]$FrameDir = 'カードフレーム'
+  [string]$FrameDir = 'カードフレーム',
+  [string]$DeckDir = 'デッキ',
+  [string]$Config
 )
 
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
-$frameJson = Join-Path $FrameDir 'frame.json'
+$frameJson = if ($Config) { $Config } else { Join-Path $FrameDir 'frame.json' }
 if (-not (Test-Path $frameJson)) { throw "$frameJson が無い" }
 $F = Get-Content -Path $frameJson -Raw -Encoding UTF8 | ConvertFrom-Json
+
+# フォントは設定ファイルからの相対パスで読む。インストールしていない環境でも同じ見た目になる
+$fontCollection = New-Object System.Drawing.Text.PrivateFontCollection
+$configDir = Split-Path -Parent (Resolve-Path $frameJson).Path
+foreach ($file in $F.fontFiles) {
+  $fontPath = Join-Path $configDir $file
+  if (-not (Test-Path $fontPath)) { throw "$fontPath が無い" }
+  $fontCollection.AddFontFile((Resolve-Path $fontPath).Path)
+}
+
+function Get-FontSpec($spec) {
+  if ($null -eq $spec) { throw 'frame.json の fonts に name / stat / label / text が要る' }
+  $family = $fontCollection.Families | Where-Object { $_.Name -eq $spec.family } | Select-Object -First 1
+  if ($null -eq $family) { $family = New-Object System.Drawing.FontFamily $spec.family }
+  [pscustomobject]@{ family = $family; style = [System.Drawing.FontStyle]$spec.style }
+}
+
+$Fonts = @{
+  name  = Get-FontSpec $F.fonts.name
+  stat  = Get-FontSpec $F.fonts.stat
+  label = Get-FontSpec $F.fonts.label
+  text  = Get-FontSpec $F.fonts.text
+}
 
 function ConvertTo-Color([string]$hex) {
   [System.Drawing.ColorTranslator]::FromHtml($hex)
@@ -49,21 +74,22 @@ function Draw-Art($g, $art, $slot) {
 }
 
 # 枠に収まるまで文字を小さくする
-function Get-FittedFont($g, [string]$text, [string]$family, [int]$size, [int]$width, [int]$height, $format) {
+function Get-FittedFont($g, [string]$text, $fontSpec, [int]$size, [int]$width, [int]$height, $format) {
   $limit = New-Object System.Drawing.SizeF ([float]$width), ([float]9999)
+  $unit = [System.Drawing.GraphicsUnit]::Pixel
   for ($s = $size; $s -ge 10; $s--) {
-    $font = New-Object System.Drawing.Font $family, ([float]$s), ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
+    $font = New-Object System.Drawing.Font $fontSpec.family, ([float]$s), $fontSpec.style, $unit
     $measured = $g.MeasureString($text, $font, $limit, $format)
     if ($measured.Height -le $height) { return $font }
     $font.Dispose()
   }
-  New-Object System.Drawing.Font $family, ([float]10), ([System.Drawing.FontStyle]::Bold), ([System.Drawing.GraphicsUnit]::Pixel)
+  New-Object System.Drawing.Font $fontSpec.family, ([float]10), $fontSpec.style, $unit
 }
 
-function Draw-Text($g, [string]$text, $slot, [string]$family, [string]$align, [string]$valign) {
+function Draw-Text($g, [string]$text, $slot, $fontSpec, [string]$align, [string]$valign) {
   if ([string]::IsNullOrWhiteSpace($text)) { return }
   $format = New-Format $align $valign
-  $font = Get-FittedFont $g $text $family ([int]$slot.size) ([int]$slot.width) ([int]$slot.height) $format
+  $font = Get-FittedFont $g $text $fontSpec ([int]$slot.size) ([int]$slot.width) ([int]$slot.height) $format
   $rect = New-Object System.Drawing.RectangleF ([float]$slot.x), ([float]$slot.y), ([float]$slot.width), ([float]$slot.height)
   $brush = New-Object System.Drawing.SolidBrush (ConvertTo-Color $slot.color)
   $g.DrawString($text, $font, $brush, $rect, $format)
@@ -82,7 +108,7 @@ function New-RoundedRect([int]$x, [int]$y, [int]$w, [int]$h, [int]$r) {
 }
 
 # 効果テキストは絵の上に敷いた半透明の板に載せる
-function Draw-EffectBox($g, [string]$text, $slot, [string]$family) {
+function Draw-EffectBox($g, [string]$text, $slot, $fontSpec) {
   if ([string]::IsNullOrWhiteSpace($text)) { return }
   $path = New-RoundedRect ([int]$slot.x) ([int]$slot.y) ([int]$slot.width) ([int]$slot.height) ([int]$slot.radius)
   $base = ConvertTo-Color $slot.fill
@@ -99,28 +125,26 @@ function Draw-EffectBox($g, [string]$text, $slot, [string]$family) {
     size   = [int]$slot.size
     color  = $slot.color
   }
-  Draw-Text $g $text $inner $family $slot.align $slot.valign
+  Draw-Text $g $text $inner $fontSpec $slot.align $slot.valign
 }
 
 # 宝石と丸の中の数字。縁取りを付けて背景から浮かせる
-function Draw-Stat($g, [string]$text, $slot, [string]$family, [string]$fill, [string]$outline) {
+function Draw-Stat($g, [string]$text, $slot, $fontSpec, [string]$fill, [string]$outline) {
   if ([string]::IsNullOrWhiteSpace($text)) { return }
   $size = [float]$slot.size
   $path = New-Object System.Drawing.Drawing2D.GraphicsPath
   $format = New-Format 'Center' 'Center'
-  $family2 = New-Object System.Drawing.FontFamily $family
   $origin = New-Object System.Drawing.PointF ([float]$slot.cx), ([float]$slot.cy)
-  $path.AddString($text, $family2, [int][System.Drawing.FontStyle]::Bold, $size, $origin, $format)
+  $path.AddString($text, $fontSpec.family, [int]$fontSpec.style, $size, $origin, $format)
   $pen = New-Object System.Drawing.Pen (ConvertTo-Color $outline), ([float]($size * 0.14))
   $pen.LineJoin = [System.Drawing.Drawing2D.LineJoin]::Round
   $g.DrawPath($pen, $path)
   $brush = New-Object System.Drawing.SolidBrush (ConvertTo-Color $fill)
   $g.FillPath($brush, $path)
-  $brush.Dispose(); $pen.Dispose(); $family2.Dispose(); $format.Dispose(); $path.Dispose()
+  $brush.Dispose(); $pen.Dispose(); $format.Dispose(); $path.Dispose()
 }
 
-function Compose-Card($meta, [string]$artPath, [string]$destPath) {
-  $card = $meta.card
+function Compose-Card($card, [string]$artPath, [string]$destPath) {
   $spec = $F.($card.type)
   if ($null -eq $spec) { throw "枠の定義が無い種類: $($card.type)" }
   $frameName = $spec.frames.($card.className)
@@ -139,30 +163,29 @@ function Compose-Card($meta, [string]$artPath, [string]$destPath) {
 
   Draw-Art $g $art $spec.art
 
-  $font = $F.font
   $effectText = ($card.effects -join "`n")
 
   # 効果の板は枠より先に敷く。枠の飾りが上に来る
-  if ($card.type -ne 'リーダー') { Draw-EffectBox $g $effectText $spec.effectBox $font }
+  if ($card.type -ne 'リーダー') { Draw-EffectBox $g $effectText $spec.effectBox $Fonts.text }
 
   $g.DrawImage($frame, 0, 0, $frame.Width, $frame.Height)
 
   if ($card.type -eq 'リーダー') {
-    Draw-Text $g $card.name $spec.name $font 'Center' 'Center'
-    Draw-Text $g $spec.skillLabel.text $spec.skillLabel $font 'Center' 'Center'
-    Draw-Text $g $card.skillName $spec.skillName $font 'Center' 'Center'
-    Draw-Text $g $effectText $spec.skillText $font 'Center' 'Center'
-    Draw-Text $g $spec.type.text $spec.type $font 'Center' 'Center'
+    Draw-Text $g $card.name $spec.name $Fonts.name 'Center' 'Center'
+    Draw-Text $g $spec.skillLabel.text $spec.skillLabel $Fonts.label 'Center' 'Center'
+    Draw-Text $g $card.skillName $spec.skillName $Fonts.name 'Center' 'Center'
+    Draw-Text $g $effectText $spec.skillText $Fonts.text 'Center' 'Center'
+    Draw-Text $g $spec.type.text $spec.type $Fonts.label 'Center' 'Center'
   } else {
-    # パネル下段は種族タグ。無いカードは種類を出す
+    # パネル下段は種族タグ。タグの無いキャラクターは空欄、スペルは種類を出す
     $sub = $card.tag
-    if ([string]::IsNullOrWhiteSpace($sub)) { $sub = $card.type }
-    Draw-Text $g $card.name $spec.name $font 'Center' 'Center'
-    Draw-Text $g $sub $spec.type $font 'Center' 'Center'
-    Draw-Stat $g $card.cost $spec.cost $font $spec.style.statText $spec.style.statOutline
+    if ([string]::IsNullOrWhiteSpace($sub) -and $card.type -ne 'キャラクター') { $sub = $card.type }
+    Draw-Text $g $card.name $spec.name $Fonts.name 'Center' 'Center'
+    Draw-Text $g $sub $spec.type $Fonts.label 'Center' 'Center'
+    Draw-Stat $g $card.cost $spec.cost $Fonts.stat $spec.style.statText $spec.style.statOutline
     if ($card.type -eq 'キャラクター') {
-      Draw-Stat $g $card.atk $spec.atk $font $spec.style.statText $spec.style.statOutline
-      Draw-Stat $g $card.hp $spec.hp $font $spec.style.statText $spec.style.statOutline
+      Draw-Stat $g $card.atk $spec.atk $Fonts.stat $spec.style.statText $spec.style.statOutline
+      Draw-Stat $g $card.hp $spec.hp $Fonts.stat $spec.style.statText $spec.style.statOutline
     }
   }
 
@@ -174,6 +197,59 @@ function Compose-Card($meta, [string]$artPath, [string]$destPath) {
 }
 
 if (-not (Test-Path $ArtDir)) { throw "$ArtDir が無い。先にイラストを生成する" }
+
+# 数値と効果はデッキの md から取る。イラストの .json は取り込んだ時点の写しで古くなる
+# 書式は システム/decks.js と揃える。Node は日本語パスのモジュールを require すると落ちるので PowerShell で読む
+$CARD_FIELDS = @{ 'クラス' = 'className'; '種類' = 'type'; 'コスト' = 'cost'; '攻撃力' = 'atk'; 'HP' = 'hp'; '種族タグ' = 'tag' }
+$BLANK = @('', '-', '─', '—')
+
+function Read-CardMarkdown([string]$path) {
+  $card = [ordered]@{}
+  $effects = New-Object System.Collections.Generic.List[string]
+  $section = $null
+  foreach ($raw in [System.IO.File]::ReadAllLines($path, [System.Text.Encoding]::UTF8)) {
+    $line = $raw.Trim()
+    if (-not $card.Contains('name') -and $line -match '^#\s+(.+)$') { $card.name = $Matches[1].Trim(); continue }
+    if ($line -match '^##\s+(.+)$') { $section = $Matches[1].Trim(); continue }
+    if ($line.StartsWith('|')) {
+      $cells = @($line.Trim('|').Split('|') | ForEach-Object { $_.Trim() })
+      if ($cells.Count -eq 2 -and $CARD_FIELDS.ContainsKey($cells[0]) -and $BLANK -notcontains $cells[1]) {
+        $card[$CARD_FIELDS[$cells[0]]] = $cells[1]
+      }
+      continue
+    }
+    if ($section -ne '効果' -or -not $line -or $line -match '^[>#]') { continue }
+    $text = ($line -replace '^[-*]\s+', '' -replace '^\d+\.\s*', '' -replace '\*\*', '').Trim()
+    if ($text -and $text -ne '効果なし') { $effects.Add($text) }
+  }
+
+  # リーダーは「テンションスキル：名前」の行をスキル名にし、残りを効果本文にする
+  $skill = $effects | Where-Object { $_ -like 'テンションスキル*' } | Select-Object -First 1
+  if ($card.type -eq 'リーダー' -and $skill) {
+    $card.skillName = ($skill -replace '^テンションスキル\s*[:：]\s*', '').Trim()
+    [void]$effects.Remove($skill)
+  }
+  $card.effects = @($effects)
+  [pscustomobject]$card
+}
+
+$deckCache = @{}
+function Get-DeckCards([string]$deckName) {
+  if ($deckCache.ContainsKey($deckName)) { return $deckCache[$deckName] }
+  $dir = Join-Path $DeckDir $deckName
+  $cardsDir = Join-Path $dir 'カード一覧'
+  if (-not (Test-Path $cardsDir)) { throw "$cardsDir が無い" }
+  $overview = Join-Path $dir 'overview.md'
+  $deckClass = if (Test-Path $overview) { (Read-CardMarkdown $overview).className } else { $null }
+
+  $cards = @(Get-ChildItem -Path $cardsDir -Filter '*.md' | ForEach-Object {
+    $c = Read-CardMarkdown $_.FullName
+    if (-not $c.className) { $c | Add-Member -NotePropertyName className -NotePropertyValue $deckClass -Force }
+    $c
+  })
+  $deckCache[$deckName] = $cards
+  $cards
+}
 
 $metaFiles = Get-ChildItem -Path $ArtDir -Filter '*.json' -Recurse
 if ($Deck) { $metaFiles = $metaFiles | Where-Object { $_.Directory.Name -eq $Deck } }
@@ -200,8 +276,16 @@ foreach ($file in $metaFiles) {
     continue
   }
 
+  # $Card 引数と同名にならないよう別名にする（PowerShell の変数は大文字小文字を区別しない）
+  $deckCard = Get-DeckCards $deckName | Where-Object { $_.name -eq $name } | Select-Object -First 1
+  if ($null -eq $deckCard) {
+    $failed++; $errors += "$deckName/$name : デッキの md にカードが無い"
+    Write-Output "NG   $deckName/$name : デッキの md にカードが無い"
+    continue
+  }
+
   try {
-    Compose-Card $meta $artPath $destPath
+    Compose-Card $deckCard $artPath $destPath
     $done++
     Write-Output "OK   $deckName/$name"
   } catch {
