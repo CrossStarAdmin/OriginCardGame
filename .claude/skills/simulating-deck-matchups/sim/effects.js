@@ -8,10 +8,14 @@ function lookOdd(p) { const c = topCost(p); return c !== null && c % 2 === 1; }
 function lookEven(p) { const c = topCost(p); return c !== null && c % 2 === 0; }
 
 // ---- 残火：このターンに自分がスペルを使っていたか（場に出たとき1回だけ判定）----
-// 師ベルゼを出したあとはバトル終了までON
-function afterburn(p) { return p.afterburnAlways || p.spellsThisTurn > 0; }
+// 師ベルゼを出したあとはバトル終了までON、火の子を出したターンはそのターン中ON
+function afterburn(p) { return p.afterburnAlways || p.afterburnTurn || p.spellsThisTurn > 0; }
 // スペル自身の残火は、そのスペルより前に別のスペルを撃っている必要がある
-function afterburnForSpell(p) { return p.afterburnAlways || p.spellsThisTurn > 1; }
+function afterburnForSpell(p) { return p.afterburnAlways || p.afterburnTurn || p.spellsThisTurn > 1; }
+
+// ---- 解放／全解放 ----
+function released(p) { return p.maxMp >= 8; }
+function fullyReleased(p) { return p.maxMp >= 10; }
 
 // ---- 手札にある間のコスト修正（ギズモ：手札で働く）----
 function handCostMod(p, name) {
@@ -23,10 +27,15 @@ function handCostMod(p, name) {
 function threat(u) { return u.atk * 2 + u.hp + (u.kw.has('守護') ? 4 : 0); }
 function best(list) { return list.slice().sort((a, b) => threat(b) - threat(a))[0]; }
 
+// p の効果で対象に取れる敵キャラクター（檻の番人の対象耐性を除く）
+function targetable(g, p) {
+  return g.opp(p).board.filter((u) => !u.kw.has('対象耐性'));
+}
+
 function chooseDamageTarget(g, p, dmg, opts) {
   opts = opts || {};
   const foe = g.opp(p);
-  const units = foe.board;
+  const units = targetable(g, p);
   const faceOk = opts.faceOk !== false;
   if (faceOk && foe.leaderHp <= dmg) return { type: 'leader', p: foe };
   const killable = units.filter((u) => u.hp <= dmg);
@@ -57,6 +66,13 @@ function searchDeck(p, pred, score) {
   return bestIdx;
 }
 
+// デッキから1枚を手札に加えてシャッフルする
+function tutor(g, p, pred, score) {
+  const idx = searchDeck(p, pred, score);
+  if (idx >= 0) p.hand.push(p.deck.splice(idx, 1)[0]);
+  p.deck = E.shuffle(p.deck, g.rng);
+}
+
 function reviveFromGrave(g, p, maxCost, opts) {
   opts = opts || {};
   let bestIdx = -1, bestVal = -1;
@@ -64,12 +80,12 @@ function reviveFromGrave(g, p, maxCost, opts) {
     const d = CARD_DB[p.grave[i]];
     if (d.kind !== 'unit' || d.cost > maxCost) continue;
     if (opts.exclude && p.grave[i] === opts.exclude) continue;
-    const v = d.atk + d.hp;
+    const v = (opts.value ? opts.value(p.grave[i]) : 0) || d.atk + d.hp;
     if (v > bestVal) { bestVal = v; bestIdx = i; }
   }
   if (bestIdx < 0 || E.boardFull(p)) return null;
   const name = p.grave.splice(bestIdx, 1)[0];
-  const u = E.putUnit(g, p, name, { trigger: false });
+  const u = E.putUnit(g, p, name);
   if (u && opts.hpOne) u.hp = 1;
   return u;
 }
@@ -86,37 +102,58 @@ function chooseHealTarget(g, p) {
   return { type: 'leader', p };
 }
 
-// ---- 召喚時 ----
+// 火口の洞守りの死亡時にデッキから加えるスペルの優先度
+const HORAMORI_SPELL_PRIORITY = { '焔弾': 4, '焼き払い': 3, '火の粉': 2, '消えぬ焔': 1 };
+
+// 貪りの供物で差し出す味方。死亡時が得になるものを優先し、無ければ一番小さいもの
+const SACRIFICE_PRIORITY = { '霊脈喰らい': 30, '眷属': 20, '無様な魔物': 20 };
+function chooseSacrifice(p) {
+  if (!p.board.length) return null;
+  return p.board.slice().sort((a, b) =>
+    ((SACRIFICE_PRIORITY[b.name] || 0) - b.value) - ((SACRIFICE_PRIORITY[a.name] || 0) - a.value))[0];
+}
+
+// 玉座の使い魔で加えるコスト8以上。敵が横に並んでいれば王の一瞥
+function thronePick(g, p) {
+  const wide = g.opp(p).board.length >= 3;
+  const prio = {
+    '王の一瞥': wide ? 50 : 10, '魔王ヴァルカス': 40, '六罪 ノクス': 30, '六罪 ミゼリア': 20,
+  };
+  return (n) => prio[n] || 0;
+}
+
+// 蘇る魔族で墓地から戻すカード。解決中は直前に墓地へ置いた自分自身を除く
+function graveReturnPick(p, resolving) {
+  const pool = resolving ? p.grave.slice(0, -1) : p.grave;
+  return pool.map((n, i) => ({ n, i, v: CARD_DB[n].cost })).sort((a, b) => b.v - a.v);
+}
+
+// ---- 場に出たとき（手札・効果どちらでも発動）----
+function onEnter(g, p, u) {
+  if (u.name === 'ポルカ') {
+    if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
+  }
+}
+
+// ---- 召喚時（手札から使って場に出したときだけ）----
 function onSummon(g, p, u) {
   const foe = g.opp(p);
   switch (u.name) {
     // ---- アグロリーゼ ----
-    case '火の子':
-      E.dealTo(g, chooseDamageTarget(g, p, 1), 1, p, u.name);
+    case '火の子': {
+      const t = chooseDamageTarget(g, p, 1, { faceOk: false });
+      if (t) E.dealTo(g, t, 1, p, u.name);
+      p.afterburnTurn = true;
       break;
+    }
     case '学舎の見習い':
-      if (afterburn(p)) u.atk += 1;
-      break;
-    case 'ドロテ':
-      if (afterburn(p)) { u.atk += 1; u.kw.add('速攻'); }
-      break;
-    case 'ポルカ':
-      if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
+      if (afterburn(p)) u.atk += 2;
       break;
     case '教授ハルド':
       E.raiseTension(g, p, 1);
       break;
-    case '火口の洞守り': {
-      const cand = foe.board.filter((x) => !x.frozen);
-      if (cand.length) {
-        const t = best(cand);
-        t.frozen = true;
-        p.frozenPending.push(t);
-      }
-      break;
-    }
     case 'ヴェルド': {
-      const taunts = foe.board.filter((x) => x.kw.has('守護'));
+      const taunts = targetable(g, p).filter((x) => x.kw.has('守護'));
       if (taunts.length) {
         const t = best(taunts);
         t.hp = 0; t._killer = u.name; t._killerOwner = p.idx;
@@ -133,7 +170,10 @@ function onSummon(g, p, u) {
       if (lookOdd(p)) u.atk += 1;
       break;
     case '凶兆のまたたき':
-      if (lookOdd(p)) E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, u.name);
+      if (lookOdd(p)) {
+        const t = chooseDamageTarget(g, p, 3, { faceOk: false });
+        if (t) E.dealTo(g, t, 3, p, u.name);
+      }
       break;
     case '使い魔サキュ':
       if (lookOdd(p)) E.draw(g, p, 1);
@@ -168,7 +208,7 @@ function onSummon(g, p, u) {
       break;
     case '双子の星占いエマ&エリ':
       if (lookOdd(p) && !u.token) {
-        E.putUnit(g, p, '双子の星占いエマ&エリ', { trigger: false, token: true });
+        E.putUnit(g, p, '双子の星占いエマ&エリ', { token: true });
       }
       break;
     case '識りすぎたヴァルザ':
@@ -201,8 +241,9 @@ function onSummon(g, p, u) {
       E.healLeader(g, p, 2, p, u.name);
       break;
     case '聖騎士ザキエル': {
-      if (foe.board.length) {
-        const t = best(foe.board);
+      const cand = targetable(g, p);
+      if (cand.length) {
+        const t = best(cand);
         t.hp = 0; t._killer = u.name; t._killerOwner = p.idx;
       }
       break;
@@ -212,25 +253,24 @@ function onSummon(g, p, u) {
         (n) => SEITO_PRIORITY[n] || 0);
       if (idx >= 0 && !E.boardFull(p)) {
         const name = p.deck.splice(idx, 1)[0];
-        const nu = E.putUnit(g, p, name, { trigger: true });
+        const nu = E.putUnit(g, p, name);
         if (nu) { nu.atk += 1; nu.maxhp += 1; nu.hp += 1; }
       }
       p.deck = E.shuffle(p.deck, g.rng);
       break;
     }
     case '怒れる聖職者アン':
+      // 「味方全体」なのでリーダーも回復する（ルール/06）
       for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
       for (const x of p.board) E.healUnit(g, x, 3, p, u.name);
+      E.healLeader(g, p, 3, p, u.name);
       break;
-    case '偽善のミゼリア': {
-      const idx = p.deck.indexOf('死のパレード');
-      if (idx >= 0) {
-        p.hand.push(p.deck.splice(idx, 1)[0]);
-        p.deck = E.shuffle(p.deck, g.rng);
-      }
+    case '偽善のミゼリア':
+      // 「敵全体」はリーダーとキャラクター
+      for (const x of foe.board.slice()) E.damageUnit(g, x, 1, p, u.name);
+      E.damageLeader(g, foe, 1, p, u.name);
       p.spellDiscount = 99; // ターン終了時まで、次に使うスペルのコストを0にする
       break;
-    }
     case '聖鳥リフルエル': {
       for (let i = 0; i < 2; i++) {
         if (E.boardFull(p)) break;
@@ -238,9 +278,51 @@ function onSummon(g, p, u) {
           (n) => SEITO_PRIORITY[n] || 0);
         if (idx < 0) break;
         const name = p.deck.splice(idx, 1)[0];
-        E.putUnit(g, p, name, { trigger: true });
+        // カードテキストが「その召喚時効果を発動する」と指定している
+        const nu = E.putUnit(g, p, name);
+        if (nu) onSummon(g, p, nu);
       }
       p.deck = E.shuffle(p.deck, g.rng);
+      break;
+    }
+
+    // ---- ランプヴァルカス ----
+    case '檻の番人':
+      if (released(p)) { u.atk += 1; u.maxhp += 3; u.hp += 3; }
+      break;
+    case '玉座の使い魔':
+      tutor(g, p, (n) => CARD_DB[n].cost >= 8, thronePick(g, p));
+      break;
+    case '眷属':
+      if (released(p)) E.putUnit(g, p, '眷属');
+      break;
+    case '記憶喰らい':
+      foe.tension = Math.max(0, foe.tension - 1);
+      E.raiseTension(g, p, 1);
+      break;
+    case '魔軍のヴェイン':
+      if (fullyReleased(p)) u.kw.add('速攻');
+      break;
+    case '霊脈喰らい':
+      E.dealTo(g, chooseDamageTarget(g, p, 3), 3, p, u.name);
+      break;
+    case '六罪 ヴェルド':
+      for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      break;
+    case '六罪 ミゼリア':
+      reviveFromGrave(g, p, 8, { value: (n) => (n === '霊脈喰らい' ? 20 : 0) });
+      break;
+    case '六罪 ノクス': {
+      const c = topCost(p);
+      if (c === null) break;
+      if (c <= 5) {
+        u.kw.add('守護');
+        E.draw(g, p, 3);
+      } else {
+        u.kw.add('速攻');
+        const cand = targetable(g, p);
+        if (cand.length) E.damageUnit(g, best(cand), 8, p, u.name);
+      }
       break;
     }
     default:
@@ -251,6 +333,7 @@ function onSummon(g, p, u) {
 // ---- 死亡時 ----
 function onDeath(g, p, u) {
   if (u.token) return;
+  const foe = g.opp(p);
   if (u.name === '相棒ヴァルザ') {
     const idx = p.deck.indexOf('識りすぎたヴァルザ');
     if (idx >= 0) {
@@ -258,13 +341,21 @@ function onDeath(g, p, u) {
       p.deck = E.shuffle(p.deck, g.rng);
     }
   } else if (u.name === '師ベルゼ') {
-    E.damageLeader(g, g.opp(p), 5, p, u.name);
+    E.damageLeader(g, foe, 5, p, u.name);
+  } else if (u.name === '火口の洞守り') {
+    tutor(g, p, (n) => CARD_DB[n].kind === 'spell', (n) => HORAMORI_SPELL_PRIORITY[n] || 0);
   } else if (u.name === '長屋の病人') {
-    const foe = g.opp(p);
-    if (foe.board.length) E.damageUnit(g, best(foe.board), 3, p, u.name);
+    const cand = targetable(g, p);
+    if (cand.length) E.damageUnit(g, best(cand), 3, p, u.name);
   } else if (u.name === '聖獣キメラ') {
-    const foe = g.opp(p);
-    if (foe.board.length) E.damageUnit(g, best(foe.board), 2, p, u.name);
+    const cand = targetable(g, p);
+    if (cand.length) E.damageUnit(g, best(cand), 2, p, u.name);
+  } else if (u.name === '無様な魔物') {
+    E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, u.name);
+  } else if (u.name === '眷属') {
+    E.draw(g, p, 1);
+  } else if (u.name === '霊脈喰らい') {
+    E.gainMaxMp(p, 1);
   }
 }
 
@@ -277,6 +368,12 @@ function onTurnEnd(g, p) {
     if (u.name === '怪我をした修道女キーラ') {
       for (const x of p.board) E.healUnit(g, x, 1, p, u.name);
       E.healLeader(g, p, 1, p, u.name);
+    } else if (u.name === 'ドロテ') {
+      E.damageLeader(g, g.opp(p), 2, p, u.name);
+    } else if (u.name === 'マルカ') {
+      if (p.board.some((x) => x.name === 'ポルカ')) {
+        u.maxhp += 1; u.hp += 1; u.kw.add('守護');
+      }
     }
   }
 }
@@ -288,7 +385,7 @@ function onTensionLink(g, p, u) {
     if (idx >= 0 && !E.boardFull(p)) {
       p.hand.splice(idx, 1);
       E.recPlay(g, p, 'ポルカ');
-      E.putUnit(g, p, 'ポルカ', { trigger: true });
+      E.putUnit(g, p, 'ポルカ');
     }
   } else if (u.name === '姉マイア') {
     if (lookOdd(p)) {
@@ -302,25 +399,48 @@ function onTensionLink(g, p, u) {
 // ---- リーダー回復時 ----
 function onLeaderHealed(g, p) { /* 該当カードなし */ }
 
+// 焼き払い：異なる2体に4ダメージ。倒せる敵キャラクターを優先し、残りは敵リーダー
+function burnDownTargets(g, p) {
+  const foe = g.opp(p);
+  const units = targetable(g, p);
+  const out = [];
+  if (foe.leaderHp <= 4) out.push({ type: 'leader', p: foe });
+  const killable = units.filter((u) => u.hp <= 4).sort((a, b) => threat(b) - threat(a));
+  for (const u of killable) if (out.length < 2) out.push({ type: 'unit', u });
+  if (out.length < 2 && !out.some((t) => t.type === 'leader')) out.push({ type: 'leader', p: foe });
+  const rest = units.filter((u) => !out.some((t) => t.u === u));
+  if (out.length < 2 && rest.length) out.push({ type: 'unit', u: best(rest) });
+  return out;
+}
+
 // ---- スペル ----
 function castSpell(g, p, name, target) {
   const foe = g.opp(p);
   switch (name) {
     // ---- アグロリーゼ ----
-    case '火の粉': E.dealTo(g, target || chooseDamageTarget(g, p, 1), 1, p, name); break;
+    case '火の粉':
+      E.dealTo(g, target || chooseDamageTarget(g, p, 1), 1, p, name);
+      E.cleanup(g);
+      E.draw(g, p, 1);
+      break;
     case '焔弾': E.dealTo(g, target || chooseDamageTarget(g, p, 3), 3, p, name); break;
-    case '焼き払い':
-      for (const x of foe.board.slice()) E.damageUnit(g, x, 2, p, name);
-      E.damageLeader(g, foe, 1, p, name);
+    case '焼き払い': {
+      const targets = target && target.type === 'leader'
+        ? [target].concat(burnDownTargets(g, p).filter((t) => t.type === 'unit').slice(0, 1))
+        : burnDownTargets(g, p);
+      for (const t of targets) E.dealTo(g, t, 4, p, name);
       E.cleanup(g);
       break;
+    }
     case '消えぬ焔': {
-      // 「全体」＝敵味方すべてのリーダーとキャラクター（ルール/06）
-      const dmg = afterburnForSpell(p) ? 4 : 3;
+      // 場全体（敵味方のキャラクター）に3、お互いのリーダーに1。残火でそれぞれ+1
+      const boost = afterburnForSpell(p) ? 1 : 0;
+      const dmg = 3 + boost;
+      const face = 1 + boost;
       for (const x of foe.board.slice()) E.damageUnit(g, x, dmg, p, name);
       for (const x of p.board.slice()) E.damageUnit(g, x, dmg, p, name);
-      E.damageLeader(g, foe, dmg, p, name);
-      p.leaderHp -= dmg;
+      E.damageLeader(g, foe, face, p, name);
+      p.leaderHp -= face;
       E.checkLeaders(g);
       break;
     }
@@ -374,19 +494,40 @@ function castSpell(g, p, name, target) {
       reviveFromGrave(g, p, 3);
       reviveFromGrave(g, p, 3);
       break;
+
+    // ---- ランプヴァルカス ----
+    case '貪りの供物': {
+      const s = chooseSacrifice(p);
+      if (s) s.hp = Math.min(s.hp, 0);
+      E.gainMaxMp(p, 1);
+      E.cleanup(g);
+      break;
+    }
+    case '蘇る魔族': {
+      const n = released(p) ? 2 : 1;
+      const picks = graveReturnPick(p, true).slice(0, n).map((x) => x.i).sort((a, b) => b - a);
+      for (const i of picks) p.hand.push(p.grave.splice(i, 1)[0]);
+      break;
+    }
+    case '王の一瞥':
+      for (const x of foe.board.slice()) E.damageUnit(g, x, 6, p, name);
+      break;
     default: break;
   }
 }
 
 // ---- テンションスキル ----
 function useTensionSkill(g, p) {
-  const foe = g.opp(p);
   E.recPlay(g, p, 'テンションスキル');
   if (p.leader === 'リーゼ') {
     E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, 'テンションスキル');
   } else if (p.leader === 'アルベル') {
     for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
     E.healLeader(g, p, 3, p, 'テンションスキル');
+  } else if (p.leader === 'ヴァルカス') {
+    // 吸魔：最大MP+1してMPを1回復。最大MPが10なら代わりに1枚引く
+    if (fullyReleased(p)) E.draw(g, p, 1);
+    else { E.gainMaxMp(p, 1); p.mp += 1; }
   } else if (p.leader === 'エルナ') {
     const seen = p.deck.splice(0, Math.min(3, p.deck.length));
     if (seen.length) {
@@ -410,7 +551,8 @@ function useTensionSkill(g, p) {
 }
 
 module.exports = {
-  onSummon, onDeath, onTurnStart, onTurnEnd, onTensionLink, onLeaderHealed,
-  castSpell, useTensionSkill, chooseDamageTarget, threat, best,
+  onEnter, onSummon, onDeath, onTurnStart, onTurnEnd, onTensionLink, onLeaderHealed,
+  castSpell, useTensionSkill, chooseDamageTarget, threat, best, targetable,
   lookOdd, lookEven, topCost, afterburn, afterburnForSpell, handCostMod,
+  released, fullyReleased, chooseSacrifice, graveReturnPick, burnDownTargets,
 };

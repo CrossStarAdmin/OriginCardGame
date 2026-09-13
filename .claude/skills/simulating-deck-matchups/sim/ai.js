@@ -41,22 +41,24 @@ function cardScore(g, p, name) {
       if (d.kw.includes('速攻')) s += 3;
       if (d.kw.includes('突進')) s += 1;
       if (d.kw.includes('守護')) s += (p.style === 'aggro' ? 0 : 2);
+      if (d.kw.includes('必殺')) s += 2;
     }
+    const targets = FX.targetable(g, p);
     switch (name) {
       // アグロリーゼ
       case '火の子': s += 1; break;
-      case '学舎の見習い': s += FX.afterburn(p) ? 2 : 0; break;
-      case 'ドロテ': s += FX.afterburn(p) ? 3 : 0; break;
+      case '学舎の見習い': s += FX.afterburn(p) ? 3 : 0; break;
+      case 'ドロテ': s += 3; break;
       case 'マルカ': s += p.hand.includes('ポルカ') ? 3 : 0; break;
       case 'ポルカ': s += p.board.some((u) => u.name === 'マルカ') ? 3 : 0; break;
       case '教授ハルド': s += 1; break;
-      case '火口の洞守り': s += enemyUnits.length ? 2 : 0; break;
+      case '火口の洞守り': s += 1; break;
       case 'ヴェルド': s += enemyTaunts.length ? 5 : 0; break;
       // 召喚時の全体3点＋死亡時の顔5点＋以降ずっと残火ON
       case '師ベルゼ': s += 4 + Math.min(6, enemyUnits.filter((u) => u.hp <= 3).length * 2); break;
       // ミッドレンジ奇数エルナ
       case 'オルレアの民': s += FX.lookOdd(p) ? 1 : 0; break;
-      case '凶兆のまたたき': s += FX.lookOdd(p) ? 2 : 0; break;
+      case '凶兆のまたたき': s += (FX.lookOdd(p) && targets.length) ? 3 : 0; break;
       case '使い魔サキュ': s += FX.lookOdd(p) ? 2 : 0; break;
       case '夜番の観測者': s += FX.lookOdd(p) ? 2 : 0; break;
       case '姉マイア': s += 1; break;
@@ -75,9 +77,24 @@ function cardScore(g, p, name) {
       case '聖騎士ザキエル': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
       case '老司祭ドラン': s += 3; break;
       case '怒れる聖職者アン': s += enemyUnits.length >= 2 ? 6 : (enemyUnits.length ? 3 : 0); break;
-      // 死のパレードを持ってきて、そのまま0コストで撃てる
-      case '偽善のミゼリア': s += 2 + (reviveBest(p, 3) > 0 ? 4 : 0); break;
+      // 敵全体1点と、手札のスペル1枚を0コストで撃てる
+      case '偽善のミゼリア':
+        s += 2 + enemyUnits.filter((u) => u.hp <= 1).length * 2
+          + (p.hand.some((n) => CARD_DB[n].kind === 'spell') ? 2 : 0);
+        break;
       case '聖鳥リフルエル': s += 8; break;
+      // ランプヴァルカス
+      case '無様な魔物': s += 1; break;
+      case '檻の番人': s += FX.released(p) ? 4 : 0; break;
+      case '玉座の使い魔': s += p.deck.some((n) => CARD_DB[n].cost >= 8) ? 2 : 0; break;
+      case '眷属': s += FX.released(p) ? 3 : 1; break;
+      case '記憶喰らい': s += (foe.tension > 0 ? 1 : 0) + (p.tension === 2 ? 1 : 0); break;
+      case '魔軍のヴェイン': s += FX.fullyReleased(p) ? 3 : 0; break;
+      case '霊脈喰らい': s += 3; break;
+      case '六罪 ヴェルド': s += enemyUnits.filter((u) => u.hp <= 3).length * 2; break;
+      case '六罪 ミゼリア': s += reviveBest(p, 8) * 0.6; break;
+      case '六罪 ノクス': s += 4; break;
+      case '魔王ヴァルカス': s += 4; break;
       default: break;
     }
     return s;
@@ -89,15 +106,17 @@ function cardScore(g, p, name) {
     case '火の粉': return burnScore(g, p, 1);
     case '焔弾': return burnScore(g, p, 3);
     case '焼き払い': {
-      if (foe.leaderHp <= 1) return 100;
-      const kills = enemyUnits.filter((u) => u.hp <= 2).length;
-      return 1 + kills * 1.5 + (enemyUnits.length >= 2 ? 1 : 0);
+      if (foe.leaderHp <= 4) return 100;
+      const kills = Math.min(2, FX.targetable(g, p).filter((u) => u.hp <= 4).length);
+      return kills ? 1 + kills * 2.5 : 2;
     }
     case '消えぬ焔': {
-      // 敵味方すべてを焼く。自分の盤面と顔も巻き込む
-      const d = FX.afterburn(p) ? 4 : 3;
-      if (foe.leaderHp <= d && p.leaderHp > d) return 100;
-      if (p.leaderHp <= d) return -100;
+      // 場全体とお互いのリーダーを焼く。自分の盤面と顔も巻き込む
+      const boost = FX.afterburn(p) ? 1 : 0;
+      const d = 3 + boost;
+      const face = 1 + boost;
+      if (foe.leaderHp <= face && p.leaderHp > face) return 100;
+      if (p.leaderHp <= face) return -100;
       const kills = enemyUnits.filter((u) => u.hp <= d).length;
       const loss = p.board.filter((u) => u.hp <= d).length;
       // 何も倒せないなら顔を撃ち合うだけなので撃たない
@@ -123,6 +142,24 @@ function cardScore(g, p, name) {
       const n = p.grave.filter((x) => CARD_DB[x].kind === 'unit' && CARD_DB[x].cost <= 3).length;
       return n >= 2 ? 5 + reviveBest(p, 3) * 0.4 : -100;
     }
+    // ランプヴァルカス
+    case '貪りの供物': {
+      if (!p.board.length || p.maxMp >= E.MAX_MP_CAP) return -100;
+      const sac = FX.chooseSacrifice(p);
+      const bonus = { '霊脈喰らい': 4, '眷属': 2, '無様な魔物': 2 }[sac.name] || 0;
+      return (p.maxMp <= 7 ? 3 : 1) + bonus - (bonus ? 0 : sac.value * 0.5);
+    }
+    case '蘇る魔族': {
+      const pool = FX.graveReturnPick(p, false);
+      if (!pool.length) return -100;
+      const n = FX.released(p) ? 2 : 1;
+      return 1 + pool.slice(0, n).reduce((a, x) => a + x.v * 0.4, 0);
+    }
+    case '王の一瞥': {
+      const kills = enemyUnits.filter((u) => u.hp <= 6).length;
+      if (!kills) return -100;
+      return kills >= 2 ? 3 + kills * 3 : (bigThreat ? 3 : -1);
+    }
     default: return 0;
   }
 }
@@ -130,7 +167,7 @@ function cardScore(g, p, name) {
 function burnScore(g, p, dmg) {
   const foe = g.opp(p);
   if (foe.leaderHp <= dmg) return 100;
-  const taunts = foe.board.filter((u) => u.kw.has('守護') && u.hp <= dmg);
+  const taunts = FX.targetable(g, p).filter((u) => u.kw.has('守護') && u.hp <= dmg);
   if (taunts.length && p.board.filter((u) => E.canAttackUnit(u)).length >= 2) return dmg + 3;
   return dmg * 0.9;
 }
@@ -142,11 +179,11 @@ function faceBurnOptions(g, p) {
     let dmg = 0;
     if (n === '火の粉') dmg = 1;
     else if (n === '焔弾') dmg = 3;
-    else if (n === '火の子') dmg = 1;
-    else if (n === '焼き払い') dmg = 1;
+    else if (n === '焼き払い') dmg = 4;
+    else if (n === '霊脈喰らい') dmg = 3;
     else if (n === '先を読む力') dmg = 1;
     else if (n === '記録を繰る') dmg = 4;
-    else if (n === '凶兆のまたたき') dmg = FX.lookOdd(p) ? 2 : 0;
+    else if (n === '偽善のミゼリア') dmg = 1;
     else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
     if (dmg <= 0) continue;
     const count = p.hand.filter((x) => x === n).length;
@@ -171,15 +208,17 @@ function planLethal(g, p) {
     if (p.tension === 3) { dmg += 2; skill = true; }
     else if (p.tension === 2 && mp >= 1 && !p.tensionRaisedThisTurn) { mp -= 1; dmg += 2; skill = true; }
   }
-  // 消えぬ焔：敵味方すべてに3(4)ダメージ。自分の盤面も焼けるので、殴れなくなるぶんを引く
+  // 消えぬ焔：場全体に3(4)、お互いのリーダーに1(2)。自分の盤面も焼けるので、殴れなくなるぶんを引く
   if (p.hand.includes('消えぬ焔')) {
-    const burn = FX.afterburn(p) ? 4 : 3;
+    const boost = FX.afterburn(p) ? 1 : 0;
+    const burn = 3 + boost;
+    const face = 1 + boost;
     const cost = E.cardCost(p, '消えぬ焔');
     let lost = 0;
     for (const u of p.board) if (u.hp <= burn && E.canAttackLeader(u)) lost += u.atk;
-    if (cost <= mp && p.leaderHp > burn && burn > lost) {
+    if (cost <= mp && p.leaderHp > face && face > lost) {
       mp -= cost;
-      dmg += burn - lost;
+      dmg += face - lost;
       plan.push({ name: '消えぬ焔', cost: 0, dmg: 0, isUnit: false });
     }
   }
@@ -244,13 +283,15 @@ function playPhase(g, p) {
     }
     if (bestIdx < 0 || bestVal <= 0) break;
     // 残火：同ターンにスペルを撃ってから出すと追加効果が乗る
-    if (['学舎の見習い', 'ギズモ', 'ドロテ'].includes(bestName) && !FX.afterburn(p)) {
-      // ギズモはスペルを撃つとコストが1下がる
+    // 火の子も出したターンは残火状態になる
+    if (['学舎の見習い', 'ギズモ'].includes(bestName) && !FX.afterburn(p)) {
+      // ギズモは残火でコストが1下がる
       const cost = E.cardCost(p, bestName) - (bestName === 'ギズモ' ? 1 : 0);
-      const spellIdx = p.hand.findIndex((n) => ['火の粉', '焔弾'].includes(n)
-        && E.cardCost(p, n) + cost <= p.mp);
-      if (spellIdx >= 0) {
-        E.payAndPlay(g, p, spellIdx, null);
+      const slotsForTwo = E.BOARD_MAX - p.board.length >= 2;
+      const enablerIdx = p.hand.findIndex((n) => (['火の粉', '焔弾'].includes(n)
+        || (n === '火の子' && slotsForTwo)) && E.cardCost(p, n) + cost <= p.mp);
+      if (enablerIdx >= 0) {
+        E.payAndPlay(g, p, enablerIdx, null);
         continue;
       }
     }
@@ -279,6 +320,8 @@ function raiseTensionFirst(g, p) {
     if (p.leader === 'リーゼ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
     if (p.leader === 'アルベル' && p.leaderHp <= 18 && (p.mp >= 3 || p.leaderHp <= 8)) return true;
     if (p.leader === 'エルナ' && p.hand.length <= 4 && p.mp >= 3) return true;
+    // 吸魔はMPを1回復するので、上げる1MPがそのまま戻る
+    if (p.leader === 'ヴァルカス') return true;
   }
   const full = bestPlayScore(g, p, p.mp);
   const held = bestPlayScore(g, p, p.mp - 1);
@@ -334,13 +377,13 @@ function pickTauntAttack(p, ready, taunts) {
   const attackers = ready.filter((u) => E.canAttackUnit(u));
   if (!attackers.length) return null;
   const target = taunts.slice().sort((a, b) => a.hp - b.hp)[0];
-  const killers = attackers.filter((u) => u.atk >= target.hp);
+  const killers = attackers.filter((u) => killsInCombat(u, target));
   if (killers.length) {
-    const safe = killers.filter((u) => u.hp > target.atk);
+    const safe = killers.filter((u) => !killsInCombat(target, u));
     const pool = safe.length ? safe : killers;
     return { u: pool.slice().sort((a, b) => a.atk - b.atk)[0], t: target };
   }
-  const survivors = attackers.filter((u) => u.hp > target.atk);
+  const survivors = attackers.filter((u) => !killsInCombat(target, u));
   if (survivors.length) return { u: survivors.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
   if (p.style === 'aggro') return { u: attackers.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
   return null;
@@ -389,13 +432,18 @@ function pickAttack(g, p, ready, forceFace) {
   return null;
 }
 
+// 戦闘で a が b を倒せるか（必殺を含む）
+function killsInCombat(a, b) {
+  return a.atk >= b.hp || (a.kw.has('必殺') && a.atk > 0);
+}
+
 // 有利トレード（相手を倒して自分は生き残る）を探す。allowAny で相打ちも許容
 function bestTrade(attackers, enemyUnits, allowAny) {
   let bestAct = null, bestVal = -Infinity;
   for (const u of attackers) {
     for (const t of enemyUnits) {
-      const kills = u.atk >= t.hp;
-      const dies = t.atk >= u.hp;
+      const kills = killsInCombat(u, t);
+      const dies = killsInCombat(t, u);
       if (!kills && !allowAny) continue;
       if (!kills && !allowAny) continue;
       let v = 0;

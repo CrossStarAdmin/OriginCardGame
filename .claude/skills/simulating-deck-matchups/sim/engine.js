@@ -64,6 +64,7 @@ class Player {
     this.spellDiscount = 0;
     this.spellsThisTurn = 0;
     this.afterburnAlways = false;
+    this.afterburnTurn = false;
     this.tensionRaisedThisTurn = false;
     this.holy = 0;
     this.holyUsedThisTurn = false;
@@ -186,16 +187,21 @@ function cleanup(g) {
 
 function boardFull(p) { return p.board.length >= BOARD_MAX; }
 
+// 効果で場に出す。召喚時は手札から使ったときだけなので、ここでは「場に出たとき」だけ発動する
 function putUnit(g, p, name, opts) {
   opts = opts || {};
-  const trigger = opts.trigger !== false;
   if (boardFull(p)) return null;
   const u = new Unit(name, p.idx);
   u.token = !!opts.token;
   u.sick = opts.sick !== false;
   p.board.push(u);
-  if (trigger) EFFECTS.onSummon(g, p, u);
+  EFFECTS.onEnter(g, p, u);
   return u;
+}
+
+// 最大MPを増やす。上限10を超えたぶんは何も起こさない（ルール/02）
+function gainMaxMp(p, n) {
+  p.maxMp = Math.min(MAX_MP_CAP, p.maxMp + n);
 }
 
 function hasTaunt(p) { return p.board.some((u) => u.kw.has('守護')); }
@@ -231,6 +237,9 @@ function attackUnit(g, p, u, target) {
   const targetHp = target.hp;
   damageUnit(g, target, dmgOut, p, u.name);
   damageUnit(g, u, dmgIn, foe, target.name);
+  // 必殺：戦闘でダメージを与えたキャラクターを破壊する。防御側も含む
+  if (u.kw.has('必殺') && dmgOut > 0) target.hp = Math.min(target.hp, 0);
+  if (target.kw.has('必殺') && dmgIn > 0) u.hp = Math.min(u.hp, 0);
   // 貫通：相手の残りHPを超えたぶんをリーダーに与える（ルール/06_キーワード能力）
   if (u.kw.has('貫通')) {
     const through = dmgOut - targetHp;
@@ -246,6 +255,7 @@ function startPhase(g, p) {
   p.tensionRaisedThisTurn = false;
   p.holyUsedThisTurn = false;
   p.spellsThisTurn = 0;
+  p.afterburnTurn = false;
   p.spellDiscount = 0;
   for (const u of p.frozenPending) u.frozen = false;
   p.frozenPending = [];
@@ -289,6 +299,7 @@ function payAndPlay(g, p, handIdx, target) {
   } else {
     const u = new Unit(name, p.idx);
     p.board.push(u);
+    EFFECTS.onEnter(g, p, u);
     EFFECTS.onSummon(g, p, u);
     cleanup(g);
   }
@@ -299,7 +310,7 @@ module.exports = {
   BOARD_MAX, LEADER_HP, MAX_MP_CAP, TURN_CAP,
   Unit, Player, Game, shuffle, mulberry32,
   setEffects, draw, endGame, checkLeaders, damageLeader, damageUnit, dealTo,
-  healLeader, healUnit, cleanup, boardFull, putUnit, hasTaunt, raiseTension,
+  healLeader, healUnit, cleanup, boardFull, putUnit, gainMaxMp, hasTaunt, raiseTension,
   canAttackUnit, canAttackLeader, attackLeader, attackUnit,
   startPhase, endPhase, cardCost, payAndPlay,
   recPlay, recFace, recKill, recHeal, stat,

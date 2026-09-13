@@ -13,6 +13,7 @@ const g = new E.Game(deckA, deckB, seed, stats, 0);
 g.playedThisGame = [];
 for (const p of g.players) { E.draw(g, p, 5); AI.mulligan(g, p); }
 g.players[1].tension = 2;
+g.players[1].holy = 2;
 
 function boardStr(p) {
   return p.board.map((u) => `${u.name}(${u.atk}/${u.hp}${u.kw.size ? '[' + [...u.kw].join(',') + ']' : ''})`).join(' ') || '（なし）';

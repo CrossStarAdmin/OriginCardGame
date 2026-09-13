@@ -5,14 +5,14 @@ const CARD_DB = {
   '学舎の見習い':   { kind: 'unit', cost: 1, atk: 1, hp: 2 },
   '火の子':         { kind: 'unit', cost: 1, atk: 1, hp: 1 },
   '火の粉':         { kind: 'spell', cost: 1, dmg: 1 },
-  'マルカ':         { kind: 'unit', cost: 2, atk: 1, hp: 3, kw: ['守護'] },
+  'マルカ':         { kind: 'unit', cost: 1, atk: 1, hp: 1 },
   'ポルカ':         { kind: 'unit', cost: 2, atk: 3, hp: 1, kw: ['突進'] },
   'ギズモ':         { kind: 'unit', cost: 3, atk: 2, hp: 2, kw: ['速攻'] },
   '焔弾':           { kind: 'spell', cost: 2, dmg: 3 },
   '教授ハルド':     { kind: 'unit', cost: 3, atk: 3, hp: 4 },
-  '火口の洞守り':   { kind: 'unit', cost: 3, atk: 3, hp: 3 },
-  '焼き払い':       { kind: 'spell', cost: 3 },
-  'ドロテ':         { kind: 'unit', cost: 4, atk: 4, hp: 4, kw: ['守護'] },
+  '火口の洞守り':   { kind: 'unit', cost: 3, atk: 3, hp: 3, kw: ['守護'] },
+  '焼き払い':       { kind: 'spell', cost: 4 },
+  'ドロテ':         { kind: 'unit', cost: 4, atk: 3, hp: 5, kw: ['必殺'] },
   'ヴェルド':       { kind: 'unit', cost: 5, atk: 5, hp: 2, kw: ['速攻'] },
   '消えぬ焔':       { kind: 'spell', cost: 5 },
   '師ベルゼ':       { kind: 'unit', cost: 6, atk: 3, hp: 6, kw: ['突進'] },
@@ -48,6 +48,23 @@ const CARD_DB = {
   '死のパレード':   { kind: 'spell', cost: 6 },
   '偽善のミゼリア': { kind: 'unit', cost: 7, atk: 4, hp: 4, kw: ['守護'] },
   '聖鳥リフルエル': { kind: 'unit', cost: 10, atk: 7, hp: 7, kw: ['守護'] },
+
+  // ---- ランプヴァルカス（魔族）----
+  // 対象耐性：相手の効果の対象にならない（全体効果は受ける）
+  '無様な魔物':     { kind: 'unit', cost: 1, atk: 1, hp: 1 },
+  '貪りの供物':     { kind: 'spell', cost: 2 },
+  '檻の番人':       { kind: 'unit', cost: 2, atk: 1, hp: 3, kw: ['守護', '対象耐性'] },
+  '蘇る魔族':       { kind: 'spell', cost: 2 },
+  '玉座の使い魔':   { kind: 'unit', cost: 2, atk: 2, hp: 2 },
+  '眷属':           { kind: 'unit', cost: 2, atk: 2, hp: 1, kw: ['突進'] },
+  '記憶喰らい':     { kind: 'unit', cost: 3, atk: 3, hp: 4, kw: ['必殺'] },
+  '魔軍のヴェイン': { kind: 'unit', cost: 4, atk: 5, hp: 2, kw: ['突進', '必殺'] },
+  '霊脈喰らい':     { kind: 'unit', cost: 5, atk: 4, hp: 4 },
+  '六罪 ヴェルド':  { kind: 'unit', cost: 7, atk: 4, hp: 3, kw: ['速攻'] },
+  '王の一瞥':       { kind: 'spell', cost: 8 },
+  '六罪 ミゼリア':  { kind: 'unit', cost: 9, atk: 4, hp: 6, kw: ['守護'] },
+  '六罪 ノクス':    { kind: 'unit', cost: 9, atk: 8, hp: 8 },
+  '魔王ヴァルカス': { kind: 'unit', cost: 10, atk: 6, hp: 6, kw: ['速攻', '守護', '必殺'] },
 };
 
 const DECKS = {
@@ -79,6 +96,16 @@ const DECKS = {
       '長屋の病人': 3, '怪我をした修道女キーラ': 3, '記録を繰る': 3, '聖獣キメラ': 3,
       '聖騎士ザキエル': 3, '老司祭ドラン': 3, '怒れる聖職者アン': 3, '死のパレード': 2,
       '偽善のミゼリア': 3, '聖鳥リフルエル': 3,
+    },
+  },
+  'ランプヴァルカス': {
+    style: 'control',
+    leader: 'ヴァルカス',
+    list: {
+      '無様な魔物': 3, '貪りの供物': 3, '檻の番人': 3, '蘇る魔族': 2,
+      '玉座の使い魔': 3, '眷属': 3, '記憶喰らい': 3, '魔軍のヴェイン': 3,
+      '霊脈喰らい': 3, '六罪 ヴェルド': 3, '王の一瞥': 3, '六罪 ミゼリア': 3,
+      '六罪 ノクス': 2, '魔王ヴァルカス': 3,
     },
   },
 };
