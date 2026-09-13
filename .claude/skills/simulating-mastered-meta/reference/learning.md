@@ -42,7 +42,7 @@
 | 攻め方 | `attackStyle`（aggro / midrange / control）、`raceMargin`、`aggroBigTradeThreat`、`midrangeTradeThreat`、`midrangeFaceGuardHp`、`controlFaceHp`、`burnKillThreat` |
 | カードの評価 | `hasteValue` `rushValue` `tauntValue` `deathtouchValue`、カードごとの加減（`cards`） |
 | 使う順番 | `costWeight` `followupWeight` `playThreshold` |
-| テンション | `tensionSlack` |
+| パワー | `powerSlack` |
 
 **学習は相手デッキ別（`vs`）の範囲にだけ書く。** 人が「vsアルベルは急ぐ」と打ち分けるのと同じ。デッキ共通（`base`）は既定値のまま。
 
@@ -132,7 +132,7 @@
 つまみに無い判断は、どれだけ回しても変わらない。結果を読むときの限界として報告に書く。
 
 - **とどめの計算**（`ai.js` の `planLethal`）。見つけられる打点の種類は固定
-- **リーダーごとのテンションの使い方**（`raiseTensionFirst` のリーダー別の条件、`shouldUseSkill`）
+- **リーダーごとのパワーの使い方**（`chargePowerFirst` のリーダー別の条件、`shouldUseSkill`）
 - **聖水を使う条件**
 - **カード固有の対象の選び方**（`effects.js` の各カードの選び方。`burnKillThreat` で顔か倒すかの基準だけは動く）
 - **デッキの中身**。カードの入れ替えは学習しない

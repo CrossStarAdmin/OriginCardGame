@@ -223,10 +223,10 @@ function Read-CardMarkdown([string]$path) {
     if ($text -and $text -ne '効果なし') { $effects.Add($text) }
   }
 
-  # リーダーは「テンションスキル：名前」の行をスキル名にし、残りを効果本文にする
-  $skill = $effects | Where-Object { $_ -like 'テンションスキル*' } | Select-Object -First 1
+  # リーダーは「パワースキル：名前」の行をスキル名にし、残りを効果本文にする
+  $skill = $effects | Where-Object { $_ -like 'パワースキル*' } | Select-Object -First 1
   if ($card.type -eq 'リーダー' -and $skill) {
-    $card.skillName = ($skill -replace '^テンションスキル\s*[:：]\s*', '').Trim()
+    $card.skillName = ($skill -replace '^パワースキル\s*[:：]\s*', '').Trim()
     [void]$effects.Remove($skill)
   }
   $card.effects = @($effects)

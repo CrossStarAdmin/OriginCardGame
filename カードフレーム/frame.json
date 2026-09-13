@@ -60,7 +60,7 @@
     "note": "コストと攻撃力の欄は無い。HPは25固定で、枠に専用欄が無い",
     "art":        { "x": 42, "y": 24, "width": 979, "height": 1053 },
     "name":       { "x": 210, "y": 1072, "width": 640, "height": 94, "size": 60, "color": "#FFFFFF" },
-    "skillLabel": { "x": 350, "y": 1186, "width": 360, "height": 46, "size": 34, "color": "#D9B657", "text": "テンションスキル" },
+    "skillLabel": { "x": 350, "y": 1186, "width": 360, "height": 46, "size": 34, "color": "#D9B657", "text": "パワースキル" },
     "skillName":  { "x": 160, "y": 1232, "width": 740, "height": 68, "size": 56, "color": "#FFFFFF" },
     "skillText":  { "x": 110, "y": 1304, "width": 840, "height": 100, "size": 34, "color": "#FFFFFF" },
     "type":       { "x": 110, "y": 1416, "width": 840, "height": 34, "size": 24, "color": "#D9B657", "text": "リーダー" },

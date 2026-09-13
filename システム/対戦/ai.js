@@ -93,7 +93,7 @@ function cardScoreBase(g, p, name) {
       case '檻の番人': s += FX.released(p) ? 4 : 0; break;
       case '玉座の使い魔': s += p.deck.some((n) => CARD_DB[n].cost >= 8) ? 2 : 0; break;
       case '眷属': s += FX.released(p) ? 3 : 1; break;
-      case '記憶喰らい': s += (foe.tension > 0 ? 1 : 0) + (p.tension === 2 ? 1 : 0); break;
+      case '記憶喰らい': s += (foe.power > 0 ? 1 : 0) + (p.power === 2 ? 1 : 0); break;
       case '魔軍のヴェイン': s += FX.fullyReleased(p) ? 3 : 0; break;
       case '霊脈喰らい': s += 3; break;
       case '六罪 ヴェルド': s += enemyUnits.filter((u) => u.hp <= 3).length * 2; break;
@@ -207,11 +207,11 @@ function planLethal(g, p) {
   let mp = p.mp;
   let slots = E.BOARD_MAX - p.board.length;
   const plan = [];
-  // テンションスキル（リーゼのみ打点）
+  // パワースキル（リーゼのみ打点）
   let skill = false;
   if (p.leader === 'リーゼ') {
-    if (p.tension === 3) { dmg += 2; skill = true; }
-    else if (p.tension === 2 && mp >= 1 && !p.tensionRaisedThisTurn) { mp -= 1; dmg += 2; skill = true; }
+    if (p.power === 3) { dmg += 2; skill = true; }
+    else if (p.power === 2 && mp >= 1 && !p.powerChargedThisTurn) { mp -= 1; dmg += 2; skill = true; }
   }
   // 消えぬ焔：場全体に3(4)、お互いのリーダーに1(2)。自分の盤面も焼けるので、殴れなくなるぶんを引く
   if (p.hand.includes('消えぬ焔')) {
@@ -241,10 +241,10 @@ function planLethal(g, p) {
 function executeLethal(g, p, lethal) {
   const foe = g.opp(p);
   if (lethal.skill) {
-    if (p.tension < 3 && !p.tensionRaisedThisTurn && p.mp >= 1) {
-      p.mp -= 1; p.tensionRaisedThisTurn = true; E.raiseTension(g, p, 1);
+    if (p.power < 3 && !p.powerChargedThisTurn && p.mp >= 1) {
+      p.mp -= 1; p.powerChargedThisTurn = true; E.chargePower(g, p, 1);
     }
-    if (p.tension === 3) FX.useTensionSkill(g, p);
+    if (p.power === 3) FX.usePowerSkill(g, p);
   }
   for (const o of lethal.plan) {
     if (g.over) return;
@@ -305,7 +305,7 @@ function playPhase(g, p) {
   }
 }
 
-// MPを1残してもプレイの質がほとんど落ちないなら、先にテンションを上げる
+// MPを1残してもプレイの質がほとんど落ちないなら、先にパワーを溜める
 function bestPlayScore(g, p, mpLimit) {
   let bestVal = -Infinity;
   for (const name of p.hand) {
@@ -318,11 +318,11 @@ function bestPlayScore(g, p, mpLimit) {
   return bestVal === -Infinity ? 0 : bestVal;
 }
 
-function raiseTensionFirst(g, p) {
-  if (p.tension >= 3 || p.mp < 1 || p.tensionRaisedThisTurn) return false;
-  // スキルが今すぐ欲しい場面は最優先で上げる
+function chargePowerFirst(g, p) {
+  if (p.power >= 3 || p.mp < 1 || p.powerChargedThisTurn) return false;
+  // スキルが今すぐ欲しい場面は最優先で溜める
   // ただし1ターンを丸ごと潰してまで上げない（MPに余裕があるときだけ優先）
-  if (p.tension === 2) {
+  if (p.power === 2) {
     if (p.leader === 'リーゼ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
     if (p.leader === 'アルベル' && p.leaderHp <= 18 && (p.mp >= 3 || p.leaderHp <= 8)) return true;
     if (p.leader === 'エルナ' && p.hand.length <= 4 && p.mp >= 3) return true;
@@ -331,19 +331,19 @@ function raiseTensionFirst(g, p) {
   }
   const full = bestPlayScore(g, p, p.mp);
   const held = bestPlayScore(g, p, p.mp - 1);
-  return held >= full - K.knob(g, p, 'tensionSlack');
+  return held >= full - K.knob(g, p, 'powerSlack');
 }
 
-function tensionPhase(g, p) {
+function powerPhase(g, p) {
   if (g.over) return;
-  if (!p.tensionRaisedThisTurn && p.tension < 3 && p.mp >= 1) {
+  if (!p.powerChargedThisTurn && p.power < 3 && p.mp >= 1) {
     p.mp -= 1;
-    p.tensionRaisedThisTurn = true;
-    E.raiseTension(g, p, 1);
+    p.powerChargedThisTurn = true;
+    E.chargePower(g, p, 1);
   }
   if (g.over) return;
-  if (p.tension === 3 && shouldUseSkill(g, p)) {
-    FX.useTensionSkill(g, p);
+  if (p.power === 3 && shouldUseSkill(g, p)) {
+    FX.usePowerSkill(g, p);
   }
 }
 
@@ -487,12 +487,12 @@ function takeTurn(g, p) {
   E.startPhase(g, p);
   if (g.over) return;
 
-  // マルカ＋ポルカのコンボは先にテンションを上げる
+  // マルカ＋ポルカのコンボは先にパワーを溜める
   if (p.board.some((u) => u.name === 'マルカ') && p.hand.includes('ポルカ')
-      && p.tension < 3 && p.mp >= 1 && !p.tensionRaisedThisTurn) {
+      && p.power < 3 && p.mp >= 1 && !p.powerChargedThisTurn) {
     p.mp -= 1;
-    p.tensionRaisedThisTurn = true;
-    E.raiseTension(g, p, 1);
+    p.powerChargedThisTurn = true;
+    E.chargePower(g, p, 1);
   }
   if (g.over) return;
 
@@ -502,13 +502,13 @@ function takeTurn(g, p) {
     if (g.over) return;
   }
 
-  if (raiseTensionFirst(g, p)) {
+  if (chargePowerFirst(g, p)) {
     p.mp -= 1;
-    p.tensionRaisedThisTurn = true;
-    E.raiseTension(g, p, 1);
+    p.powerChargedThisTurn = true;
+    E.chargePower(g, p, 1);
     if (g.over) return;
-    if (p.tension === 3 && shouldUseSkill(g, p)) {
-      FX.useTensionSkill(g, p);
+    if (p.power === 3 && shouldUseSkill(g, p)) {
+      FX.usePowerSkill(g, p);
       if (g.over) return;
     }
   }
@@ -517,7 +517,7 @@ function takeTurn(g, p) {
   playPhase(g, p);
   if (g.over) return;
   useHoly(g, p);
-  tensionPhase(g, p);
+  powerPhase(g, p);
   if (g.over) return;
   attackPhase(g, p, false);
   if (g.over) return;

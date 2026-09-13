@@ -79,10 +79,10 @@ function parseCardFile(file, deckName) {
   }
 
   const effects = parseLines(h2.get('効果')).filter((l) => l !== '効果なし');
-  // リーダーは「テンションスキル：名前」の行をスキル名として抜き、残りを効果本文にする
-  const skillLine = card.type === 'リーダー' ? effects.find((l) => l.startsWith('テンションスキル')) : null;
+  // リーダーは「パワースキル：名前」の行をスキル名として抜き、残りを効果本文にする
+  const skillLine = card.type === 'リーダー' ? effects.find((l) => l.startsWith('パワースキル')) : null;
   if (skillLine) {
-    card.skillName = skillLine.replace(/^テンションスキル\s*[:：]\s*/, '').trim();
+    card.skillName = skillLine.replace(/^パワースキル\s*[:：]\s*/, '').trim();
     card.effects = effects.filter((l) => l !== skillLine);
   } else {
     card.effects = effects;

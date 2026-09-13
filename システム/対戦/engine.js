@@ -1,4 +1,4 @@
-// ゲームエンジン：状態、ダメージ、戦闘、ターン進行、テンション
+// ゲームエンジン：状態、ダメージ、戦闘、ターン進行、パワー
 const { CARD_DB, DECKS, buildDeck } = require('./cards.js');
 
 const BOARD_MAX = 6;
@@ -56,7 +56,7 @@ class Player {
     this.leaderHp = LEADER_HP;
     this.maxMp = 0;
     this.mp = 0;
-    this.tension = 0;
+    this.power = 0;
     this.deck = shuffle(buildDeck(deckName), rng);
     this.hand = [];
     this.board = [];
@@ -66,7 +66,7 @@ class Player {
     this.spellsThisTurn = 0;
     this.afterburnAlways = false;
     this.afterburnTurn = false;
-    this.tensionRaisedThisTurn = false;
+    this.powerChargedThisTurn = false;
     this.holy = 0;
     this.holyUsedThisTurn = false;
     this.frozenPending = [];
@@ -207,11 +207,11 @@ function gainMaxMp(p, n) {
 
 function hasTaunt(p) { return p.board.some((u) => u.kw.has('守護')); }
 
-function raiseTension(g, p, amt) {
+function chargePower(g, p, amt) {
   amt = amt || 1;
-  if (p.tension >= 3) return false;
-  p.tension = Math.min(3, p.tension + amt);
-  for (const u of p.board.slice()) EFFECTS.onTensionLink(g, p, u);
+  if (p.power >= 3) return false;
+  p.power = Math.min(3, p.power + amt);
+  for (const u of p.board.slice()) EFFECTS.onPowerLink(g, p, u);
   cleanup(g);
   return true;
 }
@@ -253,7 +253,7 @@ function attackUnit(g, p, u, target) {
 function startPhase(g, p) {
   p.maxMp = Math.min(MAX_MP_CAP, p.maxMp + 1);
   p.mp = p.maxMp;
-  p.tensionRaisedThisTurn = false;
+  p.powerChargedThisTurn = false;
   p.holyUsedThisTurn = false;
   p.spellsThisTurn = 0;
   p.afterburnTurn = false;
@@ -311,7 +311,7 @@ module.exports = {
   BOARD_MAX, LEADER_HP, MAX_MP_CAP, TURN_CAP,
   Unit, Player, Game, shuffle, mulberry32,
   setEffects, draw, endGame, checkLeaders, damageLeader, damageUnit, dealTo,
-  healLeader, healUnit, cleanup, boardFull, putUnit, gainMaxMp, hasTaunt, raiseTension,
+  healLeader, healUnit, cleanup, boardFull, putUnit, gainMaxMp, hasTaunt, chargePower,
   canAttackUnit, canAttackLeader, attackLeader, attackUnit,
   startPhase, endPhase, cardCost, payAndPlay,
   recPlay, recFace, recKill, recHeal, stat,

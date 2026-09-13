@@ -6,7 +6,7 @@
 - Step A. カードを `cards.js` に登録する
 - Step B. デッキリストを `cards.js` に登録する
 - Step C. 効果を `effects.js` に実装する
-  - 召喚時 / 死亡時 / ターン終了時 / テンションリンク / リーダー回復時 / スペル / テンションスキル
+  - 召喚時 / 死亡時 / ターン終了時 / パワーリンク / リーダー回復時 / スペル / パワースキル
 - よく使うヘルパー
 - 対象の選び方
 - 実装するときの落とし穴
@@ -53,7 +53,7 @@
 ```js
 'ミッドレンジ奇数エルナ': {
   style: 'midrange',        // aggro / midrange / control のどれか。AIの方針が変わる
-  leader: 'エルナ',          // effects.js の useTensionSkill に同じ名前で分岐が要る
+  leader: 'エルナ',          // effects.js の usePowerSkill に同じ名前で分岐が要る
   list: { 'オルレアの民': 3, '使い魔サキュ': 3, /* … 合計40枚 */ },
 },
 ```
@@ -108,9 +108,9 @@ if (u.name === '癒しの人形ホミ') E.healLeader(g, p, 1, p, u.name);
 else if (u.name === '長屋の病人') E.healUnit(g, u, 1, p, u.name);
 ```
 
-### テンションリンク — `onTensionLink(g, p, u)`
+### パワーリンク — `onPowerLink(g, p, u)`
 
-テンションが上がるたび、場の自分のユニット全部に対して呼ばれる。
+パワーが溜まるたび、場の自分のユニット全部に対して呼ばれる。
 
 ```js
 if (u.name === 'マルカ') {
@@ -141,14 +141,14 @@ case '記録を繰る':
   break;
 ```
 
-### テンションスキル — `useTensionSkill(g, p)`
+### パワースキル — `usePowerSkill(g, p)`
 
-リーダーごとの分岐。`p.leader` で判定する。テンションの消費は関数の最後でまとめてやっている。
+リーダーごとの分岐。`p.leader` で判定する。パワーの消費は関数の最後でまとめてやっている。
 
 ```js
 } else if (p.leader === 'アルベル') {
-  for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
-  E.healLeader(g, p, 3, p, 'テンションスキル');
+  for (const x of p.board) E.healUnit(g, x, 3, p, 'パワースキル');
+  E.healLeader(g, p, 3, p, 'パワースキル');
 }
 ```
 
@@ -164,7 +164,7 @@ case '記録を繰る':
 | `E.healUnit(g, u, n, p, srcName)` / `E.healLeader(...)` | 回復。最大値を超えない |
 | `E.putUnit(g, p, '名前', { trigger: true })` | 場に出す。`trigger:false` で召喚時を発動させない |
 | `E.draw(g, p, n)` | n枚引く。デッキ切れ敗北も処理される |
-| `E.raiseTension(g, p, 1)` | テンションを上げる（おうえん用）。リンクも誘発する |
+| `E.chargePower(g, p, 1)` | パワーを溜める（おうえん用）。リンクも誘発する |
 | `E.boardFull(p)` | 場が6体埋まっているか |
 | `E.shuffle(p.deck, g.rng)` | シャッフル。**乱数は必ず `g.rng` を使う**（再現性のため） |
 | `lookOdd(p)` / `lookEven(p)` | ルック。デッキトップのコストが奇数／偶数か |

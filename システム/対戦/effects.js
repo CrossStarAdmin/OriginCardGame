@@ -151,7 +151,7 @@ function onSummon(g, p, u) {
       if (afterburn(p)) u.atk += 2;
       break;
     case '教授ハルド':
-      E.raiseTension(g, p, 1);
+      E.chargePower(g, p, 1);
       break;
     case 'ヴェルド': {
       const taunts = targetable(g, p).filter((x) => x.kw.has('守護'));
@@ -190,7 +190,7 @@ function onSummon(g, p, u) {
       break;
     }
     case '姉マイア':
-      E.raiseTension(g, p, 1);
+      E.chargePower(g, p, 1);
       break;
     case '相棒ヴァルザ':
       if (lookOdd(p)) {
@@ -298,8 +298,8 @@ function onSummon(g, p, u) {
       if (released(p)) E.putUnit(g, p, '眷属');
       break;
     case '記憶喰らい':
-      foe.tension = Math.max(0, foe.tension - 1);
-      E.raiseTension(g, p, 1);
+      foe.power = Math.max(0, foe.power - 1);
+      E.chargePower(g, p, 1);
       break;
     case '魔軍のヴェイン':
       if (fullyReleased(p)) u.kw.add('速攻');
@@ -379,8 +379,8 @@ function onTurnEnd(g, p) {
   }
 }
 
-// ---- テンションリンク ----
-function onTensionLink(g, p, u) {
+// ---- パワーリンク ----
+function onPowerLink(g, p, u) {
   if (u.name === 'マルカ') {
     const idx = p.hand.indexOf('ポルカ');
     if (idx >= 0 && !E.boardFull(p)) {
@@ -517,14 +517,14 @@ function castSpell(g, p, name, target) {
   }
 }
 
-// ---- テンションスキル ----
-function useTensionSkill(g, p) {
-  E.recPlay(g, p, 'テンションスキル');
+// ---- パワースキル ----
+function usePowerSkill(g, p) {
+  E.recPlay(g, p, 'パワースキル');
   if (p.leader === 'リーゼ') {
-    E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, 'テンションスキル');
+    E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, 'パワースキル');
   } else if (p.leader === 'アルベル') {
-    for (const x of p.board) E.healUnit(g, x, 3, p, 'テンションスキル');
-    E.healLeader(g, p, 3, p, 'テンションスキル');
+    for (const x of p.board) E.healUnit(g, x, 3, p, 'パワースキル');
+    E.healLeader(g, p, 3, p, 'パワースキル');
   } else if (p.leader === 'ヴァルカス') {
     // 吸魔：最大MP+1してMPを1回復。最大MPが10なら代わりに1枚引く
     if (fullyReleased(p)) E.draw(g, p, 1);
@@ -547,13 +547,13 @@ function useTensionSkill(g, p) {
       p.deck = odd.concat(p.deck, even);
     }
   }
-  p.tension = 0;
+  p.power = 0;
   E.cleanup(g);
 }
 
 module.exports = {
-  onEnter, onSummon, onDeath, onTurnStart, onTurnEnd, onTensionLink, onLeaderHealed,
-  castSpell, useTensionSkill, chooseDamageTarget, threat, best, targetable,
+  onEnter, onSummon, onDeath, onTurnStart, onTurnEnd, onPowerLink, onLeaderHealed,
+  castSpell, usePowerSkill, chooseDamageTarget, threat, best, targetable,
   lookOdd, lookEven, topCost, afterburn, afterburnForSpell, handCostMod,
   released, fullyReleased, chooseSacrifice, graveReturnPick, burnDownTargets,
 };

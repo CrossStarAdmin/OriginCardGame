@@ -21,7 +21,7 @@ function playGame(deckA, deckB, seed, stats, gameId, knobs, observe) {
     E.draw(g, p, 5 + (p.idx === 1 ? extra : 0));
     AI.mulligan(g, p);
   }
-  g.players[1].tension = 2; // 後攻はテンション2スタート
+  g.players[1].power = 2; // 後攻はパワー2スタート
   g.players[1].holy = 2;    // 後攻は聖水2つスタート（ルール/01_基本ルール）
   let tp = 0;
   while (!g.over && g.turn < E.TURN_CAP) {

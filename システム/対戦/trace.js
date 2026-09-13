@@ -12,7 +12,7 @@ const stats = {};
 const g = new E.Game(deckA, deckB, seed, stats, 0);
 g.playedThisGame = [];
 for (const p of g.players) { E.draw(g, p, 5); AI.mulligan(g, p); }
-g.players[1].tension = 2;
+g.players[1].power = 2;
 g.players[1].holy = 2;
 
 function boardStr(p) {
@@ -26,7 +26,7 @@ while (!g.over && g.turn < E.TURN_CAP) {
   const before = p.hand.slice();
   AI.takeTurn(g, p);
   const foe = g.players[1 - tp];
-  console.log(`\n[手番${g.turn}] ${p.deckName} (MP${p.maxMp} TP${p.tension})`);
+  console.log(`\n[手番${g.turn}] ${p.deckName} (MP${p.maxMp} PW${p.power})`);
   console.log(`  手札前: ${before.join(',')}`);
   console.log(`  手札後: ${p.hand.join(',')} / 山${p.deck.length} 墓${p.grave.length}`);
   console.log(`  自盤面: ${boardStr(p)}`);

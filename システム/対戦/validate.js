@@ -19,7 +19,7 @@ function implementedCards() {
   return found;
 }
 
-// テンションスキルが実装済みのリーダー名を拾う
+// パワースキルが実装済みのリーダー名を拾う
 function implementedLeaders() {
   const found = new Set();
   const re = /p\.leader === '([^']+)'/g;
@@ -55,7 +55,7 @@ for (const [deckName, def] of Object.entries(DECKS)) {
 
   if (!def.leader) errors.push(`${deckName}: leader が未設定です。`);
   else if (!leaders.has(def.leader)) {
-    errors.push(`${deckName}: リーダー「${def.leader}」のテンションスキルが effects.js の useTensionSkill にありません。`);
+    errors.push(`${deckName}: リーダー「${def.leader}」のパワースキルが effects.js の usePowerSkill にありません。`);
   }
 
   if (!['aggro', 'midrange', 'control'].includes(def.style)) {

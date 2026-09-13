@@ -13,7 +13,7 @@ const DEFAULTS = {
   costWeight: 0.3,              // 重いカードを先に使う寄りにする度合い
   followupWeight: 1,            // 同じターンに続けて使える札を見る度合い
   playThreshold: 0,             // この評価以下のカードは使わずにターンを終える
-  tensionSlack: 2.5,            // テンションを上げてもプレイの質がこれ以上落ちないなら先に上げる
+  powerSlack: 2.5,              // パワーを溜めてもプレイの質がこれ以上落ちないなら先に溜める
   raceMargin: 0,                // aggro：相手より何ターン遅いと盤面を捌き始めるか
   aggroBigTradeThreat: 9,       // aggro：これ以上の脅威は顔より先に倒す
   midrangeTradeThreat: 6,       // midrange：これ以上の脅威は顔より先に倒す
@@ -33,7 +33,7 @@ const SPEC = {
   costWeight: { min: 0, max: 1, step: 0.1 },
   followupWeight: { min: 0, max: 2, step: 0.25 },
   playThreshold: { min: -3, max: 3, step: 0.5 },
-  tensionSlack: { min: 0, max: 6, step: 0.5 },
+  powerSlack: { min: 0, max: 6, step: 0.5 },
   raceMargin: { min: -2, max: 2, step: 1 },
   aggroBigTradeThreat: { min: 5, max: 14, step: 1 },
   midrangeTradeThreat: { min: 3, max: 12, step: 1 },
