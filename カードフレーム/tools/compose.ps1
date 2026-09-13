@@ -199,7 +199,7 @@ function Compose-Card($card, [string]$artPath, [string]$destPath) {
 if (-not (Test-Path $ArtDir)) { throw "$ArtDir が無い。先にイラストを生成する" }
 
 # 数値と効果はデッキの md から取る。イラストの .json は取り込んだ時点の写しで古くなる
-# 書式は システム/decks.js と揃える。Node は日本語パスのモジュールを require すると落ちるので PowerShell で読む
+# 書式は システム/デッキ読み込み/decks.js と揃える。Node は日本語パスのモジュールを require すると落ちるので PowerShell で読む
 $CARD_FIELDS = @{ 'クラス' = 'className'; '種類' = 'type'; 'コスト' = 'cost'; '攻撃力' = 'atk'; 'HP' = 'hp'; '種族タグ' = 'tag' }
 $BLANK = @('', '-', '─', '—')
 

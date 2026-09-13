@@ -2,12 +2,13 @@
 const { CARD_DB } = require('./cards.js');
 const E = require('./engine.js');
 const FX = require('./effects.js');
+const K = require('./knobs.js');
 
 const threat = FX.threat;
 
 // ---- マリガン ----
 function mulligan(g, p) {
-  const keepMax = p.style === 'aggro' ? 3 : 4;
+  const keepMax = K.knob(g, p, 'mulliganKeepMax');
   const kept = [], returned = [];
   for (const c of p.hand) {
     if (CARD_DB[c].cost <= keepMax) kept.push(c); else returned.push(c);
@@ -29,6 +30,10 @@ function reviveBest(p, maxCost) {
 }
 
 function cardScore(g, p, name) {
+  return cardScoreBase(g, p, name) + K.cardOffset(g, p, name);
+}
+
+function cardScoreBase(g, p, name) {
   const foe = g.opp(p);
   const d = CARD_DB[name];
   const enemyUnits = foe.board;
@@ -38,10 +43,10 @@ function cardScore(g, p, name) {
   if (d.kind === 'unit') {
     let s = d.atk + d.hp;
     if (d.kw) {
-      if (d.kw.includes('速攻')) s += 3;
-      if (d.kw.includes('突進')) s += 1;
-      if (d.kw.includes('守護')) s += (p.style === 'aggro' ? 0 : 2);
-      if (d.kw.includes('必殺')) s += 2;
+      if (d.kw.includes('速攻')) s += K.knob(g, p, 'hasteValue');
+      if (d.kw.includes('突進')) s += K.knob(g, p, 'rushValue');
+      if (d.kw.includes('守護')) s += K.knob(g, p, 'tauntValue');
+      if (d.kw.includes('必殺')) s += K.knob(g, p, 'deathtouchValue');
     }
     const targets = FX.targetable(g, p);
     switch (name) {
@@ -149,7 +154,7 @@ function cardScore(g, p, name) {
       const bonus = { '霊脈喰らい': 4, '眷属': 2, '無様な魔物': 2 }[sac.name] || 0;
       return (p.maxMp <= 7 ? 3 : 1) + bonus - (bonus ? 0 : sac.value * 0.5);
     }
-    case '蘇る魔族': {
+    case '魔王の復活': {
       const pool = FX.graveReturnPick(p, false);
       if (!pool.length) return -100;
       const n = FX.released(p) ? 2 : 1;
@@ -278,10 +283,11 @@ function playPhase(g, p) {
       if (cost > p.mp) continue;
       if (d.kind === 'unit' && E.boardFull(p)) continue;
       // 同ターンに続けて出せる札まで見て、MPを余らせない組み合わせを選ぶ
-      const s = cardScore(g, p, name) + cost * 0.3 + followupScore(g, p, p.mp - cost, i);
+      const s = cardScore(g, p, name) + cost * K.knob(g, p, 'costWeight')
+        + followupScore(g, p, p.mp - cost, i) * K.knob(g, p, 'followupWeight');
       if (s > bestVal) { bestVal = s; bestIdx = i; bestName = name; }
     }
-    if (bestIdx < 0 || bestVal <= 0) break;
+    if (bestIdx < 0 || bestVal <= K.knob(g, p, 'playThreshold')) break;
     // 残火：同ターンにスペルを撃ってから出すと追加効果が乗る
     // 火の子も出したターンは残火状態になる
     if (['学舎の見習い', 'ギズモ'].includes(bestName) && !FX.afterburn(p)) {
@@ -325,7 +331,7 @@ function raiseTensionFirst(g, p) {
   }
   const full = bestPlayScore(g, p, p.mp);
   const held = bestPlayScore(g, p, p.mp - 1);
-  return held >= full - 2.5;
+  return held >= full - K.knob(g, p, 'tensionSlack');
 }
 
 function tensionPhase(g, p) {
@@ -360,7 +366,7 @@ function attackPhase(g, p, forceFace) {
     if (!ready.length) break;
 
     if (taunts.length) {
-      const act = pickTauntAttack(p, ready, taunts);
+      const act = pickTauntAttack(g, p, ready, taunts);
       if (!act) break;
       E.attackUnit(g, p, act.u, act.t);
       continue;
@@ -373,7 +379,7 @@ function attackPhase(g, p, forceFace) {
   }
 }
 
-function pickTauntAttack(p, ready, taunts) {
+function pickTauntAttack(g, p, ready, taunts) {
   const attackers = ready.filter((u) => E.canAttackUnit(u));
   if (!attackers.length) return null;
   const target = taunts.slice().sort((a, b) => a.hp - b.hp)[0];
@@ -385,7 +391,7 @@ function pickTauntAttack(p, ready, taunts) {
   }
   const survivors = attackers.filter((u) => !killsInCombat(target, u));
   if (survivors.length) return { u: survivors.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
-  if (p.style === 'aggro') return { u: attackers.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
+  if (K.knob(g, p, 'attackStyle') === 'aggro') return { u: attackers.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
   return null;
 }
 
@@ -400,15 +406,16 @@ function pickAttack(g, p, ready, forceFace) {
     return k || null;
   }
 
-  if (p.style === 'aggro') {
+  const style = K.knob(g, p, 'attackStyle');
+  if (style === 'aggro') {
     // レースに勝てるなら顔、負けているなら盤面を捌く
     const myAtk = p.board.reduce((a, u) => a + (u.frozen ? 0 : u.atk), 0);
     const theirAtk = foe.board.reduce((a, u) => a + (u.frozen ? 0 : u.atk), 0);
     const myClock = myAtk > 0 ? Math.ceil(foe.leaderHp / myAtk) : 99;
     const theirClock = theirAtk > 0 ? Math.ceil(p.leaderHp / theirAtk) : 99;
     const trade = bestTrade(unitReady, foe.board, false);
-    if (trade && myClock > theirClock) return trade;
-    if (trade && threat(trade.t) >= 9 && trade.u.hp > trade.t.atk) return trade;
+    if (trade && myClock > theirClock + K.knob(g, p, 'raceMargin')) return trade;
+    if (trade && threat(trade.t) >= K.knob(g, p, 'aggroBigTradeThreat') && trade.u.hp > trade.t.atk) return trade;
     if (faceReady.length) return { u: faceReady[0], face: true };
     // 突進のみ（召喚酔い）は敵ユニットを殴る
     const kills = bestTrade(unitReady, foe.board, true);
@@ -416,9 +423,10 @@ function pickAttack(g, p, ready, forceFace) {
     return null;
   }
 
-  if (p.style === 'midrange') {
+  if (style === 'midrange') {
     const trade = bestTrade(unitReady, foe.board, false);
-    if (trade && threat(trade.t) >= 6 && foe.leaderHp > 8) return trade;
+    if (trade && threat(trade.t) >= K.knob(g, p, 'midrangeTradeThreat')
+        && foe.leaderHp > K.knob(g, p, 'midrangeFaceGuardHp')) return trade;
     if (faceReady.length) return { u: faceReady[0], face: true };
     if (trade) return trade;
     return null;
@@ -428,7 +436,7 @@ function pickAttack(g, p, ready, forceFace) {
   const trade = bestTrade(unitReady, foe.board, false);
   if (trade) return trade;
   if (foe.board.length === 0 && faceReady.length) return { u: faceReady[0], face: true };
-  if (faceReady.length && foe.leaderHp <= 10) return { u: faceReady[0], face: true };
+  if (faceReady.length && foe.leaderHp <= K.knob(g, p, 'controlFaceHp')) return { u: faceReady[0], face: true };
   return null;
 }
 

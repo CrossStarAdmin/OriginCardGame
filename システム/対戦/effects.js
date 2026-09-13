@@ -1,6 +1,7 @@
 // カード効果の実装と対象選択ヒューリスティック
 const { CARD_DB } = require('./cards.js');
 const E = require('./engine.js');
+const K = require('./knobs.js');
 
 // ---- ルック ----
 function topCost(p) { return p.deck.length ? CARD_DB[p.deck[0]].cost : null; }
@@ -40,14 +41,14 @@ function chooseDamageTarget(g, p, dmg, opts) {
   if (faceOk && foe.leaderHp <= dmg) return { type: 'leader', p: foe };
   const killable = units.filter((u) => u.hp <= dmg);
   const taunts = killable.filter((u) => u.kw.has('守護'));
-  if (p.style === 'aggro') {
+  if (K.knob(g, p, 'attackStyle') === 'aggro') {
     if (taunts.length) return { type: 'unit', u: best(taunts) };
     if (faceOk) return { type: 'leader', p: foe };
     if (killable.length) return { type: 'unit', u: best(killable) };
   } else {
     if (killable.length) {
       const b = best(killable);
-      if (threat(b) >= 7 || !faceOk) return { type: 'unit', u: b };
+      if (threat(b) >= K.knob(g, p, 'burnKillThreat') || !faceOk) return { type: 'unit', u: b };
     }
     if (faceOk) return { type: 'leader', p: foe };
   }
@@ -122,7 +123,7 @@ function thronePick(g, p) {
   return (n) => prio[n] || 0;
 }
 
-// 蘇る魔族で墓地から戻すカード。解決中は直前に墓地へ置いた自分自身を除く
+// 魔王の復活で墓地から戻すカード。解決中は直前に墓地へ置いた自分自身を除く
 function graveReturnPick(p, resolving) {
   const pool = resolving ? p.grave.slice(0, -1) : p.grave;
   return pool.map((n, i) => ({ n, i, v: CARD_DB[n].cost })).sort((a, b) => b.v - a.v);
@@ -503,7 +504,7 @@ function castSpell(g, p, name, target) {
       E.cleanup(g);
       break;
     }
-    case '蘇る魔族': {
+    case '魔王の復活': {
       const n = released(p) ? 2 : 1;
       const picks = graveReturnPick(p, true).slice(0, n).map((x) => x.i).sort((a, b) => b - a);
       for (const i of picks) p.hand.push(p.grave.splice(i, 1)[0]);

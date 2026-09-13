@@ -1,21 +1,23 @@
 ---
 name: simulating-deck-matchups
-description: デッキ同士を自動対戦させ、勝率・エースカード・先攻後攻の偏りを統計で出す。`.claude/skills/simulating-deck-matchups/sim/` の Node.js シミュレーターにカードを実装し、総当たりで回して結果をまとめる。「このデッキとこのデッキを戦わせて」「1000戦して勝率を出して」「エースカードを教えて」「デッキのバランスを見たい」「このカードを入れたら強すぎないか確かめたい」「先攻有利すぎないか調べて」など、デッキやカードの強さを数字で確かめたいときに使う。
+description: デッキ同士を自動対戦させ、勝率・エースカード・先攻後攻の偏りを統計で出す。共通の対戦シミュレーター（`システム/対戦/`）にカードを実装し、固定したAIで総当たりを回して結果をまとめる。「このデッキとこのデッキを戦わせて」「1000戦して勝率を出して」「エースカードを教えて」「デッキのバランスを見たい」「このカードを入れたら強すぎないか確かめたい」「先攻有利すぎないか調べて」など、今のカードの強さを数字でぱっと確かめたいときに使う。
 ---
 
 # デッキ対戦シミュレーション
 
 `ルール/` を実装した Node.js のシミュレーターで、デッキ同士を任意の回数戦わせて統計を取る。
+**AIは固定したまま回す。** カードの素の強さを測るためのスキル。
 外部パッケージは使わない（Node標準のみ）。`npm install` は不要。
 
 ## 構成
 
 | 場所 | 中身 |
 |---|---|
-| `sim/` | シミュレーター本体。`cards.js` `effects.js` `ai.js` `engine.js` と実行スクリプト |
-| [reference/adding-cards.md](reference/adding-cards.md) | カード・デッキを実装する手順とコードの型 |
+| `システム/対戦/` | **共通の対戦シミュレーター。** ルール、カードの実装、AI、整合チェック、1試合の表示。ほかのスキルとも共有している。[README](../../../システム/対戦/README.md) |
+| [システム/対戦/reference/adding-cards.md](../../../システム/対戦/reference/adding-cards.md) | カード・デッキを実装する手順とコードの型 |
+| [システム/対戦/reference/rule-interpretations.md](../../../システム/対戦/reference/rule-interpretations.md) | カードテキストが曖昧な箇所の決定済み一覧 |
+| `run.js` `ace.js` `mirror.js` | このスキルの実行スクリプト。総当たり、エースカード、ミラー |
 | [reference/reading-results.md](reference/reading-results.md) | 指標の定義、バイアス、報告に書くこと |
-| [reference/rule-interpretations.md](reference/rule-interpretations.md) | カードテキストが曖昧な箇所の決定済み一覧 |
 
 ## 実行環境
 
@@ -26,10 +28,10 @@ description: デッキ同士を自動対戦させ、勝率・エースカード�
 
 ```bash
 # まずこれで試す
-node .claude/skills/simulating-deck-matchups/sim/validate.js
+node システム/対戦/validate.js
 
 # 無出力で落ちたら、日本語パスを扱えるnodeで実行する（v22.16.0で動作確認済み）
-"C:/Users/beron/scoop/apps/nvm/current/nodejs/nodejs/node.exe" .claude/skills/simulating-deck-matchups/sim/validate.js
+"C:/Users/beron/scoop/apps/nvm/current/nodejs/nodejs/node.exe" システム/対戦/validate.js
 ```
 
 以降のコマンド例では `node` と書く。落ちたら上のフルパスに置き換える。
@@ -38,13 +40,13 @@ node .claude/skills/simulating-deck-matchups/sim/validate.js
 
 | コマンド | 用途 |
 |---|---|
-| `node …/sim/validate.js` | デッキ定義と効果実装の整合チェック。**回す前に必ず通す** |
-| `node …/sim/trace.js デッキA デッキB シード` | 1試合の進行をターンごとに出力。挙動の目視確認用 |
-| `node …/sim/run.js 戦数 [デッキ…]` | 総当たり対戦。マッチアップ別の勝率とカード別統計 |
-| `node …/sim/ace.js 戦数 [デッキ…]` | 全マッチ合算のデッキ別カードランキング（エースカード） |
-| `node …/sim/mirror.js 戦数 [デッキ…]` | 同型ミラーマッチ。**先攻有利とデッキ性能を切り分ける** |
+| `node システム/対戦/validate.js` | デッキ定義と効果実装の整合チェック。**回す前に必ず通す** |
+| `node システム/対戦/trace.js デッキA デッキB シード` | 1試合の進行をターンごとに出力。挙動の目視確認用 |
+| `node .claude/skills/simulating-deck-matchups/run.js 戦数 [デッキ…]` | 総当たり対戦。マッチアップ別の勝率とカード別統計 |
+| `node .claude/skills/simulating-deck-matchups/ace.js 戦数 [デッキ…]` | 全マッチ合算のデッキ別カードランキング（エースカード） |
+| `node .claude/skills/simulating-deck-matchups/mirror.js 戦数 [デッキ…]` | 同型ミラーマッチ。**先攻有利とデッキ性能を切り分ける** |
 
-デッキ名を省略すると `sim/cards.js` の全デッキで総当たりする。
+デッキ名を省略すると `システム/対戦/cards.js` の全デッキで総当たりする。
 `run.js` と `ace.js` は先攻・後攻を1戦ごとに入れ替えるので、指定した戦数がそのまま公平な標本になる。
 
 ## 進め方
@@ -66,29 +68,32 @@ node .claude/skills/simulating-deck-matchups/sim/validate.js
 
 記憶や推測で実装しない。毎回読む。
 
-- **対戦するデッキ**：`デッキ/*.md` — カードテキストと固有キーワードは各デッキファイルの「用語」節が正
+- **対戦するデッキ**：`デッキ/<デッキ名>/カード一覧/*.md` — カードテキストとステータスはカードファイルが正。固有キーワードは各デッキの overview.md
 - **ルール**：`ルール/01_基本ルール.md`〜`08_用語集.md` — 特に 04（戦闘）、05（テンション）、06（キーワード）、07（効果処理）
-- **過去の解釈**：[reference/rule-interpretations.md](reference/rule-interpretations.md) — カードテキストだけでは決まらない箇所の決定済み一覧
+- **過去の解釈**：[rule-interpretations.md](../../../システム/対戦/reference/rule-interpretations.md) — カードテキストだけでは決まらない箇所の決定済み一覧
 
-`sim/cards.js` に既にあるデッキを回すだけなら Step2 は飛ばして Step3 へ。
+**カードファイルとシミュレーターの実装を毎回突き合わせる。** ユーザーがカードを直していることがある。
+`システム/対戦/cards.js` の数値と `effects.js` の効果が、カードファイルと食い違っていないか確かめてから回す。
 
 ---
 
-## Step2. 未実装のカードを実装する
+## Step2. 未実装・変更されたカードを実装する
 
-新しいデッキ・新しいカードを扱うときだけ。手順とコードの型は
-**[reference/adding-cards.md](reference/adding-cards.md)** に全部書いてある。必ず読んでから触る。
+新しいデッキ・新しいカード・テキストが変わったカードを扱うときだけ。手順とコードの型は
+**[adding-cards.md](../../../システム/対戦/reference/adding-cards.md)** に全部書いてある。必ず読んでから触る。
 
 触るファイルは基本この2つだけ。
 
-- `sim/cards.js` — カードのステータスとデッキリスト
-- `sim/effects.js` — カードの効果
+- `システム/対戦/cards.js` — カードのステータスとデッキリスト
+- `システム/対戦/effects.js` — カードの効果
+
+**ここは他のスキルと共有している。** 直した実装は、他のスキルの数字にも同時に効く。
 
 ### テキストが一意に決まらないとき
 
 **自分で決めずにユーザーに確認する。** 解釈で勝率が大きく変わる。
 
-確認して決まったら、**[reference/rule-interpretations.md](reference/rule-interpretations.md) に追記する。**
+確認して決まったら、**[rule-interpretations.md](../../../システム/対戦/reference/rule-interpretations.md) に追記する。**
 次回以降ここを読めば同じ議論を繰り返さずに済む。
 
 ---
@@ -100,7 +105,7 @@ node .claude/skills/simulating-deck-matchups/sim/validate.js
 ### 3-1. 整合チェック
 
 ```bash
-node .claude/skills/simulating-deck-matchups/sim/validate.js
+node システム/対戦/validate.js
 ```
 
 40枚ちょうどか、同名3枚以下か、カード定義が揃っているか、リーダーのテンションスキルがあるかを見る。
@@ -110,7 +115,7 @@ node .claude/skills/simulating-deck-matchups/sim/validate.js
 ### 3-2. 1試合を目視する
 
 ```bash
-node .claude/skills/simulating-deck-matchups/sim/trace.js アグロリーゼ コントロールアルベル 777
+node システム/対戦/trace.js アグロリーゼ コントロールアルベル 777
 ```
 
 シードを変えて2〜3試合ぶん見る。次を確認する。
@@ -127,12 +132,13 @@ node .claude/skills/simulating-deck-matchups/sim/trace.js アグロリーゼ コ
 ## Step4. 本番実行
 
 ```bash
-node .claude/skills/simulating-deck-matchups/sim/run.js 1000 > result.txt
-node .claude/skills/simulating-deck-matchups/sim/ace.js 1000 > ace.txt
-node .claude/skills/simulating-deck-matchups/sim/mirror.js 1000
+node .claude/skills/simulating-deck-matchups/run.js 1000 > result.txt
+node .claude/skills/simulating-deck-matchups/ace.js 1000 > ace.txt
+node .claude/skills/simulating-deck-matchups/mirror.js 1000
 ```
 
 戦数はユーザーの指定に従う。指定が無ければ1000戦。
+出力ファイルはスクラッチパッドに置く。プロジェクトの中に置かない。
 
 **ミラーマッチは毎回必ず回す。** 先攻勝率が高く出るのはデッキが強いからではなく、
 このゲームの構造（ブロックが無く、1ターン先に殴り始めた側が有利）による分が大きい。
@@ -168,10 +174,11 @@ node .claude/skills/simulating-deck-matchups/sim/mirror.js 1000
   ミラーの先攻勝率が95.3%→79.6%に動いた
 - **ミラーマッチ無しで「このデッキは先攻有利」と書かない。** 切り分けができていない
 - **カードテキストの曖昧な箇所を自分の判断で確定させない。** ユーザーに聞く
-- **決めた解釈を `reference/rule-interpretations.md` に書き残さずに終わらない**
+- **決めた解釈を rule-interpretations.md に書き残さずに終わらない**
 - **`デッキ/*.md` や `ルール/*.md` をシミュレーターの都合で書き換えない。** 実装側を合わせる。
   結果を受けてデッキの中身を直すのは `creating-deck` スキルの仕事で、このスキルは測るだけ
 - **少ない試行回数の数字を断定して語らない。** 使用率の低いカードの勝率はほぼノイズ
 - **使用時勝率だけでカードを評価しない。** 重いカードほど選択バイアスで高く出る
 - **AIのプレイ方針をデッキごとに有利になるよう調整しない。** 勝たせたいデッキが勝つだけになる
+- **このスキルの中にカードの効果を書かない。** 実装は `システム/対戦/` にだけ置く
 - **シミュレーターの結果を実際のプレイ感の代わりに扱わない。** 傾向を掴む道具として使う

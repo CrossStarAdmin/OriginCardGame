@@ -1,6 +1,8 @@
 // 先攻・後攻の有利さを測るミラーマッチ診断
-const { DECKS } = require('./cards.js');
-const { playGame } = require('./run.js');
+const path = require('path');
+const CORE = path.join(__dirname, '..', '..', '..', 'システム', '対戦');
+const { DECKS } = require(path.join(CORE, 'cards.js'));
+const { playGame } = require(path.join(CORE, 'match.js'));
 
 const N = parseInt(process.argv[2] || '500', 10);
 const targets = process.argv.length > 3 ? process.argv.slice(3) : Object.keys(DECKS);

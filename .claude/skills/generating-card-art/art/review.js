@@ -3,8 +3,8 @@
 const CORE = require('path').join(__dirname, '..', '..', '..', '..', 'システム');
 const { parseArgs } = require('./cli.js');
 const { resolveTargets } = require('./targets.js');
-const { buildReview } = require(CORE + '/prompt.js');
-const { styleNames } = require(CORE + '/artrules.js');
+const { buildReview } = require(CORE + '/カード絵/prompt.js');
+const { styleNames } = require(CORE + '/カード絵/artrules.js');
 
 function wrap(text, width, indent) {
   const lines = [];

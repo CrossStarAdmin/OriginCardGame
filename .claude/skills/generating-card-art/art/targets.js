@@ -3,9 +3,9 @@ const fs = require('fs');
 const path = require('path');
 
 const CORE = path.join(__dirname, '..', '..', '..', '..', 'システム');
-const { loadDecks, listSubjects } = require(path.join(CORE, 'decks.js'));
-const { buildPrompt } = require(path.join(CORE, 'prompt.js'));
-const { aspectOf } = require(path.join(CORE, 'frame.js'));
+const { loadDecks, listSubjects } = require(path.join(CORE, 'デッキ読み込み', 'decks.js'));
+const { buildPrompt } = require(path.join(CORE, 'カード絵', 'prompt.js'));
+const { aspectOf } = require(path.join(CORE, 'カード絵', 'frame.js'));
 
 function resolveTargets(opts) {
   const decks = loadDecks(opts.decks);

@@ -1,6 +1,8 @@
 // 各デッキのカードを全マッチ合算で集計し、エースカードを出す
-const { CARD_DB } = require('./cards.js');
-const { playGame, resolveMatchups } = require('./run.js');
+const path = require('path');
+const CORE = path.join(__dirname, '..', '..', '..', 'システム', '対戦');
+const { CARD_DB } = require(path.join(CORE, 'cards.js'));
+const { playGame, resolveMatchups } = require(path.join(CORE, 'match.js'));
 
 const N = parseInt(process.argv[2] || '1000', 10);
 const matchups = resolveMatchups(process.argv.slice(3));

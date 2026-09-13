@@ -51,6 +51,7 @@ class Player {
     this.idx = idx;
     this.deckName = deckName;
     this.style = def.style;
+    this.knobs = null; // AIの打ち方のつまみ（knobs.js）。null なら既定値
     this.leader = def.leader;
     this.leaderHp = LEADER_HP;
     this.maxMp = 0;

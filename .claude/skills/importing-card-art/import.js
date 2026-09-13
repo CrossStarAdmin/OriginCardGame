@@ -5,9 +5,9 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..', '..');
 const CORE = path.join(ROOT, 'システム');
-const { loadDecks, listSubjects } = require(path.join(CORE, 'decks.js'));
-const { buildPrompt } = require(path.join(CORE, 'prompt.js'));
-const { aspectOf } = require(path.join(CORE, 'frame.js'));
+const { loadDecks, listSubjects } = require(path.join(CORE, 'デッキ読み込み', 'decks.js'));
+const { buildPrompt } = require(path.join(CORE, 'カード絵', 'prompt.js'));
+const { aspectOf } = require(path.join(CORE, 'カード絵', 'frame.js'));
 
 const INBOX = path.join(ROOT, '取り込み');
 const OUT = path.join(ROOT, 'イラスト');

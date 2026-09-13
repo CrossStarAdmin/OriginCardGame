@@ -28,7 +28,7 @@ description: デッキ/<デッキ名>/カード一覧/*.md に書かれた日本
 
 | 場所 | 中身 |
 |---|---|
-| `システム/` | **共有コア。**デッキとカードmdのパーサ、共通ルールのパーサ、プロンプトの組み立て、縦横比。`showing-card-prompt` も同じものを使う |
+| `システム/デッキ読み込み/` `システム/カード絵/` | **共有コア。**デッキとカードmdのパーサ、共通ルールのパーサ、プロンプトの組み立て、縦横比。`showing-card-prompt` も同じものを使う |
 | `art/translate.js` | 日本語→英語。訳した英文はキャッシュされる |
 | `art/image.js` `art/providers/` | 画像APIの呼び出し（google / openai） |
 | `art/list.js` / `art/review.js` / `art/generate.js` | 実行スクリプト |
