@@ -177,15 +177,17 @@ function Compose-Card($card, [string]$artPath, [string]$destPath) {
     Draw-Text $g $effectText $spec.skillText $Fonts.text 'Center' 'Center'
     Draw-Text $g $spec.type.text $spec.type $Fonts.label 'Center' 'Center'
   } else {
-    # パネル下段は種族タグ。タグの無いキャラクターは空欄、スペルは種類を出す
+    # パネル下段は種族タグ。タグの無いキャラクターは空欄、スペルと武器は種類を出す
     $sub = $card.tag
     if ([string]::IsNullOrWhiteSpace($sub) -and $card.type -ne 'キャラクター') { $sub = $card.type }
     Draw-Text $g $card.name $spec.name $Fonts.name 'Center' 'Center'
     Draw-Text $g $sub $spec.type $Fonts.label 'Center' 'Center'
     Draw-Stat $g $card.cost $spec.cost $Fonts.stat $spec.style.statText $spec.style.statOutline
-    if ($card.type -eq 'キャラクター') {
+    if ($card.type -eq 'キャラクター' -or $card.type -eq '武器') {
+      # 武器は右下の丸に耐久力を出す
+      $life = if ($card.type -eq '武器') { $card.durability } else { $card.hp }
       Draw-Stat $g $card.atk $spec.atk $Fonts.stat $spec.style.statText $spec.style.statOutline
-      Draw-Stat $g $card.hp $spec.hp $Fonts.stat $spec.style.statText $spec.style.statOutline
+      Draw-Stat $g $life $spec.hp $Fonts.stat $spec.style.statText $spec.style.statOutline
     }
   }
 
@@ -200,7 +202,7 @@ if (-not (Test-Path $ArtDir)) { throw "$ArtDir が無い。先にイラストを
 
 # 数値と効果はデッキの md から取る。イラストの .json は取り込んだ時点の写しで古くなる
 # 書式は システム/デッキ読み込み/decks.js と揃える。Node は日本語パスのモジュールを require すると落ちるので PowerShell で読む
-$CARD_FIELDS = @{ 'クラス' = 'className'; '種類' = 'type'; 'コスト' = 'cost'; '攻撃力' = 'atk'; 'HP' = 'hp'; '種族タグ' = 'tag' }
+$CARD_FIELDS = @{ 'クラス' = 'className'; '種類' = 'type'; 'コスト' = 'cost'; '攻撃力' = 'atk'; 'HP' = 'hp'; '耐久力' = 'durability'; '種族タグ' = 'tag' }
 $BLANK = @('', '-', '─', '—')
 
 function Read-CardMarkdown([string]$path) {
