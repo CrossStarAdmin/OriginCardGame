@@ -37,15 +37,15 @@
 
 | クラス | リーダー | 枠の色 | キャラクター | スペル | リーダー |
 |---|---|---|---|---|---|
-| 焔術士 | リーゼ | 赤 | `Pyromancer.png` | `Pyromancer.png` | `Pyromancer.png` |
-| 星詠み | エルナ | 紫 | `Astrologer.png` | `Astrologer.png` | `Astrologer.png` |
+| 焔術士 | リーゼ | 赤 | `Wizard.png` | `Wizard.png` | `Wizard.png` |
+| 星詠み | エルナ | 紫 | `Fortune.png` | `Fortune.png` | `Fortune.png` |
 | 司祭 | アルベル | 金 | `Priest.png` | `Priest.png` | `Priest.png` |
 | 魔族 | ヴァルカス | 黒紺 | `Demon.png` | `Demon.png` | `Demon.png` |
 
 **スペルの `Priest.png` と `Demon.png` は青の枠から色替えして作った。** 手順は下の「色替え」を参照。
 `Demon.png` の数値は `--hue 216 --sat 1.0136 --light 0.2689`（`キャラクター/戦士.png` と旧 `魔剣士.png` の対応画素51853点の中央値）。
 
-リーダー枠の名前帯とスキル欄は全クラス共通の紺色で、クラスの色は外周の帯だけに出る。
+リーダー枠の名前帯とスキル欄は全クラス共通の紙色で、クラスの色は外周の帯だけに出る。文字は濃い茶色で載せる。
 
 ## 未割り当ての枠
 
