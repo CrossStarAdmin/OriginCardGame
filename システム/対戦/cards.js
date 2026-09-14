@@ -1,7 +1,7 @@
 // カード定義とデッキリスト（デッキ/*/カード一覧/*.md より）
 
 const CARD_DB = {
-  // ---- アグロリーゼ（焔術士）----
+  // ---- アグロリーゼ（ウィザード）----
   '学舎の見習い':   { kind: 'unit', cost: 1, atk: 1, hp: 2 },
   '火の子':         { kind: 'unit', cost: 1, atk: 1, hp: 1 },
   '火の粉':         { kind: 'spell', cost: 1, dmg: 1 },
@@ -17,7 +17,7 @@ const CARD_DB = {
   '消えぬ焔':       { kind: 'spell', cost: 5 },
   '師ベルゼ':       { kind: 'unit', cost: 6, atk: 3, hp: 6, kw: ['突進'] },
 
-  // ---- ミッドレンジ奇数エルナ（占い師）----
+  // ---- ミッドレンジ奇数エルナ（ウィザード）----
   'オルレアの民':   { kind: 'unit', cost: 1, atk: 1, hp: 2 },
   '使い魔サキュ':   { kind: 'unit', cost: 1, atk: 2, hp: 1 },
   '凶兆のまたたき': { kind: 'unit', cost: 1, atk: 1, hp: 1 },
@@ -33,7 +33,7 @@ const CARD_DB = {
   '識りすぎたヴァルザ':    { kind: 'unit', cost: 7, atk: 8, hp: 6 },
   '傲慢のノクス':   { kind: 'unit', cost: 8, atk: 5, hp: 5 },
 
-  // ---- コントロールアルベル（司祭）----
+  // ---- コントロールアルベル（プリースト）----
   '癒しの人形':     { kind: 'unit', cost: 1, atk: 1, hp: 1 },
   '小さな手当て':   { kind: 'spell', cost: 1 },
   '禁術・蘇生':     { kind: 'spell', cost: 1 },
@@ -49,7 +49,7 @@ const CARD_DB = {
   '偽善のミゼリア': { kind: 'unit', cost: 7, atk: 4, hp: 4, kw: ['守護'] },
   '聖鳥リフルエル': { kind: 'unit', cost: 10, atk: 7, hp: 7, kw: ['守護'] },
 
-  // ---- ランプヴァルカス（魔族）----
+  // ---- ランプヴァルカス（デーモン）----
   // 対象耐性：相手の効果の対象にならない（全体効果は受ける）
   '無様な魔物':     { kind: 'unit', cost: 1, atk: 1, hp: 1 },
   '貪りの供物':     { kind: 'spell', cost: 2 },

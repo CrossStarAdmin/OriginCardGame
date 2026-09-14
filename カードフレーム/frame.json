@@ -25,32 +25,32 @@
     "type": { "x": 265, "y": 1334, "width": 533, "height": 76, "size": 26, "color": "#3B2A14" },
     "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
     "frames": {
-      "焔術士": "Wizard.png",
-      "占い師": "Fortune.png",
-      "司祭": "Priest.png",
-      "魔族": "Demon.png"
+      "ウォリアー": "Warrior.png",
+      "ウィザード": "Wizard.png",
+      "プリースト": "Priest.png",
+      "デーモン": "Demon.png"
     }
   },
 
   "スペル": {
     "dir": "スペル",
-    "canvas": { "width": 1061, "height": 1482 },
-    "art":  { "x": 42, "y": 30, "width": 983, "height": 1199 },
-    "cost": { "cx": 102, "cy": 115, "size": 80 },
+    "canvas": { "width": 1056, "height": 1489 },
+    "art":  { "x": 37, "y": 38, "width": 983, "height": 1199 },
+    "cost": { "cx": 103, "cy": 124, "size": 80 },
     "effectBox": {
-      "x": 64, "y": 938, "width": 942, "height": 211, "radius": 25,
+      "x": 57, "y": 946, "width": 942, "height": 211, "radius": 25,
       "padX": 22, "padY": 28, "size": 30,
       "align": "near", "valign": "near",
       "fill": "#000000", "alpha": 150, "color": "#FFFFFF"
     },
-    "name": { "x": 135, "y": 1180, "width": 806, "height": 148, "size": 70, "color": "#3B2A14" },
-    "type": { "x": 135, "y": 1345, "width": 806, "height": 60, "size": 26, "color": "#3B2A14" },
+    "name": { "x": 127, "y": 1188, "width": 806, "height": 148, "size": 70, "color": "#3B2A14" },
+    "type": { "x": 127, "y": 1352, "width": 806, "height": 60, "size": 26, "color": "#3B2A14" },
     "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
     "frames": {
-      "焔術士": "Wizard.png",
-      "占い師": "Fortune.png",
-      "司祭": "Priest.png",
-      "魔族": "Demon.png"
+      "ウォリアー": "Warrior.png",
+      "ウィザード": "Wizard.png",
+      "プリースト": "Priest.png",
+      "デーモン": "Demon.png"
     }
   },
 
@@ -66,10 +66,10 @@
     "type":       { "x": 110, "y": 1387, "width": 840, "height": 28, "size": 22, "color": "#7A5A1E", "text": "リーダー" },
     "style": { "statText": "#FFFFFF", "statOutline": "#0A1A32" },
     "frames": {
-      "焔術士": "Wizard.png",
-      "占い師": "Fortune.png",
-      "司祭": "Priest.png",
-      "魔族": "Demon.png"
+      "ウォリアー": "Warrior.png",
+      "ウィザード": "Wizard.png",
+      "プリースト": "Priest.png",
+      "デーモン": "Demon.png"
     }
   }
 }
