@@ -97,7 +97,7 @@ function cardScoreBase(g, p, name) {
       case '魔軍のヴェイン': s += FX.fullyReleased(p) ? 3 : 0; break;
       case '霊脈喰らい': s += 3; break;
       case '六罪 ヴェルド': s += enemyUnits.filter((u) => u.hp <= 3).length * 2; break;
-      case '六罪 ミゼリア': s += reviveBest(p, 8) * 0.6; break;
+      case '六罪 ミゼリア': s += reviveBest(p, 5) * 0.6; break;
       case '六罪 ノクス': s += 4; break;
       case '魔王ヴァルカス': s += 4; break;
       default: break;

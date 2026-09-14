@@ -310,9 +310,12 @@ function onSummon(g, p, u) {
     case '六罪 ヴェルド':
       for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
       break;
-    case '六罪 ミゼリア':
-      reviveFromGrave(g, p, 8, { value: (n) => (n === '霊脈喰らい' ? 20 : 0) });
+    case '六罪 ミゼリア': {
+      // カードテキストが「その召喚時効果を発動する」と指定している
+      const nu = reviveFromGrave(g, p, 5, { value: (n) => (n === '霊脈喰らい' ? 20 : 0) });
+      if (nu) onSummon(g, p, nu);
       break;
+    }
     case '六罪 ノクス': {
       const c = topCost(p);
       if (c === null) break;
@@ -322,7 +325,7 @@ function onSummon(g, p, u) {
       } else {
         u.kw.add('速攻');
         const cand = targetable(g, p);
-        if (cand.length) E.damageUnit(g, best(cand), 8, p, u.name);
+        if (cand.length) E.damageUnit(g, best(cand), 6, p, u.name);
       }
       break;
     }

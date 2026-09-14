@@ -57,14 +57,14 @@ const CARD_DB = {
   '魔王の復活':     { kind: 'spell', cost: 2 },
   '玉座の使い魔':   { kind: 'unit', cost: 2, atk: 2, hp: 2 },
   '眷属':           { kind: 'unit', cost: 2, atk: 2, hp: 1, kw: ['突進'] },
-  '記憶喰らい':     { kind: 'unit', cost: 3, atk: 3, hp: 4, kw: ['必殺'] },
+  '記憶喰らい':     { kind: 'unit', cost: 3, atk: 2, hp: 4 },
   '魔軍のヴェイン': { kind: 'unit', cost: 4, atk: 5, hp: 2, kw: ['突進', '必殺'] },
   '霊脈喰らい':     { kind: 'unit', cost: 5, atk: 4, hp: 4 },
   '六罪 ヴェルド':  { kind: 'unit', cost: 7, atk: 4, hp: 3, kw: ['速攻'] },
   '王の一瞥':       { kind: 'spell', cost: 8 },
-  '六罪 ミゼリア':  { kind: 'unit', cost: 9, atk: 4, hp: 6, kw: ['守護'] },
-  '六罪 ノクス':    { kind: 'unit', cost: 9, atk: 8, hp: 8 },
-  '魔王ヴァルカス': { kind: 'unit', cost: 10, atk: 6, hp: 6, kw: ['速攻', '守護', '必殺'] },
+  '六罪 ミゼリア':  { kind: 'unit', cost: 9, atk: 3, hp: 5, kw: ['守護'] },
+  '六罪 ノクス':    { kind: 'unit', cost: 9, atk: 7, hp: 7 },
+  '魔王ヴァルカス': { kind: 'unit', cost: 10, atk: 8, hp: 8, kw: ['速攻', '守護', '必殺'] },
 };
 
 const DECKS = {
