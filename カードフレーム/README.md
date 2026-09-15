@@ -37,7 +37,7 @@
 
 | クラス | リーダー | 枠の色 | キャラクター | スペル | リーダー |
 |---|---|---|---|---|---|
-| ウォリアー | ガイル（デッキ未作成） | 赤 | `Warrior.png` | `Warrior.png` | `Warrior.png` |
+| ウォーリア | ガイル・シュリ | 赤 | `Warrior.png` | `Warrior.png` | `Warrior.png` |
 | ウィザード | リーゼ・エルナ | 紫 | `Wizard.png` | `Wizard.png` | `Wizard.png` |
 | プリースト | アルベル | 金 | `Priest.png` | `Priest.png` | `Priest.png` |
 | デーモン | ヴァルカス | 黒 | `Demon.png` | `Demon.png` | `Demon.png` |

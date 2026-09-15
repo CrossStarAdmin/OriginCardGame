@@ -25,7 +25,7 @@
     "type": { "x": 265, "y": 1334, "width": 533, "height": 76, "size": 26, "color": "#3B2A14" },
     "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
     "frames": {
-      "ウォリアー": "Warrior.png",
+      "ウォーリア": "Warrior.png",
       "ウィザード": "Wizard.png",
       "プリースト": "Priest.png",
       "デーモン": "Demon.png"
@@ -50,7 +50,7 @@
     "type": { "x": 265, "y": 1334, "width": 533, "height": 76, "size": 26, "color": "#3B2A14" },
     "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
     "frames": {
-      "ウォリアー": "Warrior.png",
+      "ウォーリア": "Warrior.png",
       "ウィザード": "Wizard.png",
       "プリースト": "Priest.png",
       "デーモン": "Demon.png"
@@ -72,7 +72,7 @@
     "type": { "x": 127, "y": 1352, "width": 806, "height": 60, "size": 26, "color": "#3B2A14" },
     "style": { "statText": "#FFFFFF", "statOutline": "#2A1206" },
     "frames": {
-      "ウォリアー": "Warrior.png",
+      "ウォーリア": "Warrior.png",
       "ウィザード": "Wizard.png",
       "プリースト": "Priest.png",
       "デーモン": "Demon.png"
@@ -91,7 +91,7 @@
     "type":       { "x": 110, "y": 1387, "width": 840, "height": 28, "size": 22, "color": "#7A5A1E", "text": "リーダー" },
     "style": { "statText": "#FFFFFF", "statOutline": "#0A1A32" },
     "frames": {
-      "ウォリアー": "Warrior.png",
+      "ウォーリア": "Warrior.png",
       "ウィザード": "Wizard.png",
       "プリースト": "Priest.png",
       "デーモン": "Demon.png"
