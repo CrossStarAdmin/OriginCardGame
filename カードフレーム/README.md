@@ -40,7 +40,7 @@
 | ウォーリア | ガイル・シュリ | 赤 | `Warrior.png` | `Warrior.png` | `Warrior.png` |
 | ウィザード | リーゼ・エルナ | 紫 | `Wizard.png` | `Wizard.png` | `Wizard.png` |
 | プリースト | アルベル | 金 | `Priest.png` | `Priest.png` | `Priest.png` |
-| デーモン | ヴァルカス | 黒 | `Demon.png` | `Demon.png` | `Demon.png` |
+| デーモン | ヴァルカス・ヴェイン | 黒 | `Demon.png` | `Demon.png` | `Demon.png` |
 
 **スペルの `Priest.png` と `Demon.png` は青の枠から色替えして作った。** 手順は下の「色替え」を参照。
 `Demon.png` の数値は `--hue 216 --sat 1.0136 --light 0.2689`（`キャラクター/予備_青.png` と旧 `魔剣士.png` の対応画素51853点の中央値）。
