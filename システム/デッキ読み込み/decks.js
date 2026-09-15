@@ -87,6 +87,7 @@ function parseCardFile(file, deckName) {
   } else {
     card.effects = effects;
   }
+  card.flavor = parseLines(h2.get('フレーバー')).join('\n');
 
   card.look = {
     外見: parseLines(art.get('外見')).join(''),

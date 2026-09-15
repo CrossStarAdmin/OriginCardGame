@@ -107,10 +107,62 @@ function New-RoundedRect([int]$x, [int]$y, [int]$w, [int]$h, [int]$r) {
   $path
 }
 
-# 効果テキストは絵の上に敷いた半透明の板に載せる
-function Draw-EffectBox($g, [string]$text, $slot, $fontSpec) {
-  if ([string]::IsNullOrWhiteSpace($text)) { return }
-  $path = New-RoundedRect ([int]$slot.x) ([int]$slot.y) ([int]$slot.width) ([int]$slot.height) ([int]$slot.radius)
+function Measure-TextHeight($g, [string]$text, $fontSpec, [int]$size, [int]$width) {
+  $format = New-Format 'Near' 'Near'
+  $unit = [System.Drawing.GraphicsUnit]::Pixel
+  $font = New-Object System.Drawing.Font $fontSpec.family, ([float]$size), $fontSpec.style, $unit
+  $limit = New-Object System.Drawing.SizeF ([float]$width), ([float]9999)
+  $height = [int][Math]::Ceiling($g.MeasureString($text, $font, $limit, $format).Height)
+  $font.Dispose(); $format.Dispose()
+  $height
+}
+
+# 効果テキストとフレーバーの境目の飾り線。両端が消える線と中央の菱形
+function Draw-FlavorRule($g, [int]$x, [int]$y, [int]$width, [string]$hex) {
+  $base = ConvertTo-Color $hex
+  $clear = [System.Drawing.Color]::FromArgb(0, $base.R, $base.G, $base.B)
+  $rect = New-Object System.Drawing.Rectangle $x, ($y - 1), $width, 2
+  $line = New-Object System.Drawing.Drawing2D.LinearGradientBrush $rect, $clear, $base, ([single]0)
+  $blend = New-Object System.Drawing.Drawing2D.ColorBlend 3
+  $blend.Colors = [System.Drawing.Color[]]@($clear, $base, $clear)
+  $blend.Positions = [single[]]@(0, 0.5, 1)
+  $line.InterpolationColors = $blend
+  $g.FillRectangle($line, $rect)
+  $line.Dispose()
+
+  $cx = [float]($x + $width / 2)
+  $r = [float]6
+  $points = [System.Drawing.PointF[]]@(
+    (New-Object System.Drawing.PointF $cx, ([float]$y - $r)),
+    (New-Object System.Drawing.PointF ($cx + $r), ([float]$y)),
+    (New-Object System.Drawing.PointF $cx, ([float]$y + $r)),
+    (New-Object System.Drawing.PointF ($cx - $r), ([float]$y))
+  )
+  $diamond = New-Object System.Drawing.SolidBrush $base
+  $g.FillPolygon($diamond, $points)
+  $diamond.Dispose()
+}
+
+# 効果テキストは絵の上に敷いた半透明の板に載せる。フレーバーテキストは板の下端に色を変えて載せる
+function Draw-EffectBox($g, [string]$text, [string]$flavor, $slot, $fontSpec) {
+  $hasFlavor = -not [string]::IsNullOrWhiteSpace($flavor)
+  if ([string]::IsNullOrWhiteSpace($text) -and -not $hasFlavor) { return }
+
+  $padX = [int]$slot.padX
+  $padY = [int]$slot.padY
+  $innerWidth = [int]$slot.width - 2 * $padX
+  $grow = 0
+  if ($hasFlavor) {
+    # 効果テキストを元の大きさのまま置けるよう、足りない分だけ板を上へ伸ばす
+    $needed = (Measure-TextHeight $g $text $fontSpec ([int]$slot.size) $innerWidth) + [int]$slot.flavorGap +
+      (Measure-TextHeight $g $flavor $fontSpec ([int]$slot.flavorSize) $innerWidth)
+    $shortage = $needed - ([int]$slot.height - $padY - [int]$slot.flavorPadBottom)
+    $grow = [Math]::Min([Math]::Max($shortage, 0), [int]$slot.flavorGrowMax)
+  }
+  $boxY = [int]$slot.y - $grow
+  $boxHeight = [int]$slot.height + $grow
+
+  $path = New-RoundedRect ([int]$slot.x) $boxY ([int]$slot.width) $boxHeight ([int]$slot.radius)
   $base = ConvertTo-Color $slot.fill
   $color = [System.Drawing.Color]::FromArgb([int]$slot.alpha, $base.R, $base.G, $base.B)
   $brush = New-Object System.Drawing.SolidBrush $color
@@ -118,14 +170,39 @@ function Draw-EffectBox($g, [string]$text, $slot, $fontSpec) {
   $brush.Dispose(); $path.Dispose()
 
   $inner = [pscustomobject]@{
-    x      = [int]$slot.x + [int]$slot.padX
-    y      = [int]$slot.y + [int]$slot.padY
-    width  = [int]$slot.width - 2 * [int]$slot.padX
-    height = [int]$slot.height - 2 * [int]$slot.padY
+    x      = [int]$slot.x + $padX
+    y      = $boxY + $padY
+    width  = $innerWidth
+    height = $boxHeight - 2 * $padY
     size   = [int]$slot.size
     color  = $slot.color
   }
-  Draw-Text $g $text $inner $fontSpec $slot.align $slot.valign
+  if (-not $hasFlavor) {
+    Draw-Text $g $text $inner $fontSpec $slot.align $slot.valign
+    return
+  }
+
+  # フレーバーは板の半分までに収め、効果テキストは残りの高さに収める
+  $flavorHeight = [Math]::Min((Measure-TextHeight $g $flavor $fontSpec ([int]$slot.flavorSize) $inner.width), [int]($inner.height / 2))
+  $flavorSlot = [pscustomobject]@{
+    x      = $inner.x
+    y      = $boxY + $boxHeight - [int]$slot.flavorPadBottom - $flavorHeight
+    width  = $inner.width
+    height = $flavorHeight
+    size   = [int]$slot.flavorSize
+    color  = $slot.flavorColor
+  }
+  $effectSlot = [pscustomobject]@{
+    x      = $inner.x
+    y      = $inner.y
+    width  = $inner.width
+    height = $flavorSlot.y - [int]$slot.flavorGap - $inner.y
+    size   = $inner.size
+    color  = $inner.color
+  }
+  Draw-FlavorRule $g $inner.x ($flavorSlot.y - [int]([int]$slot.flavorGap / 2)) $inner.width $slot.flavorRuleColor
+  Draw-Text $g $flavor $flavorSlot $fontSpec $slot.align 'Far'
+  Draw-Text $g $text $effectSlot $fontSpec $slot.align $slot.valign
 }
 
 # 宝石と丸の中の数字。縁取りを付けて背景から浮かせる
@@ -166,7 +243,7 @@ function Compose-Card($card, [string]$artPath, [string]$destPath) {
   $effectText = ($card.effects -join "`n")
 
   # 効果の板は枠より先に敷く。枠の飾りが上に来る
-  if ($card.type -ne 'リーダー') { Draw-EffectBox $g $effectText $spec.effectBox $Fonts.text }
+  if ($card.type -ne 'リーダー') { Draw-EffectBox $g $effectText $card.flavor $spec.effectBox $Fonts.text }
 
   $g.DrawImage($frame, 0, 0, $frame.Width, $frame.Height)
 
@@ -208,6 +285,7 @@ $BLANK = @('', '-', '─', '—')
 function Read-CardMarkdown([string]$path) {
   $card = [ordered]@{}
   $effects = New-Object System.Collections.Generic.List[string]
+  $flavor = New-Object System.Collections.Generic.List[string]
   $section = $null
   foreach ($raw in [System.IO.File]::ReadAllLines($path, [System.Text.Encoding]::UTF8)) {
     $line = $raw.Trim()
@@ -220,6 +298,7 @@ function Read-CardMarkdown([string]$path) {
       }
       continue
     }
+    if ($section -eq 'フレーバー' -and $line -and $line -notmatch '^[>#]') { $flavor.Add($line); continue }
     if ($section -ne '効果' -or -not $line -or $line -match '^[>#]') { continue }
     $text = ($line -replace '^[-*]\s+', '' -replace '^\d+\.\s*', '' -replace '\*\*', '').Trim()
     if ($text -and $text -ne '効果なし') { $effects.Add($text) }
@@ -232,6 +311,7 @@ function Read-CardMarkdown([string]$path) {
     [void]$effects.Remove($skill)
   }
   $card.effects = @($effects)
+  $card.flavor = ($flavor -join "`n")
   [pscustomobject]$card
 }
 

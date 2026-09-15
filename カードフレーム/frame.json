@@ -19,7 +19,8 @@
       "x": 64, "y": 939, "width": 942, "height": 211, "radius": 25,
       "padX": 22, "padY": 28, "size": 30,
       "align": "near", "valign": "near",
-      "fill": "#000000", "alpha": 150, "color": "#FFFFFF"
+      "fill": "#000000", "alpha": 150, "color": "#FFFFFF",
+      "flavorSize": 22, "flavorColor": "#D9BE85", "flavorGap": 26, "flavorPadBottom": 6, "flavorGrowMax": 60, "flavorRuleColor": "#C8A45A"
     },
     "name": { "x": 265, "y": 1192, "width": 533, "height": 130, "size": 63, "color": "#3B2A14" },
     "type": { "x": 265, "y": 1334, "width": 533, "height": 76, "size": 26, "color": "#3B2A14" },
@@ -44,7 +45,8 @@
       "x": 64, "y": 939, "width": 942, "height": 211, "radius": 25,
       "padX": 22, "padY": 28, "size": 30,
       "align": "near", "valign": "near",
-      "fill": "#000000", "alpha": 150, "color": "#FFFFFF"
+      "fill": "#000000", "alpha": 150, "color": "#FFFFFF",
+      "flavorSize": 22, "flavorColor": "#D9BE85", "flavorGap": 26, "flavorPadBottom": 6, "flavorGrowMax": 60, "flavorRuleColor": "#C8A45A"
     },
     "name": { "x": 265, "y": 1192, "width": 533, "height": 130, "size": 63, "color": "#3B2A14" },
     "type": { "x": 265, "y": 1334, "width": 533, "height": 76, "size": 26, "color": "#3B2A14" },
@@ -66,7 +68,8 @@
       "x": 57, "y": 946, "width": 942, "height": 211, "radius": 25,
       "padX": 22, "padY": 28, "size": 30,
       "align": "near", "valign": "near",
-      "fill": "#000000", "alpha": 150, "color": "#FFFFFF"
+      "fill": "#000000", "alpha": 150, "color": "#FFFFFF",
+      "flavorSize": 22, "flavorColor": "#D9BE85", "flavorGap": 26, "flavorPadBottom": 6, "flavorGrowMax": 60, "flavorRuleColor": "#C8A45A"
     },
     "name": { "x": 127, "y": 1188, "width": 806, "height": 148, "size": 70, "color": "#3B2A14" },
     "type": { "x": 127, "y": 1352, "width": 806, "height": 60, "size": 26, "color": "#3B2A14" },
