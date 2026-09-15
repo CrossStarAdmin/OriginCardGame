@@ -6,6 +6,53 @@ const K = require('./knobs.js');
 
 const threat = FX.threat;
 
+// パワースキルをカードより先に使うリーダー（練気の連携、面の切り替え、武器、薬草）
+const EARLY_SKILL = new Set(['トバル', 'シュリ', 'ガイル', 'ヴェイン']);
+
+// 武器の評価。今の武器を上書きして損をするなら使わない
+function weaponScore(g, p, name) {
+  const d = CARD_DB[name];
+  let atk = d.atk;
+  if (name === '鉄の大剣' && FX.unyielding(p)) atk += 2;
+  if (name === '呪剣ノア' && FX.isBlack(p)) atk += 2;
+  let v = atk * d.dur * 0.6 + 2;
+  if (name === '研ぎ直した長剣') v += 1;
+  if (name === 'ドヴァルの遺作') v += 3;
+  if (name === '呪剣ノア') v += 1;
+  if (p.weapon) v -= E.weaponAtk(p) * p.weapon.dur * 0.6 + 2;
+  return v > 0 ? v : -100;
+}
+
+// 捨てる効果を持つカードの評価。捨てて得をする札が手札にあるほど高い
+function discardValue(g, p, self) {
+  const rest = p.hand.slice();
+  rest.splice(rest.indexOf(self), 1);
+  if (!rest.length) return -0.5;
+  const top = Math.max(...rest.map((n) => FX.discardPriority(g, p, n)));
+  if (top >= 6) return 3;
+  return top >= 3 ? 1 : -1;
+}
+
+// 連携の材料になる軽い札を、奥義を持っているときだけ高く見る
+function comboFuel(p) {
+  return p.hand.includes('拳で届かせる') && p.maxMp >= 6 ? 1.5 : 0;
+}
+
+// 拳で届かせる：今の連携で、手札の奥義をすべて撃ったら届くか
+function fistScore(g, p) {
+  const foe = g.opp(p);
+  const c = FX.chain(p);
+  const copies = p.hand.filter((n) => n === '拳で届かせる').length;
+  const cost = E.cardCost(p, '拳で届かせる');
+  let total = 0, mp = p.mp;
+  for (let i = 0; i < copies && mp >= cost; i++) { total += c + 2 + i; mp -= cost; }
+  if (total >= foe.leaderHp) return 100;
+  const dmg = c + 2;
+  if (FX.targetable(g, p).some((u) => u.hp <= dmg && threat(u) >= 8)) return 4;
+  if (p.maxMp >= 8 && c >= 3) return dmg * 0.7;
+  return -1;
+}
+
 // ---- マリガン ----
 function mulligan(g, p) {
   const keepMax = K.knob(g, p, 'mulliganKeepMax');
@@ -39,6 +86,8 @@ function cardScoreBase(g, p, name) {
   const enemyUnits = foe.board;
   const enemyTaunts = enemyUnits.filter((u) => u.kw.has('守護'));
   const bigThreat = enemyUnits.filter((u) => threat(u) >= 8).length;
+
+  if (d.kind === 'weapon') return weaponScore(g, p, name);
 
   if (d.kind === 'unit') {
     let s = d.atk + d.hp;
@@ -100,6 +149,56 @@ function cardScoreBase(g, p, name) {
       case '六罪 ミゼリア': s += reviveBest(p, 5) * 0.6; break;
       case '六罪 ノクス': s += 4; break;
       case '魔王ヴァルカス': s += 4; break;
+      // アグロトバル
+      case '市場の荷運び': s += discardValue(g, p, name); break;
+      case '市場の売り子': s += 1; break;
+      case '隊商の用心棒': s += discardValue(g, p, name) + K.knob(g, p, 'hasteValue'); break;
+      case '空籠の行商人': s += 1; break;
+      case '護衛バルド': s += p.discardedThisTurn ? 4 : 0; break;
+      case '運び屋ゴルダ': s += 2; break;
+      case '隊商の頭': s += p.board.length; break;
+      case '強欲のネフィス': s += 1 + discardValue(g, p, name); break;
+      case '早馬の隊商': s += targets.length ? 4 : 1; break;
+      case '弟子ザイル': {
+        const rest = p.hand.slice();
+        rest.splice(rest.indexOf(name), 1);
+        s += rest.length * 1.2 + K.knob(g, p, 'hasteValue')
+          + rest.filter((n) => n === '早馬の隊商').length * 2
+          + rest.filter((n) => n === '毒入りの霊薬').length * 2;
+        break;
+      }
+      // コンボシュリ
+      case 'ガンザの門下生': {
+        const c = FX.chain(p);
+        s += (c >= 2 ? 2 : 0) + (c >= 4 ? 2 : 0) + comboFuel(p);
+        break;
+      }
+      case '弟弟子カイ': s += 1.5 + comboFuel(p); break;
+      case '組み手の兄弟子': s += (FX.chain(p) >= 1 ? K.knob(g, p, 'tauntValue') : 0) + comboFuel(p) * 0.5; break;
+      case '岩窟の見張り': s += targets.length ? 3 + Math.min(3, threat(FX.best(targets)) * 0.2) : -1; break;
+      case '老師ロウ': s += FX.chain(p) >= 3 ? 7 : -3; break;
+      // 速攻7点を入れて、自分も3点受け、ターン終了時に破壊される
+      case '妹リン': s = p.leaderHp <= 6 ? -100 : 7 + (foe.leaderHp <= 7 ? 50 : 0); break;
+      case '渇望のガドル': s += 1; break;
+      // ミッドレンジヴェイン
+      case 'さまよう魂': s += FX.isBlack(p) ? 1 : K.knob(g, p, 'tauntValue'); break;
+      case '魔軍の小鬼':
+      case '魔軍の剣兵': s += p.power < 3 ? 1 : 0; break;
+      case '罪の影': s += 1; break;
+      case '魔軍の伝令': s += 2; break;
+      case '黒いヴェイン': s += FX.isBlack(p) ? 3 : 0; break;
+      case '魔軍一の剣': s += 2; break;
+      case '六罪 グラーク': s += targets.length ? 3 + Math.min(4, threat(FX.best(targets)) * 0.3) : -2; break;
+      case '六罪 ガドル': s += p.board.length * 2; break;
+      case '六罪 ネフィス': s += 2 + enemyUnits.filter((u) => u.hp <= 2).length * 2; break;
+      // ミッドレンジガイル
+      case 'ロダンの傭兵': s -= p.leaderHp <= 8 ? 5 : 0; break;
+      case '番犬ゴロ': s -= p.leaderHp <= 8 ? 6 : 1; break;
+      case '鍛冶師ドヴァル': s += p.weapon ? (FX.unyielding(p) ? 3 : 2) * p.weapon.dur * 0.6 : -1; break;
+      case '砦の古参兵': s += FX.unyielding(p) && !p.preventNext ? 2 : 0; break;
+      case '剣術学校の師範': s += p.leaderHp <= 18 ? 3 : 0; break;
+      case '裏切のグラーク': s = p.leaderHp <= 4 ? -100 : s + enemyUnits.filter((u) => u.hp <= 3).length * 2.5 - 1; break;
+      case '兄ゲイン': s += 2 + enemyUnits.filter((u) => u.hp <= 4).length * 2.5; break;
       default: break;
     }
     return s;
@@ -165,6 +264,91 @@ function cardScoreBase(g, p, name) {
       if (!kills) return -100;
       return kills >= 2 ? 3 + kills * 3 : (bigThreat ? 3 : -1);
     }
+    // アグロトバル
+    case '薬草の仕入れ': return 1.5 + (p.hand.includes('捨て値の毒') ? 1 : 0);
+    case '結晶の粉': {
+      const t = FX.targetable(g, p);
+      if (t.some((u) => u.hp <= 2)) return 3.5;
+      if (t.length) return 2;
+      return p.board.length ? 1.5 : -100;
+    }
+    case '捨て値の毒': {
+      const herbs = p.hand.filter((n) => n === '薬草').length;
+      return herbs >= 2 ? 1 + herbs * 1.5 : -100;
+    }
+    case '薬草': {
+      if (p.poisonHerbs) return foe.leaderHp <= 1 ? 100 : 1.5;
+      // 回復は手札に余裕があるときだけ。普段は捨てる札として持っておく
+      const hurt = p.board.some((u) => u.hp < u.maxhp) || p.leaderHp < 25;
+      return hurt && p.hand.length > 3 ? 0.5 : -100;
+    }
+    case '毒入りの霊薬': return foe.leaderHp <= 4 ? 100 : 1;
+    // コンボシュリ
+    case '朝駆け': return 1.5 + comboFuel(p);
+    case '牽制の拳': {
+      const dmg = FX.chain(p) >= 3 ? 3 : 1;
+      const t = FX.targetable(g, p);
+      if (!t.length) return comboFuel(p) ? 1 : -100;
+      return (t.some((u) => u.hp <= dmg) ? 2 + dmg : 0.5) + comboFuel(p);
+    }
+    case '掌打': {
+      const t = FX.targetable(g, p);
+      if (!t.length) return -100;
+      if (t.some((u) => u.hp <= 4 && threat(u) >= 5)) return 5;
+      return t.some((u) => u.hp <= 4) ? 2.5 : 1;
+    }
+    case '息を整える': return 1.5 + (p.leaderHp <= 18 ? 2 : 0);
+    case '型の写本': {
+      const n = p.grave.filter((x) => CARD_DB[x].cost <= 2).length;
+      return n >= 2 ? 3 : (n === 1 ? 1 : -100);
+    }
+    case '拳で届かせる': return fistScore(g, p);
+    case '旋風脚': {
+      const dmg = FX.chain(p) >= 2 ? 4 : 2;
+      const kills = enemyUnits.filter((u) => u.hp <= dmg).length;
+      return kills >= 2 ? 2 + kills * 2.5 : (kills ? 1 : -100);
+    }
+    // ミッドレンジヴェイン
+    case '気まぐれの一太刀': {
+      const dmg = FX.isBlack(p) ? 4 : 2;
+      const t = FX.targetable(g, p);
+      if (!t.length) return -100;
+      return t.some((u) => u.hp <= dmg) ? 3 + dmg * 0.5 : 1;
+    }
+    case '逢瀬の記憶':
+      return 3 + (FX.isWhite(p) && p.leaderHp <= 20 ? 1.5 : 0)
+        + (FX.isBlack(p) && FX.targetable(g, p).some((u) => u.hp <= 2) ? 2 : 0);
+    case '皆殺しの命令': {
+      if (FX.isBlack(p)) {
+        const kills = enemyUnits.filter((u) => u.hp <= 2).length;
+        return kills ? 1 + kills * 2.5 : -100;
+      }
+      return p.board.length >= 2 ? 1 + p.board.length : -100;
+    }
+    case '千年の眠り': {
+      // 裏返してから判定するので、今と逆の面の効果になる
+      if (FX.isBlack(p)) return p.leaderHp <= 17 ? 5 : -100;
+      const t = FX.targetable(g, p);
+      return t.length ? 3 + Math.min(4, threat(FX.best(t)) * 0.4) : -100;
+    }
+    // ミッドレンジガイル
+    case '踏み込み': {
+      if (p.leaderHp <= 2) return -100;
+      const t = FX.targetable(g, p);
+      if (!t.length) return -100;
+      return t.some((u) => u.hp <= 3) ? 3 : 1;
+    }
+    case '一騎打ち': {
+      const t = FX.targetable(g, p);
+      if (!t.length) return -100;
+      if (FX.unyielding(p)) return 3 + Math.min(4, threat(FX.best(t)) * 0.4);
+      return t.some((u) => u.hp <= 4) ? 3 : 0.5;
+    }
+    case '立てなくなるまで': {
+      if (!p.weapon) return -100;
+      const a = E.weaponAtk(p);
+      return foe.leaderHp <= a ? 100 : a * 0.6;
+    }
     default: return 0;
   }
 }
@@ -190,10 +374,18 @@ function faceBurnOptions(g, p) {
     else if (n === '謎の日記') dmg = 4;
     else if (n === '偽善のミゼリア') dmg = 1;
     else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
+    else if (n === '毒入りの霊薬') dmg = 4;
+    else if (n === '立てなくなるまで') dmg = E.weaponAtk(p);
+    else if (n === '兄ゲイン') dmg = 2;
+    else if (n === '六罪 ネフィス') dmg = 2;
+    else if (n === '薬草') dmg = p.poisonHerbs ? 1 : 0;
+    else if (n === '拳で届かせる') dmg = FX.chain(p) + 2;
     if (dmg <= 0) continue;
     const count = p.hand.filter((x) => x === n).length;
     for (let i = 0; i < count; i++) {
-      out.push({ name: n, cost: E.cardCost(p, n), dmg, isUnit: CARD_DB[n].kind === 'unit' });
+      // 奥義は1枚撃つごとに連携が1増える
+      const inc = n === '拳で届かせる' ? i : 0;
+      out.push({ name: n, cost: E.cardCost(p, n), dmg: dmg + inc, isUnit: CARD_DB[n].kind === 'unit' });
     }
   }
   return out.sort((a, b) => (b.dmg / Math.max(1, b.cost)) - (a.dmg / Math.max(1, a.cost)));
@@ -204,6 +396,7 @@ function planLethal(g, p) {
   if (foe.board.some((u) => u.kw.has('守護'))) return null;
   let dmg = 0;
   for (const u of p.board) if (E.canAttackLeader(u)) dmg += u.atk;
+  if (E.canLeaderAttack(p)) dmg += E.weaponAtk(p);
   let mp = p.mp;
   let slots = E.BOARD_MAX - p.board.length;
   const plan = [];
@@ -328,6 +521,11 @@ function chargePowerFirst(g, p) {
     if (p.leader === 'エルナ' && p.hand.length <= 4 && p.mp >= 3) return true;
     // 吸魔はMPを1回復するので、上げる1MPがそのまま戻る
     if (p.leader === 'ヴァルカス') return true;
+    if (p.leader === 'トバル' && p.mp >= 2) return true;
+    if (p.leader === 'シュリ' && p.mp >= 3
+      && ['拳で届かせる', '老師ロウ', '旋風脚'].some((n) => p.hand.includes(n))) return true;
+    if (p.leader === 'ガイル' && !p.weapon) return true;
+    if (p.leader === 'ヴェイン' && p.mp >= 3) return true;
   }
   const full = bestPlayScore(g, p, p.mp);
   const held = bestPlayScore(g, p, p.mp - 1);
@@ -354,11 +552,47 @@ function shouldUseSkill(g, p) {
     const unitHeal = p.board.reduce((a, u) => a + Math.min(3, u.maxhp - u.hp), 0);
     return p.leaderHp <= 22 || unitHeal >= 3;
   }
+  // 鍛錬の剣は3/1。今の武器のほうが強いなら上書きしない
+  if (p.leader === 'ガイル') return !p.weapon || E.weaponAtk(p) * p.weapon.dur < 3;
+  if (p.leader === 'シュリ') return p.hand.length <= 9;
   return true;
 }
 
 // ---- 攻撃 ----
+// 武器を装備したリーダーの攻撃。守護は先に退かし、倒せる脅威は斬り、それ以外は顔
+function leaderAttack(g, p, forceFace, tauntsOnly) {
+  if (g.over || !E.canLeaderAttack(p)) return;
+  const foe = g.opp(p);
+  const atk = E.weaponAtk(p);
+  // ガイルは不屈のためにHPを削ってよいので、反撃を受ける余裕を小さく見る
+  const margin = p.leader === 'ガイル' ? 5 : 8;
+  const safe = (t) => p.leaderHp - t.atk > margin;
+  const taunts = foe.board.filter((u) => u.kw.has('守護'));
+  if (taunts.length) {
+    const kill = taunts.filter((t) => atk >= t.hp && safe(t)).sort((a, b) => threat(b) - threat(a))[0];
+    if (kill) E.leaderAttackUnit(g, p, kill);
+    return;
+  }
+  if (tauntsOnly) return;
+  if (!forceFace) {
+    const style = K.knob(g, p, 'attackStyle');
+    const minThreat = style === 'aggro' ? 9 : 4;
+    const kills = foe.board.filter((t) => atk >= t.hp && safe(t) && threat(t) >= minThreat);
+    if (kills.length) {
+      E.leaderAttackUnit(g, p, FX.best(kills));
+      return;
+    }
+  }
+  E.leaderAttackLeader(g, p);
+}
+
 function attackPhase(g, p, forceFace) {
+  leaderAttack(g, p, forceFace, true);
+  unitAttacks(g, p, forceFace);
+  leaderAttack(g, p, forceFace, false);
+}
+
+function unitAttacks(g, p, forceFace) {
   for (let guard = 0; guard < 40 && !g.over; guard++) {
     const foe = g.opp(p);
     const taunts = foe.board.filter((u) => u.kw.has('守護'));
@@ -511,6 +745,11 @@ function takeTurn(g, p) {
       FX.usePowerSkill(g, p);
       if (g.over) return;
     }
+  }
+
+  if (p.power === 3 && EARLY_SKILL.has(p.leader) && shouldUseSkill(g, p)) {
+    FX.usePowerSkill(g, p);
+    if (g.over) return;
   }
 
   useHoly(g, p);

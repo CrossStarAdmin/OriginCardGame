@@ -24,6 +24,7 @@ while (!g.over && g.turn < E.TURN_CAP) {
   g.turn++;
   const p = g.players[tp];
   const before = p.hand.slice();
+  g.turnPlayer = tp;
   AI.takeTurn(g, p);
   const foe = g.players[1 - tp];
   console.log(`\n[手番${g.turn}] ${p.deckName} (MP${p.maxMp} PW${p.power})`);
@@ -32,6 +33,12 @@ while (!g.over && g.turn < E.TURN_CAP) {
   console.log(`  自盤面: ${boardStr(p)}`);
   console.log(`  敵盤面: ${boardStr(foe)}`);
   console.log(`  HP: ${p.deckName}=${p.leaderHp}  ${foe.deckName}=${foe.leaderHp}`);
+  const gear = (x) => [
+    x.weapon ? `武器${x.weapon.name}(${E.weaponAtk(x)}/${x.weapon.dur})` : '',
+    x.leader === 'ヴェイン' ? `面:${x.side}` : '',
+    x.preventNext ? '次のダメージ0' : '',
+  ].filter(Boolean).join(' ');
+  if (gear(p) || gear(foe)) console.log(`  装備: ${p.deckName}=${gear(p) || 'なし'}  ${foe.deckName}=${gear(foe) || 'なし'}`);
   tp = 1 - tp;
 }
 console.log(`\n決着: ${g.winner === 'draw' ? '引き分け' : g.players[g.winner].deckName + 'の勝ち'} (手番${g.turn})`);

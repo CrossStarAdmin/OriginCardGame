@@ -71,6 +71,14 @@ class Player {
     this.holyUsedThisTurn = false;
     this.frozenPending = [];
     this.fatigueLoss = false;
+    this.weapon = null;          // { name, atk, dur, kw, token }
+    this.leaderAttacked = false;
+    this.side = '白';            // 表裏（ヴェイン）
+    this.cardsThisTurn = 0;      // 連携：このターンに手札から使ったカードの枚数
+    this.chainBonus = 0;         // 連携：練気で足したぶん
+    this.discardedThisTurn = false;
+    this.poisonHerbs = false;    // 捨て値の毒：このターン中、薬草はダメージを与える
+    this.preventNext = false;    // 砦の古参兵：次に受けるダメージを0にする
   }
 }
 
@@ -128,6 +136,9 @@ function checkLeaders(g) {
 
 function damageLeader(g, target, amt, srcPlayer, srcName) {
   if (amt <= 0 || g.over) return;
+  // 受けるダメージの軽減と無効化（ドヴァルの遺作、砦の古参兵）
+  if (EFFECTS && EFFECTS.modifyLeaderDamage) amt = EFFECTS.modifyLeaderDamage(g, target, amt);
+  if (amt <= 0) return;
   target.leaderHp -= amt;
   if (srcPlayer && srcName) recFace(g, srcPlayer, srcName, amt);
   checkLeaders(g);
@@ -233,6 +244,7 @@ function attackLeader(g, p, u) {
 function attackUnit(g, p, u, target) {
   const foe = g.opp(p);
   u.attacked = true;
+  EFFECTS.onAttacked(g, p, target);
   const dmgOut = u.atk;
   const dmgIn = target.atk;
   const targetHp = target.hp;
@@ -249,6 +261,66 @@ function attackUnit(g, p, u, target) {
   cleanup(g);
 }
 
+// ---- 武器（ルール/03・04）----
+function weaponAtk(p) {
+  if (!p.weapon) return 0;
+  const mod = EFFECTS && EFFECTS.weaponAtkMod ? EFFECTS.weaponAtkMod(p) : 0;
+  return Math.max(0, p.weapon.atk + mod);
+}
+
+// 装備する。装備中の武器は破壊して墓地へ置く
+function equipWeapon(g, p, name) {
+  if (p.weapon) breakWeapon(g, p);
+  const d = CARD_DB[name];
+  p.weapon = { name, atk: d.atk, dur: d.dur, kw: new Set(d.kw || []), token: !!d.token };
+}
+
+function breakWeapon(g, p) {
+  const w = p.weapon;
+  if (!w) return;
+  p.weapon = null;
+  if (!w.token) p.grave.push(w.name);
+  EFFECTS.onWeaponBreak(g, p, w);
+}
+
+function wearWeapon(g, p) {
+  if (!p.weapon) return;
+  p.weapon.dur -= 1;
+  if (p.weapon.dur <= 0) breakWeapon(g, p);
+}
+
+function canLeaderAttack(p) {
+  return !!p.weapon && !p.leaderAttacked && weaponAtk(p) > 0;
+}
+
+function leaderAttackLeader(g, p) {
+  const w = p.weapon;
+  p.leaderAttacked = true;
+  damageLeader(g, g.opp(p), weaponAtk(p), p, w.name);
+  EFFECTS.onLeaderAttacked(g, p, w);
+  wearWeapon(g, p);
+  cleanup(g);
+}
+
+// 敵キャラクターを攻撃したリーダーは、そのキャラクターの攻撃力ぶんダメージを受ける
+function leaderAttackUnit(g, p, target) {
+  const foe = g.opp(p);
+  const w = p.weapon;
+  const atk = weaponAtk(p);
+  p.leaderAttacked = true;
+  EFFECTS.onAttacked(g, p, target);
+  const targetHp = target.hp;
+  damageUnit(g, target, atk, p, w.name);
+  damageLeader(g, p, target.atk, foe, target.name);
+  if (w.kw.has('貫通')) {
+    const through = atk - targetHp;
+    if (through > 0) damageLeader(g, foe, through, p, w.name);
+  }
+  EFFECTS.onLeaderAttacked(g, p, w);
+  wearWeapon(g, p);
+  cleanup(g);
+}
+
 // ---- ターン進行 ----
 function startPhase(g, p) {
   p.maxMp = Math.min(MAX_MP_CAP, p.maxMp + 1);
@@ -258,6 +330,11 @@ function startPhase(g, p) {
   p.spellsThisTurn = 0;
   p.afterburnTurn = false;
   p.spellDiscount = 0;
+  p.leaderAttacked = false;
+  p.cardsThisTurn = 0;
+  p.chainBonus = 0;
+  p.discardedThisTurn = false;
+  p.poisonHerbs = false;
   for (const u of p.frozenPending) u.frozen = false;
   p.frozenPending = [];
   for (const u of p.board) { u.sick = false; u.attacked = false; }
@@ -293,9 +370,14 @@ function payAndPlay(g, p, handIdx, target) {
   if (d.kind === 'spell') {
     p.spellDiscount = 0;
     p.spellsThisTurn++;
-    p.grave.push(name);
-    p.spellsInGrave++;
+    if (!d.token) {
+      p.grave.push(name);
+      p.spellsInGrave++;
+    }
     EFFECTS.castSpell(g, p, name, target);
+    cleanup(g);
+  } else if (d.kind === 'weapon') {
+    equipWeapon(g, p, name);
     cleanup(g);
   } else {
     const u = new Unit(name, p.idx);
@@ -304,6 +386,8 @@ function payAndPlay(g, p, handIdx, target) {
     EFFECTS.onSummon(g, p, u);
     cleanup(g);
   }
+  // 連携は「このカードより前に使った枚数」なので、効果を解決してから数える
+  p.cardsThisTurn++;
   return true;
 }
 
@@ -313,6 +397,7 @@ module.exports = {
   setEffects, draw, endGame, checkLeaders, damageLeader, damageUnit, dealTo,
   healLeader, healUnit, cleanup, boardFull, putUnit, gainMaxMp, hasTaunt, chargePower,
   canAttackUnit, canAttackLeader, attackLeader, attackUnit,
+  weaponAtk, equipWeapon, breakWeapon, canLeaderAttack, leaderAttackLeader, leaderAttackUnit,
   startPhase, endPhase, cardCost, payAndPlay,
   recPlay, recFace, recKill, recHeal, stat,
 };

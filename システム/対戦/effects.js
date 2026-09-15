@@ -18,6 +18,13 @@ function afterburnForSpell(p) { return p.afterburnAlways || p.afterburnTurn || p
 function released(p) { return p.maxMp >= 8; }
 function fullyReleased(p) { return p.maxMp >= 10; }
 
+// ---- 不屈（ガイル）／連携（シュリ）／表裏（ヴェイン）----
+function unyielding(p) { return p.leaderHp <= 15; }
+function chain(p) { return p.cardsThisTurn + p.chainBonus; }
+// 黒の効果はヴェインだけが使える。ほかのリーダーは常に白として扱う
+function isBlack(p) { return p.leader === 'ヴェイン' && p.side === '黒'; }
+function isWhite(p) { return !isBlack(p); }
+
 // ---- 手札にある間のコスト修正（ギズモ：手札で働く）----
 function handCostMod(p, name) {
   if (name === 'ギズモ' && afterburn(p)) return 1;
@@ -129,11 +136,131 @@ function graveReturnPick(p, resolving) {
   return pool.map((n, i) => ({ n, i, v: CARD_DB[n].cost })).sort((a, b) => b.v - a.v);
 }
 
+// 倒せる相手を優先して1体選ぶ
+function pickKill(list, dmg) {
+  const killable = list.filter((u) => u.hp <= dmg);
+  return best(killable.length ? killable : list);
+}
+
+// ---- 表裏（ヴェイン）----
+// 「白：」「黒：」の常在効果を今の状態に合わせる
+function refreshSide(p) {
+  const black = isBlack(p);
+  for (const u of p.board) {
+    if (u.name === 'さまよう魂') {
+      if (black) u.kw.delete('守護'); else u.kw.add('守護');
+      if (black && !u._sideAtk) { u.atk += 1; u._sideAtk = true; }
+      if (!black && u._sideAtk) { u.atk = Math.max(0, u.atk - 1); u._sideAtk = false; }
+    } else if (u.name === '魔軍一の剣') {
+      if (black) { u.kw.delete('守護'); u.kw.add('必殺'); } else { u.kw.add('守護'); u.kw.delete('必殺'); }
+    } else if (u.name === '黒いヴェイン') {
+      if (black) u.kw.add('突進'); else u.kw.delete('突進');
+    }
+  }
+}
+
+function flip(g, p) {
+  if (p.leader !== 'ヴェイン') return;
+  p.side = p.side === '白' ? '黒' : '白';
+  refreshSide(p);
+  for (const u of p.board.slice()) {
+    if (u.name === '罪の影') { u.atk += 1; u.maxhp += 1; u.hp += 1; }
+  }
+}
+
+// どちらの面が今の盤面と手札に合っているか（AIの判断）
+function sideValue(g, p, black) {
+  const foe = g.opp(p);
+  let v = 0;
+  for (const u of p.board) {
+    if (u.name === 'さまよう魂') v += black ? 1 : 1.5;
+    else if (u.name === '魔軍一の剣') v += black ? 2 : 1.5;
+    else if (u.name === '黒いヴェイン') v += black ? 2 : 0;
+  }
+  if (p.weapon && p.weapon.name === '呪剣ノア') v += black ? 2 : (p.leaderHp < 25 ? 1.5 : 0);
+  if (black) {
+    if (p.hand.includes('気まぐれの一太刀')) v += 1;
+    if (p.hand.includes('皆殺しの命令') && foe.board.length >= 2) v += 1.5;
+    if (p.hand.includes('黒いヴェイン')) v += 1;
+    if (foe.board.length) v += 1;
+  } else {
+    if (p.leaderHp <= 15) v += 2;
+    if (p.hand.includes('皆殺しの命令') && p.board.length >= 2) v += 1;
+  }
+  return v;
+}
+function wantBlack(g, p) { return sideValue(g, p, true) > sideValue(g, p, false); }
+
+// ---- 捨てる・選別（トバル）----
+// 捨てる札の優先度。選別で得をする札、薬草、今は使えない重い札の順
+function discardPriority(g, p, name) {
+  if (name === '早馬の隊商') return E.boardFull(p) ? 1 : 10;
+  if (name === '毒入りの霊薬') return 9;
+  if (name === '薬草') return p.hand.includes('捨て値の毒') ? 4 : 7;
+  return (CARD_DB[name].cost - p.maxMp) * 0.5 - 2;
+}
+
+// 捨てたカードは墓地へ置く。薬草はデッキの外のカードなので消える
+function discardNames(g, p, names) {
+  if (!names.length) return;
+  p.discardedThisTurn = true;
+  for (const name of names) if (!CARD_DB[name].token) p.grave.push(name);
+  for (const name of names) {
+    if (g.over) return;
+    onDiscard(g, p, name);
+  }
+}
+
+function discardOne(g, p) {
+  if (!p.hand.length) return;
+  let idx = 0, bestS = -Infinity;
+  for (let i = 0; i < p.hand.length; i++) {
+    const s = discardPriority(g, p, p.hand[i]);
+    if (s > bestS) { bestS = s; idx = i; }
+  }
+  discardNames(g, p, p.hand.splice(idx, 1));
+}
+
+// 選別：手札から捨てられたとき
+function onDiscard(g, p, name) {
+  if (name === '早馬の隊商') {
+    if (E.boardFull(p)) return;
+    const gi = p.grave.lastIndexOf(name);
+    if (gi >= 0) p.grave.splice(gi, 1);
+    E.recPlay(g, p, name);
+    E.putUnit(g, p, name);
+  } else if (name === '毒入りの霊薬') {
+    E.recPlay(g, p, name);
+    E.damageLeader(g, g.opp(p), 2, p, name);
+    if (!g.over) E.draw(g, p, 1);
+  }
+}
+
+function addHerbs(p, n) {
+  for (let i = 0; i < n; i++) p.hand.push('薬草');
+}
+
+// 結晶の粉：倒せる敵、並べる味方がいなければ一番強い敵、それ以外は一番強い味方
+function crystalTarget(g, p) {
+  const foes = targetable(g, p);
+  const killable = foes.filter((u) => u.hp <= 2);
+  if (killable.length) return best(killable);
+  if (foes.length && !p.board.length) return best(foes);
+  if (p.board.length) return p.board.slice().sort((a, b) => b.atk - a.atk)[0];
+  return foes.length ? best(foes) : null;
+}
+
+// 型の写本で墓地から拾う優先度
+const KATA_PRIORITY = {
+  '掌打': 5, '朝駆け': 4, '弟弟子カイ': 4, '牽制の拳': 3, 'ガンザの門下生': 3, '息を整える': 2, '組み手の兄弟子': 2,
+};
+
 // ---- 場に出たとき（手札・効果どちらでも発動）----
 function onEnter(g, p, u) {
   if (u.name === 'ポルカ') {
     if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
   }
+  refreshSide(p);
 }
 
 // ---- 召喚時（手札から使って場に出したときだけ）----
@@ -329,6 +456,129 @@ function onSummon(g, p, u) {
       }
       break;
     }
+
+    // ---- アグロトバル ----
+    case '市場の荷運び':
+      discardOne(g, p);
+      break;
+    case '隊商の用心棒':
+      discardOne(g, p);
+      u.kw.add('速攻');
+      break;
+    case '護衛バルド':
+      if (p.discardedThisTurn) { u.atk += 2; u.maxhp += 2; u.hp += 2; u.kw.add('突進'); }
+      break;
+    case '運び屋ゴルダ':
+      addHerbs(p, 3);
+      break;
+    case '隊商の頭':
+      for (const x of p.board) x.atk += 1;
+      break;
+    case '強欲のネフィス':
+      discardOne(g, p);
+      if (!g.over) discardOne(g, foe);
+      break;
+    case '早馬の隊商': {
+      u.atk += 1; u.maxhp += 1; u.hp += 1;
+      u.kw.add('速攻');
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, 4), 4, p, u.name);
+      break;
+    }
+    case '弟子ザイル': {
+      // 手札をすべて捨てる。選別で引いたカードは捨てない
+      const names = p.hand.splice(0);
+      discardNames(g, p, names);
+      u.atk += names.length; u.maxhp += names.length; u.hp += names.length;
+      u.kw.add('速攻');
+      break;
+    }
+
+    // ---- コンボシュリ ----
+    case 'ガンザの門下生': {
+      const c = chain(p);
+      if (c >= 2) { u.maxhp += 2; u.hp += 2; }
+      if (c >= 4) { u.atk += 1; u.maxhp += 1; u.hp += 1; }
+      break;
+    }
+    case '弟弟子カイ':
+      E.draw(g, p, 1);
+      break;
+    case '組み手の兄弟子':
+      if (chain(p) >= 1) u.kw.add('守護');
+      break;
+    case '岩窟の見張り': {
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, 5), 5, p, u.name);
+      break;
+    }
+    case '老師ロウ':
+      // 最大MPを超えては回復しない
+      if (chain(p) >= 3) p.mp = Math.max(p.mp, Math.min(p.maxMp, p.mp + 4));
+      break;
+    case '妹リン':
+      E.damageLeader(g, p, 3, null, null);
+      break;
+
+    // ---- ミッドレンジヴェイン ----
+    case '魔軍の小鬼':
+    case '魔軍の剣兵':
+    case '魔軍一の剣':
+      E.chargePower(g, p, 1);
+      break;
+    case '魔軍の伝令':
+      E.chargePower(g, p, 1);
+      if (wantBlack(g, p) !== isBlack(p)) flip(g, p);
+      break;
+    case '六罪 グラーク': {
+      const cand = targetable(g, p);
+      if (cand.length) {
+        const t = best(cand);
+        t.hp = 0; t._killer = u.name; t._killerOwner = p.idx;
+      }
+      break;
+    }
+    case '六罪 ガドル':
+      for (const x of p.board) { x.atk += 2; x.maxhp += 2; x.hp += 2; }
+      break;
+    case '六罪 ネフィス': {
+      // 回復量は実際に減ったHPの合計。残りHPを超えたぶんは数えない
+      let total = 0;
+      for (const x of foe.board.slice()) {
+        total += Math.max(0, Math.min(2, x.hp));
+        E.damageUnit(g, x, 2, p, u.name);
+      }
+      const before = foe.leaderHp;
+      E.damageLeader(g, foe, 2, p, u.name);
+      total += Math.max(0, before - Math.max(0, foe.leaderHp));
+      if (!g.over) E.healLeader(g, p, total, p, u.name);
+      break;
+    }
+
+    // ---- ミッドレンジガイル ----
+    case 'ロダンの傭兵':
+      E.damageLeader(g, p, 1, null, null);
+      break;
+    case '番犬ゴロ':
+      E.damageLeader(g, p, 2, null, null);
+      break;
+    case '鍛冶師ドヴァル':
+      if (p.weapon) p.weapon.atk += unyielding(p) ? 3 : 2;
+      break;
+    case '砦の古参兵':
+      if (unyielding(p)) p.preventNext = true;
+      break;
+    case '剣術学校の師範':
+      E.healLeader(g, p, 5, p, u.name);
+      break;
+    case '裏切のグラーク':
+      E.damageLeader(g, p, 3, null, null);
+      for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      break;
+    case '兄ゲイン':
+      for (const x of foe.board.slice()) E.damageUnit(g, x, 4, p, u.name);
+      E.damageLeader(g, foe, 2, p, u.name);
+      break;
     default:
       break;
   }
@@ -360,6 +610,27 @@ function onDeath(g, p, u) {
     E.draw(g, p, 1);
   } else if (u.name === '霊脈喰らい') {
     E.gainMaxMp(p, 1);
+  } else if (u.name === '市場の売り子' || u.name === '弟子ザイル') {
+    E.draw(g, p, 1);
+  } else if (u.name === '黒いヴェイン') {
+    if (isBlack(p)) {
+      const gi = p.grave.lastIndexOf(u.name);
+      if (gi >= 0) p.grave.splice(gi, 1);
+      p.hand.push(u.name);
+    }
+  } else if (u.name === '兄ゲイン') {
+    // デッキから武器を1枚選んで装備してもよい。今の武器より強いときだけ装備する
+    const idx = searchDeck(p, (n) => CARD_DB[n].kind === 'weapon', (n) => CARD_DB[n].atk * CARD_DB[n].dur);
+    if (idx >= 0) {
+      const d = CARD_DB[p.deck[idx]];
+      const current = p.weapon ? E.weaponAtk(p) * p.weapon.dur : 0;
+      if (d.atk * d.dur > current) {
+        const name = p.deck.splice(idx, 1)[0];
+        E.recPlay(g, p, name);
+        E.equipWeapon(g, p, name);
+      }
+      p.deck = E.shuffle(p.deck, g.rng);
+    }
   }
 }
 
@@ -378,6 +649,10 @@ function onTurnEnd(g, p) {
       if (p.board.some((x) => x.name === 'ポルカ')) {
         u.maxhp += 1; u.hp += 1; u.kw.add('守護');
       }
+    } else if (u.name === '空籠の行商人') {
+      if (p.discardedThisTurn) u.atk += 2;
+    } else if (u.name === '妹リン') {
+      u.hp = Math.min(u.hp, 0);
     }
   }
 }
@@ -516,6 +791,139 @@ function castSpell(g, p, name, target) {
     case '王の一瞥':
       for (const x of foe.board.slice()) E.damageUnit(g, x, 6, p, name);
       break;
+
+    // ---- アグロトバル ----
+    case '薬草の仕入れ':
+      addHerbs(p, 2);
+      break;
+    case '結晶の粉': {
+      // 味方なら+2/+2、敵なら-2/-2。最大HPも下がり、HPが0以下なら破壊される
+      const t = crystalTarget(g, p);
+      if (t && t.owner === p.idx) { t.atk += 2; t.maxhp += 2; t.hp += 2; }
+      else if (t) {
+        t.atk = Math.max(0, t.atk - 2); t.maxhp -= 2; t.hp -= 2;
+        t._killer = name; t._killerOwner = p.idx;
+      }
+      E.cleanup(g);
+      break;
+    }
+    case '捨て値の毒':
+      p.poisonHerbs = true;
+      break;
+    case '薬草':
+      if (p.poisonHerbs) {
+        const t = target && target.type === 'leader' && target.p !== p ? target : chooseDamageTarget(g, p, 1);
+        E.dealTo(g, t, 1, p, name);
+      } else {
+        const t = chooseHealTarget(g, p);
+        if (t.type === 'unit') E.healUnit(g, t.u, 1, p, name);
+        else E.healLeader(g, p, 1, p, name);
+      }
+      break;
+    case '毒入りの霊薬':
+      E.damageLeader(g, foe, 4, p, name);
+      break;
+
+    // ---- コンボシュリ ----
+    case '朝駆け':
+      E.draw(g, p, 1);
+      break;
+    case '牽制の拳': {
+      const dmg = chain(p) >= 3 ? 3 : 1;
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, dmg), dmg, p, name);
+      break;
+    }
+    case '掌打': {
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, 4), 4, p, name);
+      break;
+    }
+    case '息を整える':
+      E.healLeader(g, p, 3, p, name);
+      E.draw(g, p, 1);
+      break;
+    case '型の写本':
+      for (let i = 0; i < 2; i++) {
+        let bi = -1, bs = -Infinity;
+        for (let j = 0; j < p.grave.length; j++) {
+          const n = p.grave[j];
+          if (CARD_DB[n].cost > 2) continue;
+          const s = KATA_PRIORITY[n] || 1;
+          if (s > bs) { bs = s; bi = j; }
+        }
+        if (bi < 0) break;
+        p.hand.push(p.grave.splice(bi, 1)[0]);
+      }
+      break;
+    case '拳で届かせる': {
+      const dmg = chain(p) + 2;
+      E.dealTo(g, target || chooseDamageTarget(g, p, dmg), dmg, p, name);
+      break;
+    }
+    case '旋風脚': {
+      const dmg = chain(p) >= 2 ? 4 : 2;
+      for (const x of foe.board.slice()) E.damageUnit(g, x, dmg, p, name);
+      break;
+    }
+
+    // ---- ミッドレンジヴェイン ----
+    case '気まぐれの一太刀': {
+      const dmg = isBlack(p) ? 4 : 2;
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, dmg), dmg, p, name);
+      break;
+    }
+    case '逢瀬の記憶': {
+      E.draw(g, p, 2);
+      if (g.over) break;
+      if (isWhite(p)) E.healLeader(g, p, 3, p, name);
+      else {
+        const cand = targetable(g, p);
+        if (cand.length) E.damageUnit(g, pickKill(cand, 2), 2, p, name);
+      }
+      break;
+    }
+    case '皆殺しの命令':
+      if (isBlack(p)) for (const x of foe.board.slice()) E.damageUnit(g, x, 2, p, name);
+      else for (const x of p.board) { x.maxhp += 2; x.hp += 2; }
+      break;
+    case '千年の眠り': {
+      flip(g, p);
+      if (isWhite(p)) {
+        E.healLeader(g, p, 6, p, name);
+        E.draw(g, p, 1);
+      } else {
+        const cand = targetable(g, p);
+        if (cand.length) {
+          const t = best(cand);
+          t.hp = 0; t._killer = name; t._killerOwner = p.idx;
+        }
+      }
+      break;
+    }
+
+    // ---- ミッドレンジガイル ----
+    case '踏み込み': {
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, 3), 3, p, name);
+      E.damageLeader(g, p, 1, null, null);
+      break;
+    }
+    case '一騎打ち': {
+      const cand = targetable(g, p);
+      if (!cand.length) break;
+      if (unyielding(p)) {
+        const t = best(cand);
+        t.hp = 0; t._killer = name; t._killerOwner = p.idx;
+      } else {
+        E.damageUnit(g, pickKill(cand, 4), 4, p, name);
+      }
+      break;
+    }
+    case '立てなくなるまで':
+      if (p.weapon) E.damageLeader(g, foe, E.weaponAtk(p), p, name);
+      break;
     default: break;
   }
 }
@@ -549,14 +957,77 @@ function usePowerSkill(g, p) {
       const even = seen.filter((n) => CARD_DB[n].cost % 2 === 0);
       p.deck = odd.concat(p.deck, even);
     }
+  } else if (p.leader === 'トバル') {
+    addHerbs(p, 1);
+  } else if (p.leader === 'シュリ') {
+    E.draw(g, p, 1);
+    p.chainBonus += 1;
+  } else if (p.leader === 'ガイル') {
+    E.equipWeapon(g, p, '鍛錬の剣');
+  } else if (p.leader === 'ヴェイン') {
+    // 揺れる魂：裏返してよい。白なら味方1体3回復とリーダー1回復、黒なら敵キャラクター1体に3と敵リーダーに1
+    const foe = g.opp(p);
+    const blackPay = targetable(g, p).some((u) => u.hp <= 3) ? 3 : (foe.board.length ? 1.5 : 1);
+    const hurtUnit = p.board.reduce((a, u) => Math.max(a, Math.min(3, u.maxhp - u.hp)), 0);
+    const whitePay = Math.max(hurtUnit, Math.min(3, 25 - p.leaderHp)) * 0.7 + (p.leaderHp < 25 ? 0.5 : 0);
+    const toBlack = sideValue(g, p, true) + blackPay > sideValue(g, p, false) + whitePay;
+    if (toBlack !== isBlack(p)) flip(g, p);
+    if (isBlack(p)) {
+      const cand = targetable(g, p);
+      if (cand.length) E.damageUnit(g, pickKill(cand, 3), 3, p, 'パワースキル');
+      E.damageLeader(g, foe, 1, p, 'パワースキル');
+    } else {
+      const t = chooseHealTarget(g, p);
+      if (t.type === 'unit') E.healUnit(g, t.u, 3, p, 'パワースキル');
+      else E.healLeader(g, p, 3, p, 'パワースキル');
+      E.healLeader(g, p, 1, p, 'パワースキル');
+    }
   }
   p.power = 0;
   E.cleanup(g);
 }
 
+// ---- 武器が壊れたとき ----
+function onWeaponBreak(g, p, w) {
+  if (w.name === '研ぎ直した長剣') E.draw(g, p, 1);
+}
+
+// ---- 武器で攻撃したとき（戦闘ダメージのあと）----
+function onLeaderAttacked(g, p, w) {
+  if (w.name === '呪剣ノア' && isWhite(p)) E.healLeader(g, p, 2, p, w.name);
+}
+
+// ---- キャラクターが攻撃されたとき（戦闘ダメージの前）----
+function onAttacked(g, attackerOwner, target) {
+  if (target.name === '渇望のガドル') E.damageLeader(g, attackerOwner, 1, g.opp(attackerOwner), target.name);
+}
+
+// ---- 武器の攻撃力の常在修正 ----
+function weaponAtkMod(p) {
+  const w = p.weapon;
+  if (w.name === '鉄の大剣' && unyielding(p)) return 2;
+  if (w.name === '呪剣ノア' && isBlack(p)) return 2;
+  return 0;
+}
+
+// ---- リーダーが受けるダメージの修正 ----
+// ドヴァルの遺作：自分のターン中は-3（0未満にならない）。砦の古参兵：実際に1回防ぐまで残る
+function modifyLeaderDamage(g, target, amt) {
+  if (target.weapon && target.weapon.name === 'ドヴァルの遺作' && g.turnPlayer === target.idx) {
+    amt = Math.max(0, amt - 3);
+  }
+  if (amt > 0 && target.preventNext) {
+    target.preventNext = false;
+    amt = 0;
+  }
+  return amt;
+}
+
 module.exports = {
   onEnter, onSummon, onDeath, onTurnStart, onTurnEnd, onPowerLink, onLeaderHealed,
+  onWeaponBreak, onLeaderAttacked, onAttacked, weaponAtkMod, modifyLeaderDamage,
   castSpell, usePowerSkill, chooseDamageTarget, threat, best, targetable,
   lookOdd, lookEven, topCost, afterburn, afterburnForSpell, handCostMod,
   released, fullyReleased, chooseSacrifice, graveReturnPick, burnDownTargets,
+  unyielding, chain, isBlack, isWhite, wantBlack, discardPriority,
 };
