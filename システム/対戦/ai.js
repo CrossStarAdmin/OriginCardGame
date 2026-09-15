@@ -138,7 +138,7 @@ function cardScoreBase(g, p, name) {
     // コントロールアルベル
     case '小さな手当て': return 2 + (p.leaderHp <= 22 ? 2 : 0) + (p.board.some((u) => u.hp < u.maxhp) ? 1 : 0);
     case '禁術・蘇生': return reviveBest(p, 2) > 0 ? 2 + reviveBest(p, 2) * 0.3 : -100;
-    case '記録を繰る': {
+    case '謎の日記': {
       if (foe.leaderHp <= 4) return 100;
       const kill = enemyUnits.some((u) => u.hp <= 4);
       return 3 + (kill ? 3 : 0) + (p.hand.length <= 5 ? 1 : 0);
@@ -187,7 +187,7 @@ function faceBurnOptions(g, p) {
     else if (n === '焼き払い') dmg = 4;
     else if (n === '霊脈喰らい') dmg = 3;
     else if (n === '先を読む力') dmg = 1;
-    else if (n === '記録を繰る') dmg = 4;
+    else if (n === '謎の日記') dmg = 4;
     else if (n === '偽善のミゼリア') dmg = 1;
     else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
     if (dmg <= 0) continue;

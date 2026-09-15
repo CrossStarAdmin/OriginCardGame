@@ -489,7 +489,7 @@ function castSpell(g, p, name, target) {
     case '禁術・蘇生':
       reviveFromGrave(g, p, 2);
       break;
-    case '記録を繰る':
+    case '謎の日記':
       E.dealTo(g, target || chooseDamageTarget(g, p, 4), 4, p, name);
       E.cleanup(g);
       E.draw(g, p, 1);

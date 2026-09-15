@@ -136,7 +136,7 @@ case '焔弾':
   E.dealTo(g, target || chooseDamageTarget(g, p, 3), 3, p, name);
   break;
 
-case '記録を繰る':
+case '謎の日記':
   E.draw(g, p, 2);
   break;
 ```
