@@ -10,3 +10,6 @@
 
 # 熟練環境の学習結果。何度でも作り直せて、大きくなる
 .claude/skills/simulating-mastered-meta/out/
+
+# git worktree の作業ディレクトリ
+.claude/worktrees/
