@@ -1,7 +1,7 @@
 // ゲームエンジン：状態、ダメージ、戦闘、ターン進行、パワー
-const { CARD_DB, DECKS, buildDeck } = require('./cards.js');
+const { CARD_DB, DECKS, LEADERS, buildDeck } = require('./cards.js');
 
-const BOARD_MAX = 6;
+const BOARD_MAX = 5;      // ルール/03_カードとキャラクター（場は5体まで）
 const LEADER_HP = 25;
 const MAX_MP_CAP = 10;
 const TURN_CAP = 100; // 両者合計ターン数の上限（引き分け判定用）
@@ -29,11 +29,20 @@ class Unit {
     this.tag = d.tag || null;
     this.owner = ownerIdx;
     this.sick = true;
-    this.attacked = false;
+    this.attacked = false; // 攻撃または強化で行動済みになったら true
     this.frozen = false;
     this.token = false;
   }
   get value() { return this.atk + this.hp; }
+}
+
+// ステージ：場に永続的に残るカード（ルール/03_カードとキャラクター）。5体制限に数えない
+class Stage {
+  constructor(name, ownerIdx) {
+    this.name = name;
+    this.owner = ownerIdx;
+    this.resting = false;
+  }
 }
 
 function shuffle(arr, rng) {
@@ -54,25 +63,28 @@ class Player {
     this.knobs = null; // AIの打ち方のつまみ（knobs.js）。null なら既定値
     this.leader = def.leader;
     this.leaderHp = LEADER_HP;
+    const ld = LEADERS[def.leader] || { atk: 0, def: 0 };
+    this.leaderAtk = ld.atk;   // リーダーの攻撃力（強化・カード効果で変動）
+    this.leaderDef = ld.def;   // リーダーの防御力
+    this.strengthenCount = 0;  // キャラをレストにしてリーダーを強化した回数（パワースキルの段階に使う）
     this.maxMp = 0;
     this.mp = 0;
     this.power = 0;
     this.deck = shuffle(buildDeck(deckName), rng);
     this.hand = [];
     this.board = [];
+    this.stages = [];
     this.grave = [];
     this.spellsInGrave = 0;
     this.spellDiscount = 0;
     this.spellsThisTurn = 0;
     this.afterburnAlways = false;
-    this.afterburnTurn = false;
     this.powerChargedThisTurn = false;
     this.holy = 0;
     this.holyUsedThisTurn = false;
     this.frozenPending = [];
     this.fatigueLoss = false;
-    this.weapon = null;          // { name, atk, dur, kw, token }
-    this.leaderAttacked = false;
+    this.weapon = null;          // { name, atk, token }
     this.side = '白';            // 表裏（ヴェイン）
     this.cardsThisTurn = 0;      // 連携：このターンに手札から使ったカードの枚数
     this.chainBonus = 0;         // 連携：練気で足したぶん
@@ -136,7 +148,7 @@ function checkLeaders(g) {
 
 function damageLeader(g, target, amt, srcPlayer, srcName) {
   if (amt <= 0 || g.over) return;
-  // 受けるダメージの軽減と無効化（ドヴァルの遺作、砦の古参兵）
+  // 受けるダメージの軽減と無効化（兄ゲイン、砦の古参兵）
   if (EFFECTS && EFFECTS.modifyLeaderDamage) amt = EFFECTS.modifyLeaderDamage(g, target, amt);
   if (amt <= 0) return;
   target.leaderHp -= amt;
@@ -227,18 +239,41 @@ function chargePower(g, p, amt) {
   return true;
 }
 
-// ---- 戦闘 ----
+// ---- リーダーの攻撃力／防御力 ----
+function boostLeader(g, p, datk, ddef) {
+  p.leaderAtk = Math.max(0, p.leaderAtk + (datk || 0));
+  p.leaderDef = Math.max(0, p.leaderDef + (ddef || 0));
+}
+
+// パワースキルの段階：2回強化で第2段階、5回で第3段階（ルール/05_パワー）
+function powerSkillStage(p) {
+  if (p.strengthenCount >= 5) return 3;
+  if (p.strengthenCount >= 2) return 2;
+  return 1;
+}
+
+// ---- 戦闘（キャラクター同士）----
 function canAttackUnit(u) {
   return !u.attacked && !u.frozen && u.atk > 0 && (!u.sick || u.kw.has('突進') || u.kw.has('速攻'));
 }
-function canAttackLeader(u) {
-  return !u.attacked && !u.frozen && u.atk > 0 && (!u.sick || u.kw.has('速攻'));
+
+// キャラクターをレストにしてリーダーを強化できるか（召喚酔い中・行動済みは不可）
+function canStrengthen(u) {
+  return !u.attacked && !u.frozen && !u.sick;
 }
 
-function attackLeader(g, p, u) {
-  const foe = g.opp(p);
+function strengthen(g, p, u, statName) {
+  if (!canStrengthen(u)) return false;
   u.attacked = true;
-  damageLeader(g, foe, u.atk, p, u.name);
+  strengthenDirect(g, p, statName);
+  return true;
+}
+
+// カード効果が「強化を1回行う」と明示するトリガー用。キャラクターの行動状態は問わない
+function strengthenDirect(g, p, statName) {
+  if (statName === 'def') p.leaderDef = Math.max(0, p.leaderDef + 1);
+  else p.leaderAtk = Math.max(0, p.leaderAtk + 1);
+  p.strengthenCount++;
 }
 
 function attackUnit(g, p, u, target) {
@@ -247,21 +282,15 @@ function attackUnit(g, p, u, target) {
   EFFECTS.onAttacked(g, p, target);
   const dmgOut = u.atk;
   const dmgIn = target.atk;
-  const targetHp = target.hp;
   damageUnit(g, target, dmgOut, p, u.name);
   damageUnit(g, u, dmgIn, foe, target.name);
   // 必殺：戦闘でダメージを与えたキャラクターを破壊する。防御側も含む
   if (u.kw.has('必殺') && dmgOut > 0) target.hp = Math.min(target.hp, 0);
   if (target.kw.has('必殺') && dmgIn > 0) u.hp = Math.min(u.hp, 0);
-  // 貫通：相手の残りHPを超えたぶんをリーダーに与える（ルール/06_キーワード能力）
-  if (u.kw.has('貫通')) {
-    const through = dmgOut - targetHp;
-    if (through > 0) damageLeader(g, foe, through, p, u.name);
-  }
   cleanup(g);
 }
 
-// ---- 武器（ルール/03・04）----
+// ---- 武器（ルール/03・04。耐久力は廃止。装備者の攻撃力に+する値）----
 function weaponAtk(p) {
   if (!p.weapon) return 0;
   const mod = EFFECTS && EFFECTS.weaponAtkMod ? EFFECTS.weaponAtkMod(p) : 0;
@@ -272,7 +301,9 @@ function weaponAtk(p) {
 function equipWeapon(g, p, name) {
   if (p.weapon) breakWeapon(g, p);
   const d = CARD_DB[name];
-  p.weapon = { name, atk: d.atk, dur: d.dur, kw: new Set(d.kw || []), token: !!d.token };
+  p.weapon = { name, atk: d.atk, token: !!d.token };
+  if (EFFECTS && EFFECTS.onWeaponEquip) EFFECTS.onWeaponEquip(g, p, name);
+  cleanup(g);
 }
 
 function breakWeapon(g, p) {
@@ -280,45 +311,26 @@ function breakWeapon(g, p) {
   if (!w) return;
   p.weapon = null;
   if (!w.token) p.grave.push(w.name);
-  EFFECTS.onWeaponBreak(g, p, w);
+  if (EFFECTS && EFFECTS.onWeaponBreak) EFFECTS.onWeaponBreak(g, p, w);
 }
 
-function wearWeapon(g, p) {
-  if (!p.weapon) return;
-  p.weapon.dur -= 1;
-  if (p.weapon.dur <= 0) breakWeapon(g, p);
+// リーダーの合計攻撃力／防御力（武器を含む。0未満にならない）
+function leaderAtkTotal(p) { return Math.max(0, p.leaderAtk + weaponAtk(p)); }
+function leaderDefTotal(p) { return Math.max(0, p.leaderDef); }
+
+// ---- ステージ（ルール/03_カードとキャラクター）----
+function putStage(p, name) {
+  const st = new Stage(name, p.idx);
+  p.stages.push(st);
+  return st;
 }
 
-function canLeaderAttack(p) {
-  return !!p.weapon && !p.leaderAttacked && weaponAtk(p) > 0;
-}
-
-function leaderAttackLeader(g, p) {
-  const w = p.weapon;
-  p.leaderAttacked = true;
-  damageLeader(g, g.opp(p), weaponAtk(p), p, w.name);
-  EFFECTS.onLeaderAttacked(g, p, w);
-  wearWeapon(g, p);
+function activateStage(g, p, st) {
+  if (st.resting) return false;
+  st.resting = true;
+  if (EFFECTS && EFFECTS.onStageActivate) EFFECTS.onStageActivate(g, p, st);
   cleanup(g);
-}
-
-// 敵キャラクターを攻撃したリーダーは、そのキャラクターの攻撃力ぶんダメージを受ける
-function leaderAttackUnit(g, p, target) {
-  const foe = g.opp(p);
-  const w = p.weapon;
-  const atk = weaponAtk(p);
-  p.leaderAttacked = true;
-  EFFECTS.onAttacked(g, p, target);
-  const targetHp = target.hp;
-  damageUnit(g, target, atk, p, w.name);
-  damageLeader(g, p, target.atk, foe, target.name);
-  if (w.kw.has('貫通')) {
-    const through = atk - targetHp;
-    if (through > 0) damageLeader(g, foe, through, p, w.name);
-  }
-  EFFECTS.onLeaderAttacked(g, p, w);
-  wearWeapon(g, p);
-  cleanup(g);
+  return true;
 }
 
 // ---- ターン進行 ----
@@ -328,9 +340,7 @@ function startPhase(g, p) {
   p.powerChargedThisTurn = false;
   p.holyUsedThisTurn = false;
   p.spellsThisTurn = 0;
-  p.afterburnTurn = false;
   p.spellDiscount = 0;
-  p.leaderAttacked = false;
   p.cardsThisTurn = 0;
   p.chainBonus = 0;
   p.discardedThisTurn = false;
@@ -338,14 +348,28 @@ function startPhase(g, p) {
   for (const u of p.frozenPending) u.frozen = false;
   p.frozenPending = [];
   for (const u of p.board) { u.sick = false; u.attacked = false; }
+  for (const st of p.stages) st.resting = false;
   if (g.turn > 1) draw(g, p, 1); // 先攻の最初のターンはドローしない（ルール/02_ターンの流れ）
   if (g.over) return;
   EFFECTS.onTurnStart(g, p);
   cleanup(g);
 }
 
+// リーダー同士の戦闘：終了フェイズに自動で発動する（ルール/04_戦闘）
+// 防御力が攻撃力以上ならダメージは0（下限保証なし）
+function leaderAutoAttack(g, p) {
+  if (g.over) return;
+  if (g.turn === 1) return; // 先攻1ターン目のみ行わない
+  const foe = g.opp(p);
+  const dmg = Math.max(0, leaderAtkTotal(p) - leaderDefTotal(foe));
+  damageLeader(g, foe, dmg, p, 'リーダー攻撃');
+}
+
 function endPhase(g, p) {
   EFFECTS.onTurnEnd(g, p);
+  cleanup(g);
+  if (g.over) return;
+  leaderAutoAttack(g, p);
   cleanup(g);
 }
 
@@ -378,7 +402,8 @@ function payAndPlay(g, p, handIdx, target) {
     cleanup(g);
   } else if (d.kind === 'weapon') {
     equipWeapon(g, p, name);
-    cleanup(g);
+  } else if (d.kind === 'stage') {
+    putStage(p, name);
   } else {
     const u = new Unit(name, p.idx);
     p.board.push(u);
@@ -393,11 +418,13 @@ function payAndPlay(g, p, handIdx, target) {
 
 module.exports = {
   BOARD_MAX, LEADER_HP, MAX_MP_CAP, TURN_CAP,
-  Unit, Player, Game, shuffle, mulberry32,
+  Unit, Stage, Player, Game, shuffle, mulberry32,
   setEffects, draw, endGame, checkLeaders, damageLeader, damageUnit, dealTo,
   healLeader, healUnit, cleanup, boardFull, putUnit, gainMaxMp, hasTaunt, chargePower,
-  canAttackUnit, canAttackLeader, attackLeader, attackUnit,
-  weaponAtk, equipWeapon, breakWeapon, canLeaderAttack, leaderAttackLeader, leaderAttackUnit,
-  startPhase, endPhase, cardCost, payAndPlay,
+  boostLeader, powerSkillStage,
+  canAttackUnit, canStrengthen, strengthen, strengthenDirect, attackUnit,
+  weaponAtk, equipWeapon, breakWeapon, leaderAtkTotal, leaderDefTotal,
+  putStage, activateStage,
+  startPhase, endPhase, leaderAutoAttack, cardCost, payAndPlay,
   recPlay, recFace, recKill, recHeal, stat,
 };

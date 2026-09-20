@@ -6,20 +6,19 @@ const K = require('./knobs.js');
 
 const threat = FX.threat;
 
-// パワースキルをカードより先に使うリーダー（練気の連携、面の切り替え、武器、薬草）
-const EARLY_SKILL = new Set(['トバル', 'シュリ', 'ガイル', 'ヴェイン']);
+// パワースキルをカードより先に使うリーダー（練気の連携、面の切り替え、リーダー強化、薬草）
+const EARLY_SKILL = new Set(['トバル', 'シュリ', 'ガイル', 'アルベル', 'ヴェイン']);
 
-// 武器の評価。今の武器を上書きして損をするなら使わない
+// 武器の評価。今の武器を上書きして損をするなら使わない（耐久力は廃止。単純に攻撃力で比べる）
 function weaponScore(g, p, name) {
   const d = CARD_DB[name];
   let atk = d.atk;
-  if (name === '鉄の大剣' && FX.unyielding(p)) atk += 2;
   if (name === '呪剣ノア' && FX.isBlack(p)) atk += 2;
-  let v = atk * d.dur * 0.6 + 2;
-  if (name === '研ぎ直した長剣') v += 1;
+  let v = atk * 1.2 + 2;
+  if (name === '兵士の剣') v += 1;
   if (name === 'ドヴァルの遺作') v += 3;
   if (name === '呪剣ノア') v += 1;
-  if (p.weapon) v -= E.weaponAtk(p) * p.weapon.dur * 0.6 + 2;
+  if (p.weapon) v -= E.weaponAtk(p) * 1.2 + 2;
   return v > 0 ? v : -100;
 }
 
@@ -88,6 +87,7 @@ function cardScoreBase(g, p, name) {
   const bigThreat = enemyUnits.filter((u) => threat(u) >= 8).length;
 
   if (d.kind === 'weapon') return weaponScore(g, p, name);
+  if (d.kind === 'stage') return name === '消えぬ焔' ? 4 : 0;
 
   if (d.kind === 'unit') {
     let s = d.atk + d.hp;
@@ -96,18 +96,19 @@ function cardScoreBase(g, p, name) {
       if (d.kw.includes('突進')) s += K.knob(g, p, 'rushValue');
       if (d.kw.includes('守護')) s += K.knob(g, p, 'tauntValue');
       if (d.kw.includes('必殺')) s += K.knob(g, p, 'deathtouchValue');
+      if (d.kw.includes('おうえん')) s += 1.5;
     }
     const targets = FX.targetable(g, p);
     switch (name) {
       // アグロリーゼ
       case '火の子': s += 1; break;
-      case '学舎の見習い': s += FX.afterburn(p) ? 3 : 0; break;
+      case '学舎の見習い': s += 1; break;
       case 'ドロテ': s += 3; break;
       case 'マルカ': s += p.hand.includes('ポルカ') ? 3 : 0; break;
       case 'ポルカ': s += p.board.some((u) => u.name === 'マルカ') ? 3 : 0; break;
-      case '教授ハルド': s += 1; break;
       case '火口の洞守り': s += 1; break;
-      case 'ヴェルド': s += enemyTaunts.length ? 5 : 0; break;
+      case 'ヴェルド': s += enemyTaunts.length ? 7 : 0; break;
+      case 'ギズモ': s += 1; break;
       // 召喚時の全体3点＋死亡時の顔5点＋以降ずっと残火ON
       case '師ベルゼ': s += 4 + Math.min(6, enemyUnits.filter((u) => u.hp <= 3).length * 2); break;
       // ミッドレンジ奇数エルナ
@@ -124,18 +125,20 @@ function cardScoreBase(g, p, name) {
       case '傲慢のノクス': s += FX.lookOdd(p) ? 8 : -12; break;
       // コントロールアルベル
       case '癒しの人形': s += 1; break;
-      case '傷ついた巡礼者': s -= 2; break;
+      case '傷ついた巡礼者': s -= 1; break;
       case '長屋の病人': s += enemyUnits.length ? 2 : 1; break;
       case '怪我をした修道女キーラ': s += 3; break;
       case '聖獣キメラ': s += 2 + (enemyUnits.length ? 1 : 0); break;
       case '聖騎士ザキエル': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
       case '老司祭ドラン': s += 3; break;
-      case '怒れる聖職者アン': s += enemyUnits.length >= 2 ? 6 : (enemyUnits.length ? 3 : 0); break;
-      // 敵全体1点と、手札のスペル1枚を0コストで撃てる
-      case '偽善のミゼリア':
-        s += 2 + enemyUnits.filter((u) => u.hp <= 1).length * 2
-          + (p.hand.some((n) => CARD_DB[n].kind === 'spell') ? 2 : 0);
+      // 場全体（敵味方とも）に3点。自分の場も巻き込むので、相手のほうが多いときだけ高く見る
+      case '怒れる聖職者アン': {
+        const selfHits = p.board.filter((u) => u.hp <= 3).length;
+        const foeHits = enemyUnits.filter((u) => u.hp <= 3).length;
+        s += (foeHits - selfHits) * 3 + (enemyUnits.length >= 2 ? 2 : 0);
         break;
+      }
+      case '偽善のミゼリア': s += (p.hand.some((n) => CARD_DB[n].kind === 'spell') ? 2 : 0); break;
       case '聖鳥リフルエル': s += 8; break;
       // ランプヴァルカス
       case '無様な魔物': s += 1; break;
@@ -177,7 +180,6 @@ function cardScoreBase(g, p, name) {
       case '組み手の兄弟子': s += (FX.chain(p) >= 1 ? K.knob(g, p, 'tauntValue') : 0) + comboFuel(p) * 0.5; break;
       case '岩窟の見張り': s += targets.length ? 3 + Math.min(3, threat(FX.best(targets)) * 0.2) : -1; break;
       case '老師ロウ': s += FX.chain(p) >= 3 ? 7 : -3; break;
-      // 速攻7点を入れて、自分も3点受け、ターン終了時に破壊される
       case '妹リン': s = p.leaderHp <= 6 ? -100 : 7 + (foe.leaderHp <= 7 ? 50 : 0); break;
       case '渇望のガドル': s += 1; break;
       // ミッドレンジヴェイン
@@ -192,13 +194,13 @@ function cardScoreBase(g, p, name) {
       case '六罪 ガドル': s += p.board.length * 2; break;
       case '六罪 ネフィス': s += 2 + enemyUnits.filter((u) => u.hp <= 2).length * 2; break;
       // ミッドレンジガイル
-      case 'ロダンの傭兵': s -= p.leaderHp <= 8 ? 5 : 0; break;
-      case '番犬ゴロ': s -= p.leaderHp <= 8 ? 6 : 1; break;
-      case '鍛冶師ドヴァル': s += p.weapon ? (FX.unyielding(p) ? 3 : 2) * p.weapon.dur * 0.6 : -1; break;
+      case '鍛冶師ドヴァル': s += p.board.some((x) => x.atk > 0) ? (FX.unyielding(p) ? 2 : 1) : -1; break;
+      case 'ロダンの傭兵': s += 1; break;
       case '砦の古参兵': s += FX.unyielding(p) && !p.preventNext ? 2 : 0; break;
+      case '兵士長サム': s += 3; break;
       case '剣術学校の師範': s += p.leaderHp <= 18 ? 3 : 0; break;
-      case '裏切のグラーク': s = p.leaderHp <= 4 ? -100 : s + enemyUnits.filter((u) => u.hp <= 3).length * 2.5 - 1; break;
-      case '兄ゲイン': s += 2 + enemyUnits.filter((u) => u.hp <= 4).length * 2.5; break;
+      case '裏切のグラーク': s = p.leaderHp <= 5 ? -100 : s + enemyUnits.filter((u) => u.hp <= 3).length * 2.5 - 1; break;
+      case '兄ゲイン': s += 3; break;
       default: break;
     }
     return s;
@@ -214,18 +216,6 @@ function cardScoreBase(g, p, name) {
       const kills = Math.min(2, FX.targetable(g, p).filter((u) => u.hp <= 4).length);
       return kills ? 1 + kills * 2.5 : 2;
     }
-    case '消えぬ焔': {
-      // 場全体とお互いのリーダーを焼く。自分の盤面と顔も巻き込む
-      const boost = FX.afterburn(p) ? 1 : 0;
-      const d = 3 + boost;
-      const face = 1 + boost;
-      if (foe.leaderHp <= face && p.leaderHp > face) return 100;
-      if (p.leaderHp <= face) return -100;
-      const kills = enemyUnits.filter((u) => u.hp <= d).length;
-      const loss = p.board.filter((u) => u.hp <= d).length;
-      // 何も倒せないなら顔を撃ち合うだけなので撃たない
-      return (kills > 0 ? 1 : -3) + kills * 3 - loss * 3;
-    }
     // ミッドレンジ奇数エルナ
     case '先を読む力': return 2 + (enemyUnits.some((u) => u.hp <= 1) ? 2 : 0);
     case '深読み': {
@@ -238,8 +228,7 @@ function cardScoreBase(g, p, name) {
     case '小さな手当て': return 2 + (p.leaderHp <= 22 ? 2 : 0) + (p.board.some((u) => u.hp < u.maxhp) ? 1 : 0);
     case '禁術・蘇生': return reviveBest(p, 2) > 0 ? 2 + reviveBest(p, 2) * 0.3 : -100;
     case '謎の日記': {
-      if (foe.leaderHp <= 4) return 100;
-      const kill = enemyUnits.some((u) => u.hp <= 4);
+      const kill = FX.targetable(g, p).some((u) => u.hp <= 4);
       return 3 + (kill ? 3 : 0) + (p.hand.length <= 5 ? 1 : 0);
     }
     case '死のパレード': {
@@ -278,7 +267,6 @@ function cardScoreBase(g, p, name) {
     }
     case '薬草': {
       if (p.poisonHerbs) return foe.leaderHp <= 1 ? 100 : 1.5;
-      // 回復は手札に余裕があるときだけ。普段は捨てる札として持っておく
       const hurt = p.board.some((u) => u.hp < u.maxhp) || p.leaderHp < 25;
       return hurt && p.hand.length > 3 ? 0.5 : -100;
     }
@@ -326,17 +314,15 @@ function cardScoreBase(g, p, name) {
       return p.board.length >= 2 ? 1 + p.board.length : -100;
     }
     case '千年の眠り': {
-      // 裏返してから判定するので、今と逆の面の効果になる
       if (FX.isBlack(p)) return p.leaderHp <= 17 ? 5 : -100;
       const t = FX.targetable(g, p);
       return t.length ? 3 + Math.min(4, threat(FX.best(t)) * 0.4) : -100;
     }
     // ミッドレンジガイル
     case '踏み込み': {
-      if (p.leaderHp <= 2) return -100;
       const t = FX.targetable(g, p);
       if (!t.length) return -100;
-      return t.some((u) => u.hp <= 3) ? 3 : 1;
+      return t.some((u) => u.hp <= 2) ? 3 : 1;
     }
     case '一騎打ち': {
       const t = FX.targetable(g, p);
@@ -345,8 +331,8 @@ function cardScoreBase(g, p, name) {
       return t.some((u) => u.hp <= 4) ? 3 : 0.5;
     }
     case '立てなくなるまで': {
-      if (!p.weapon) return -100;
-      const a = E.weaponAtk(p);
+      const a = E.leaderAtkTotal(p);
+      if (a <= 0) return -100;
       return foe.leaderHp <= a ? 100 : a * 0.6;
     }
     default: return 0;
@@ -361,7 +347,7 @@ function burnScore(g, p, dmg) {
   return dmg * 0.9;
 }
 
-// ---- リーサル計算 ----
+// ---- 顔に飛ぶ確定ダメージ（リーサル判定用）----
 function faceBurnOptions(g, p) {
   const out = [];
   for (const n of new Set(p.hand)) {
@@ -371,19 +357,16 @@ function faceBurnOptions(g, p) {
     else if (n === '焼き払い') dmg = 4;
     else if (n === '霊脈喰らい') dmg = 3;
     else if (n === '先を読む力') dmg = 1;
-    else if (n === '謎の日記') dmg = 4;
-    else if (n === '偽善のミゼリア') dmg = 1;
     else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
     else if (n === '毒入りの霊薬') dmg = 4;
-    else if (n === '立てなくなるまで') dmg = E.weaponAtk(p);
-    else if (n === '兄ゲイン') dmg = 2;
+    else if (n === '立てなくなるまで') dmg = E.leaderAtkTotal(p);
+    else if (n === 'ドヴァルの遺作') dmg = 4;
     else if (n === '六罪 ネフィス') dmg = 2;
     else if (n === '薬草') dmg = p.poisonHerbs ? 1 : 0;
     else if (n === '拳で届かせる') dmg = FX.chain(p) + 2;
     if (dmg <= 0) continue;
     const count = p.hand.filter((x) => x === n).length;
     for (let i = 0; i < count; i++) {
-      // 奥義は1枚撃つごとに連携が1増える
       const inc = n === '拳で届かせる' ? i : 0;
       out.push({ name: n, cost: E.cardCost(p, n), dmg: dmg + inc, isUnit: CARD_DB[n].kind === 'unit' });
     }
@@ -391,40 +374,22 @@ function faceBurnOptions(g, p) {
   return out.sort((a, b) => (b.dmg / Math.max(1, b.cost)) - (a.dmg / Math.max(1, a.cost)));
 }
 
+// リーダー同士の戦闘は終了フェイズに自動で起こる。ここでは「今の攻撃力-防御力」を基準に、
+// 燃焼スペル・パワースキルを足しても足りるかどうかだけを見る（確定で追加できる分だけ数える）
 function planLethal(g, p) {
   const foe = g.opp(p);
-  if (foe.board.some((u) => u.kw.has('守護'))) return null;
-  let dmg = 0;
-  for (const u of p.board) if (E.canAttackLeader(u)) dmg += u.atk;
-  if (E.canLeaderAttack(p)) dmg += E.weaponAtk(p);
+  let dmg = Math.max(0, E.leaderAtkTotal(p) - E.leaderDefTotal(foe));
   let mp = p.mp;
-  let slots = E.BOARD_MAX - p.board.length;
   const plan = [];
-  // パワースキル（リーゼのみ打点）
   let skill = false;
-  if (p.leader === 'リーゼ') {
-    if (p.power === 3) { dmg += 2; skill = true; }
-    else if (p.power === 2 && mp >= 1 && !p.powerChargedThisTurn) { mp -= 1; dmg += 2; skill = true; }
-  }
-  // 消えぬ焔：場全体に3(4)、お互いのリーダーに1(2)。自分の盤面も焼けるので、殴れなくなるぶんを引く
-  if (p.hand.includes('消えぬ焔')) {
-    const boost = FX.afterburn(p) ? 1 : 0;
-    const burn = 3 + boost;
-    const face = 1 + boost;
-    const cost = E.cardCost(p, '消えぬ焔');
-    let lost = 0;
-    for (const u of p.board) if (u.hp <= burn && E.canAttackLeader(u)) lost += u.atk;
-    if (cost <= mp && p.leaderHp > face && face > lost) {
-      mp -= cost;
-      dmg += face - lost;
-      plan.push({ name: '消えぬ焔', cost: 0, dmg: 0, isUnit: false });
-    }
+  if (p.leader === 'リーゼ' && p.power === 3) {
+    const stage = E.powerSkillStage(p);
+    dmg += stage >= 3 ? 4 : stage >= 2 ? 2 : 1;
+    skill = true;
   }
   for (const o of faceBurnOptions(g, p)) {
-    if (o.cost > mp) continue;
-    if (o.isUnit && slots <= 0) continue;
+    if (o.cost > mp || o.isUnit) continue;
     mp -= o.cost;
-    if (o.isUnit) slots -= 1;
     dmg += o.dmg;
     plan.push(o);
   }
@@ -432,20 +397,13 @@ function planLethal(g, p) {
 }
 
 function executeLethal(g, p, lethal) {
-  const foe = g.opp(p);
-  if (lethal.skill) {
-    if (p.power < 3 && !p.powerChargedThisTurn && p.mp >= 1) {
-      p.mp -= 1; p.powerChargedThisTurn = true; E.chargePower(g, p, 1);
-    }
-    if (p.power === 3) FX.usePowerSkill(g, p);
-  }
+  if (lethal.skill && p.power === 3) FX.usePowerSkill(g, p);
   for (const o of lethal.plan) {
     if (g.over) return;
     const idx = p.hand.indexOf(o.name);
     if (idx < 0) continue;
-    E.payAndPlay(g, p, idx, { type: 'leader', p: foe });
+    E.payAndPlay(g, p, idx, { type: 'leader', p: g.opp(p) });
   }
-  attackPhase(g, p, true);
 }
 
 function followupScore(g, p, mpLeft, excludeIdx) {
@@ -475,26 +433,29 @@ function playPhase(g, p) {
       const cost = E.cardCost(p, name);
       if (cost > p.mp) continue;
       if (d.kind === 'unit' && E.boardFull(p)) continue;
-      // 同ターンに続けて出せる札まで見て、MPを余らせない組み合わせを選ぶ
       const s = cardScore(g, p, name) + cost * K.knob(g, p, 'costWeight')
         + followupScore(g, p, p.mp - cost, i) * K.knob(g, p, 'followupWeight');
       if (s > bestVal) { bestVal = s; bestIdx = i; bestName = name; }
     }
     if (bestIdx < 0 || bestVal <= K.knob(g, p, 'playThreshold')) break;
     // 残火：同ターンにスペルを撃ってから出すと追加効果が乗る
-    // 火の子も出したターンは残火状態になる
-    if (['学舎の見習い', 'ギズモ'].includes(bestName) && !FX.afterburn(p)) {
-      // ギズモは残火でコストが1下がる
-      const cost = E.cardCost(p, bestName) - (bestName === 'ギズモ' ? 1 : 0);
-      const slotsForTwo = E.BOARD_MAX - p.board.length >= 2;
-      const enablerIdx = p.hand.findIndex((n) => (['火の粉', '焔弾'].includes(n)
-        || (n === '火の子' && slotsForTwo)) && E.cardCost(p, n) + cost <= p.mp);
+    if (bestName === 'ギズモ' && !FX.afterburn(p)) {
+      const cost = E.cardCost(p, bestName) - 1;
+      const enablerIdx = p.hand.findIndex((n) => ['火の粉', '焔弾'].includes(n) && E.cardCost(p, n) + cost <= p.mp);
       if (enablerIdx >= 0) {
         E.payAndPlay(g, p, enablerIdx, null);
         continue;
       }
     }
     if (!E.payAndPlay(g, p, bestIdx, null)) break;
+  }
+}
+
+// ---- ステージを起動する（消えぬ焔など）----
+function stagePhase(g, p) {
+  for (const st of p.stages) {
+    if (g.over) return;
+    if (!st.resting) E.activateStage(g, p, st);
   }
 }
 
@@ -513,18 +474,15 @@ function bestPlayScore(g, p, mpLimit) {
 
 function chargePowerFirst(g, p) {
   if (p.power >= 3 || p.mp < 1 || p.powerChargedThisTurn) return false;
-  // スキルが今すぐ欲しい場面は最優先で溜める
-  // ただし1ターンを丸ごと潰してまで上げない（MPに余裕があるときだけ優先）
   if (p.power === 2) {
     if (p.leader === 'リーゼ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
-    if (p.leader === 'アルベル' && p.leaderHp <= 18 && (p.mp >= 3 || p.leaderHp <= 8)) return true;
+    if (p.leader === 'アルベル') return true;
+    if (p.leader === 'ガイル') return true;
     if (p.leader === 'エルナ' && p.hand.length <= 4 && p.mp >= 3) return true;
-    // 吸魔はMPを1回復するので、上げる1MPがそのまま戻る
     if (p.leader === 'ヴァルカス') return true;
     if (p.leader === 'トバル' && p.mp >= 2) return true;
     if (p.leader === 'シュリ' && p.mp >= 3
       && ['拳で届かせる', '老師ロウ', '旋風脚'].some((n) => p.hand.includes(n))) return true;
-    if (p.leader === 'ガイル' && !p.weapon) return true;
     if (p.leader === 'ヴェイン' && p.mp >= 3) return true;
   }
   const full = bestPlayScore(g, p, p.mp);
@@ -547,56 +505,26 @@ function powerPhase(g, p) {
 
 function shouldUseSkill(g, p) {
   if (p.leader === 'リーゼ') return true;
+  if (p.leader === 'ガイル') return true;
   if (p.leader === 'エルナ') return p.hand.length <= 8;
   if (p.leader === 'アルベル') {
     const unitHeal = p.board.reduce((a, u) => a + Math.min(3, u.maxhp - u.hp), 0);
-    return p.leaderHp <= 22 || unitHeal >= 3;
+    return E.powerSkillStage(p) >= 3 || p.leaderHp <= 22 || unitHeal >= 3;
   }
-  // 鍛錬の剣は3/1。今の武器のほうが強いなら上書きしない
-  if (p.leader === 'ガイル') return !p.weapon || E.weaponAtk(p) * p.weapon.dur < 3;
   if (p.leader === 'シュリ') return p.hand.length <= 9;
   return true;
 }
 
-// ---- 攻撃 ----
-// 武器を装備したリーダーの攻撃。守護は先に退かし、倒せる脅威は斬り、それ以外は顔
-function leaderAttack(g, p, forceFace, tauntsOnly) {
-  if (g.over || !E.canLeaderAttack(p)) return;
-  const foe = g.opp(p);
-  const atk = E.weaponAtk(p);
-  // ガイルは不屈のためにHPを削ってよいので、反撃を受ける余裕を小さく見る
-  const margin = p.leader === 'ガイル' ? 5 : 8;
-  const safe = (t) => p.leaderHp - t.atk > margin;
-  const taunts = foe.board.filter((u) => u.kw.has('守護'));
-  if (taunts.length) {
-    const kill = taunts.filter((t) => atk >= t.hp && safe(t)).sort((a, b) => threat(b) - threat(a))[0];
-    if (kill) E.leaderAttackUnit(g, p, kill);
-    return;
-  }
-  if (tauntsOnly) return;
-  if (!forceFace) {
-    const style = K.knob(g, p, 'attackStyle');
-    const minThreat = style === 'aggro' ? 9 : 4;
-    const kills = foe.board.filter((t) => atk >= t.hp && safe(t) && threat(t) >= minThreat);
-    if (kills.length) {
-      E.leaderAttackUnit(g, p, FX.best(kills));
-      return;
-    }
-  }
-  E.leaderAttackLeader(g, p);
+// ---- 攻撃（キャラクター同士のみ。リーダー同士の戦闘は終了フェイズに自動発生）----
+function attackPhase(g, p) {
+  unitAttacks(g, p);
 }
 
-function attackPhase(g, p, forceFace) {
-  leaderAttack(g, p, forceFace, true);
-  unitAttacks(g, p, forceFace);
-  leaderAttack(g, p, forceFace, false);
-}
-
-function unitAttacks(g, p, forceFace) {
+function unitAttacks(g, p) {
   for (let guard = 0; guard < 40 && !g.over; guard++) {
     const foe = g.opp(p);
     const taunts = foe.board.filter((u) => u.kw.has('守護'));
-    const ready = p.board.filter((u) => E.canAttackUnit(u) || E.canAttackLeader(u));
+    const ready = p.board.filter((u) => E.canAttackUnit(u));
     if (!ready.length) break;
 
     if (taunts.length) {
@@ -606,72 +534,33 @@ function unitAttacks(g, p, forceFace) {
       continue;
     }
 
-    const act = pickAttack(g, p, ready, forceFace);
+    const act = pickAttack(g, p, ready, foe.board);
     if (!act) break;
-    if (act.face) E.attackLeader(g, p, act.u);
-    else E.attackUnit(g, p, act.u, act.t);
+    E.attackUnit(g, p, act.u, act.t);
   }
 }
 
 function pickTauntAttack(g, p, ready, taunts) {
-  const attackers = ready.filter((u) => E.canAttackUnit(u));
-  if (!attackers.length) return null;
   const target = taunts.slice().sort((a, b) => a.hp - b.hp)[0];
-  const killers = attackers.filter((u) => killsInCombat(u, target));
+  const killers = ready.filter((u) => killsInCombat(u, target));
   if (killers.length) {
     const safe = killers.filter((u) => !killsInCombat(target, u));
     const pool = safe.length ? safe : killers;
     return { u: pool.slice().sort((a, b) => a.atk - b.atk)[0], t: target };
   }
-  const survivors = attackers.filter((u) => !killsInCombat(target, u));
+  const survivors = ready.filter((u) => !killsInCombat(target, u));
   if (survivors.length) return { u: survivors.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
-  if (K.knob(g, p, 'attackStyle') === 'aggro') return { u: attackers.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
+  if (K.knob(g, p, 'attackStyle') === 'aggro') return { u: ready.slice().sort((a, b) => b.atk - a.atk)[0], t: target };
   return null;
 }
 
-function pickAttack(g, p, ready, forceFace) {
-  const foe = g.opp(p);
-  const faceReady = ready.filter((u) => E.canAttackLeader(u));
-  const unitReady = ready.filter((u) => E.canAttackUnit(u));
-
-  if (forceFace) {
-    if (faceReady.length) return { u: faceReady[0], face: true };
-    const k = bestTrade(unitReady, foe.board, true);
-    return k || null;
-  }
-
+function pickAttack(g, p, ready, enemyUnits) {
   const style = K.knob(g, p, 'attackStyle');
-  if (style === 'aggro') {
-    // レースに勝てるなら顔、負けているなら盤面を捌く
-    const myAtk = p.board.reduce((a, u) => a + (u.frozen ? 0 : u.atk), 0);
-    const theirAtk = foe.board.reduce((a, u) => a + (u.frozen ? 0 : u.atk), 0);
-    const myClock = myAtk > 0 ? Math.ceil(foe.leaderHp / myAtk) : 99;
-    const theirClock = theirAtk > 0 ? Math.ceil(p.leaderHp / theirAtk) : 99;
-    const trade = bestTrade(unitReady, foe.board, false);
-    if (trade && myClock > theirClock + K.knob(g, p, 'raceMargin')) return trade;
-    if (trade && threat(trade.t) >= K.knob(g, p, 'aggroBigTradeThreat') && trade.u.hp > trade.t.atk) return trade;
-    if (faceReady.length) return { u: faceReady[0], face: true };
-    // 突進のみ（召喚酔い）は敵ユニットを殴る
-    const kills = bestTrade(unitReady, foe.board, true);
-    if (kills) return kills;
-    return null;
-  }
-
-  if (style === 'midrange') {
-    const trade = bestTrade(unitReady, foe.board, false);
-    if (trade && threat(trade.t) >= K.knob(g, p, 'midrangeTradeThreat')
-        && foe.leaderHp > K.knob(g, p, 'midrangeFaceGuardHp')) return trade;
-    if (faceReady.length) return { u: faceReady[0], face: true };
-    if (trade) return trade;
-    return null;
-  }
-
-  // control
-  const trade = bestTrade(unitReady, foe.board, false);
-  if (trade) return trade;
-  if (foe.board.length === 0 && faceReady.length) return { u: faceReady[0], face: true };
-  if (faceReady.length && foe.leaderHp <= K.knob(g, p, 'controlFaceHp')) return { u: faceReady[0], face: true };
-  return null;
+  const threshold = style === 'aggro' ? 2 : style === 'midrange' ? 4 : 6;
+  const trade = bestTrade(ready, enemyUnits, style === 'aggro');
+  if (trade && threat(trade.t) >= threshold) return trade;
+  if (trade && killsInCombat(trade.u, trade.t) && !killsInCombat(trade.t, trade.u)) return trade;
+  return trade;
 }
 
 // 戦闘で a が b を倒せるか（必殺を含む）
@@ -686,8 +575,6 @@ function bestTrade(attackers, enemyUnits, allowAny) {
     for (const t of enemyUnits) {
       const kills = killsInCombat(u, t);
       const dies = killsInCombat(t, u);
-      if (!kills && !allowAny) continue;
-      if (!kills && !allowAny) continue;
       let v = 0;
       if (kills && !dies) v = threat(t) * 2;
       else if (kills && dies) v = threat(t) - threat(u) + 2;
@@ -699,6 +586,30 @@ function bestTrade(attackers, enemyUnits, allowAny) {
   if (!bestAct) return null;
   if (bestVal <= 0 && !allowAny) return null;
   return bestAct;
+}
+
+// ---- キャラクターをレストにしてリーダーを強化する（攻撃しなかった残りぜんぶ）----
+function strengthenPhase(g, p) {
+  if (g.over) return;
+  const ready = p.board.filter((u) => E.canStrengthen(u));
+  if (!ready.length) return;
+  const statName = chooseStrengthenStat(g, p);
+  for (const u of ready) {
+    if (g.over) return;
+    E.strengthen(g, p, u, statName);
+  }
+}
+
+// 強化で攻撃力と防御力のどちらを伸ばすか。単純に「今のレース」で決める
+function chooseStrengthenStat(g, p) {
+  const foe = g.opp(p);
+  const style = K.knob(g, p, 'attackStyle');
+  const incoming = Math.max(1, E.leaderAtkTotal(foe) - E.leaderDefTotal(p));
+  const myTurnsToKill = Math.ceil(foe.leaderHp / Math.max(1, E.leaderAtkTotal(p) - E.leaderDefTotal(foe)));
+  const foeTurnsToKill = Math.ceil(p.leaderHp / incoming);
+  if (style === 'control' && foeTurnsToKill <= myTurnsToKill + 1) return 'def';
+  if (style === 'aggro') return 'atk';
+  return foeTurnsToKill <= myTurnsToKill ? 'def' : 'atk';
 }
 
 // 聖水：1ターン1つまで。「あと1MPあれば手札が使える」ときに切る
@@ -755,10 +666,14 @@ function takeTurn(g, p) {
   useHoly(g, p);
   playPhase(g, p);
   if (g.over) return;
+  stagePhase(g, p);
+  if (g.over) return;
   useHoly(g, p);
   powerPhase(g, p);
   if (g.over) return;
-  attackPhase(g, p, false);
+  attackPhase(g, p);
+  if (g.over) return;
+  strengthenPhase(g, p);
   if (g.over) return;
   E.endPhase(g, p);
 }

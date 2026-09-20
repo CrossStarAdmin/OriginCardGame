@@ -72,8 +72,8 @@ for (const [name, d] of Object.entries(CARD_DB)) {
   if (d.kind === 'unit' && (typeof d.atk !== 'number' || typeof d.hp !== 'number')) {
     errors.push(`CARD_DB「${name}」: ユニットに atk / hp がありません。`);
   }
-  if (d.kind === 'weapon' && (typeof d.atk !== 'number' || typeof d.dur !== 'number')) {
-    errors.push(`CARD_DB「${name}」: 武器に atk / dur がありません。`);
+  if (d.kind === 'weapon' && typeof d.atk !== 'number') {
+    errors.push(`CARD_DB「${name}」: 武器に atk がありません。`);
   }
   if (typeof d.cost !== 'number') {
     errors.push(`CARD_DB「${name}」: cost がありません。`);

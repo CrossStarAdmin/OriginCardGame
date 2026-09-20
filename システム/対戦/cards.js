@@ -1,20 +1,32 @@
 // カード定義とデッキリスト（デッキ/*/カード一覧/*.md より）
 
+// リーダーの素の攻撃力・防御力（デッキ内容が新ルールへ未移行のリーダーは仮で0/0）
+const LEADERS = {
+  'リーゼ': { atk: 2, def: 1 },
+  'ガイル': { atk: 2, def: 1 },
+  'アルベル': { atk: 1, def: 2 },
+  'エルナ': { atk: 0, def: 0 },
+  'ヴァルカス': { atk: 0, def: 0 },
+  'トバル': { atk: 0, def: 0 },
+  'シュリ': { atk: 0, def: 0 },
+  'ヴェイン': { atk: 0, def: 0 },
+};
+
 const CARD_DB = {
   // ---- アグロリーゼ（ウィザード）----
-  '学舎の見習い':   { kind: 'unit', cost: 1, atk: 1, hp: 2 },
+  '学舎の見習い':   { kind: 'unit', cost: 1, atk: 2, hp: 1 },
   '火の子':         { kind: 'unit', cost: 1, atk: 1, hp: 1 },
   '火の粉':         { kind: 'spell', cost: 1, dmg: 1 },
   'マルカ':         { kind: 'unit', cost: 1, atk: 1, hp: 1 },
-  'ポルカ':         { kind: 'unit', cost: 2, atk: 3, hp: 1, kw: ['突進'] },
-  'ギズモ':         { kind: 'unit', cost: 3, atk: 2, hp: 2, kw: ['速攻'] },
+  'ポルカ':         { kind: 'unit', cost: 2, atk: 3, hp: 2 },
+  'ギズモ':         { kind: 'unit', cost: 3, atk: 2, hp: 2 },
   '焔弾':           { kind: 'spell', cost: 2, dmg: 3 },
-  '教授ハルド':     { kind: 'unit', cost: 3, atk: 3, hp: 4 },
-  '火口の洞守り':   { kind: 'unit', cost: 3, atk: 3, hp: 3, kw: ['守護'] },
+  '教授ハルド':     { kind: 'unit', cost: 3, atk: 3, hp: 4, kw: ['おうえん'] },
+  '火口の洞守り':   { kind: 'unit', cost: 3, atk: 2, hp: 4, kw: ['守護'] },
   '焼き払い':       { kind: 'spell', cost: 4 },
   'ドロテ':         { kind: 'unit', cost: 4, atk: 3, hp: 5, kw: ['必殺'] },
-  'ヴェルド':       { kind: 'unit', cost: 5, atk: 5, hp: 2, kw: ['速攻'] },
-  '消えぬ焔':       { kind: 'spell', cost: 5 },
+  'ヴェルド':       { kind: 'unit', cost: 5, atk: 5, hp: 2, kw: ['突進'] },
+  '消えぬ焔':       { kind: 'stage', cost: 3 },
   '師ベルゼ':       { kind: 'unit', cost: 6, atk: 3, hp: 6, kw: ['突進'] },
 
   // ---- ミッドレンジ奇数エルナ（ウィザード）----
@@ -34,19 +46,19 @@ const CARD_DB = {
   '傲慢のノクス':   { kind: 'unit', cost: 8, atk: 5, hp: 5 },
 
   // ---- コントロールアルベル（プリースト）----
-  '癒しの人形':     { kind: 'unit', cost: 1, atk: 1, hp: 1 },
+  '癒しの人形':     { kind: 'unit', cost: 1, atk: 1, hp: 2 },
   '小さな手当て':   { kind: 'spell', cost: 1 },
   '禁術・蘇生':     { kind: 'spell', cost: 1 },
   '傷ついた巡礼者': { kind: 'unit', cost: 2, atk: 2, hp: 3, kw: ['守護'] },
-  '長屋の病人':     { kind: 'unit', cost: 2, atk: 1, hp: 3 },
+  '長屋の病人':     { kind: 'unit', cost: 2, atk: 0, hp: 2 },
   '怪我をした修道女キーラ': { kind: 'unit', cost: 3, atk: 2, hp: 2, kw: ['守護'], tag: '聖徒' },
   '謎の日記':     { kind: 'spell', cost: 3 },
   '聖獣キメラ':     { kind: 'unit', cost: 4, atk: 2, hp: 5, kw: ['守護'] },
   '聖騎士ザキエル': { kind: 'unit', cost: 5, atk: 2, hp: 4, tag: '聖徒' },
-  '老司祭ドラン':   { kind: 'unit', cost: 5, atk: 3, hp: 4, tag: '聖徒' },
+  '老司祭ドラン':   { kind: 'unit', cost: 5, atk: 2, hp: 3, tag: '聖徒' },
   '怒れる聖職者アン': { kind: 'unit', cost: 5, atk: 2, hp: 4, tag: '聖徒' },
   '死のパレード':   { kind: 'spell', cost: 6 },
-  '偽善のミゼリア': { kind: 'unit', cost: 7, atk: 4, hp: 4, kw: ['守護'] },
+  '偽善のミゼリア': { kind: 'unit', cost: 7, atk: 5, hp: 5, kw: ['守護'] },
   '聖鳥リフルエル': { kind: 'unit', cost: 10, atk: 7, hp: 7, kw: ['守護'] },
 
   // ---- ランプヴァルカス（デーモン）----
@@ -119,22 +131,21 @@ const CARD_DB = {
   '六罪 ネフィス':  { kind: 'unit', cost: 8, atk: 6, hp: 6 },
 
   // ---- ミッドレンジガイル（ウォーリア）----
-  'ロダンの傭兵':   { kind: 'unit', cost: 1, atk: 2, hp: 2 },
-  '番犬ゴロ':       { kind: 'unit', cost: 2, atk: 1, hp: 5, kw: ['守護'] },
-  '研ぎ直した長剣': { kind: 'weapon', cost: 2, atk: 2, dur: 2 },
+  'ロダンの傭兵':   { kind: 'unit', cost: 1, atk: 1, hp: 1 },
+  '番犬ゴロ':       { kind: 'unit', cost: 1, atk: 2, hp: 1, kw: ['突進'] },
+  '兵士の剣':       { kind: 'weapon', cost: 2, atk: 1 },
   '踏み込み':       { kind: 'spell', cost: 1 },
-  '傭兵仲間リナ':   { kind: 'unit', cost: 3, atk: 3, hp: 4, kw: ['突進'] },
-  '鍛冶師ドヴァル': { kind: 'unit', cost: 3, atk: 2, hp: 3 },
-  '鉄の大剣':       { kind: 'weapon', cost: 4, atk: 4, dur: 2 },
-  '砦の古参兵':     { kind: 'unit', cost: 4, atk: 4, hp: 4, kw: ['守護'] },
-  '剣術学校の師範': { kind: 'unit', cost: 5, atk: 4, hp: 5 },
+  '傭兵仲間リナ':   { kind: 'unit', cost: 2, atk: 3, hp: 2, kw: ['突進'] },
+  '鍛冶師ドヴァル': { kind: 'unit', cost: 3, atk: 2, hp: 2 },
+  '砦の古参兵':     { kind: 'unit', cost: 4, atk: 4, hp: 5, kw: ['守護'] },
+  '兵士長サム':     { kind: 'unit', cost: 4, atk: 4, hp: 5 },
+  '剣術学校の師範': { kind: 'unit', cost: 3, atk: 3, hp: 4 },
   '一騎打ち':       { kind: 'spell', cost: 3 },
-  'ロダンの重装兵': { kind: 'unit', cost: 6, atk: 5, hp: 7, kw: ['守護'] },
-  '裏切のグラーク': { kind: 'unit', cost: 5, atk: 5, hp: 5 },
-  'ドヴァルの遺作': { kind: 'weapon', cost: 7, atk: 5, dur: 3, kw: ['貫通'] },
-  '兄ゲイン':       { kind: 'unit', cost: 8, atk: 5, hp: 5 },
-  '立てなくなるまで': { kind: 'spell', cost: 5 },
-  '鍛錬の剣':       { kind: 'weapon', cost: 0, atk: 3, dur: 1, token: true },
+  'ロダンの重装兵': { kind: 'unit', cost: 2, atk: 2, hp: 3, kw: ['守護'] },
+  '裏切のグラーク': { kind: 'unit', cost: 5, atk: 6, hp: 8, kw: ['突進'], tag: '六罪' },
+  'ドヴァルの遺作': { kind: 'weapon', cost: 7, atk: 3 },
+  '兄ゲイン':       { kind: 'unit', cost: 6, atk: 5, hp: 5 },
+  '立てなくなるまで': { kind: 'spell', cost: 7 },
 };
 
 const DECKS = {
@@ -212,10 +223,10 @@ const DECKS = {
     style: 'midrange',
     leader: 'ガイル',
     list: {
-      'ロダンの傭兵': 3, '番犬ゴロ': 2, '研ぎ直した長剣': 3, '踏み込み': 2,
-      '傭兵仲間リナ': 3, '鍛冶師ドヴァル': 3, '鉄の大剣': 3, '砦の古参兵': 3,
-      '剣術学校の師範': 3, '一騎打ち': 3, 'ロダンの重装兵': 2, '裏切のグラーク': 2,
-      'ドヴァルの遺作': 3, '兄ゲイン': 3, '立てなくなるまで': 2,
+      'ロダンの傭兵': 3, '番犬ゴロ': 3, '兵士の剣': 2, '踏み込み': 2,
+      '傭兵仲間リナ': 3, '鍛冶師ドヴァル': 3, '砦の古参兵': 3, '兵士長サム': 3,
+      '剣術学校の師範': 3, '一騎打ち': 3, 'ロダンの重装兵': 2, '裏切のグラーク': 3,
+      'ドヴァルの遺作': 2, '兄ゲイン': 3, '立てなくなるまで': 2,
     },
   },
 };
@@ -228,4 +239,4 @@ function buildDeck(deckName) {
   return out;
 }
 
-module.exports = { CARD_DB, DECKS, buildDeck };
+module.exports = { CARD_DB, DECKS, LEADERS, buildDeck };

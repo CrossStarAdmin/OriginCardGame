@@ -13,7 +13,7 @@ const g = new E.Game(deckA, deckB, seed, stats, 0);
 g.playedThisGame = [];
 for (const p of g.players) { E.draw(g, p, 5); AI.mulligan(g, p); }
 g.players[1].power = 2;
-g.players[1].holy = 2;
+g.players[1].holy = 1;
 
 function boardStr(p) {
   return p.board.map((u) => `${u.name}(${u.atk}/${u.hp}${u.kw.size ? '[' + [...u.kw].join(',') + ']' : ''})`).join(' ') || '（なし）';
@@ -32,11 +32,13 @@ while (!g.over && g.turn < E.TURN_CAP) {
   console.log(`  手札後: ${p.hand.join(',')} / 山${p.deck.length} 墓${p.grave.length}`);
   console.log(`  自盤面: ${boardStr(p)}`);
   console.log(`  敵盤面: ${boardStr(foe)}`);
-  console.log(`  HP: ${p.deckName}=${p.leaderHp}  ${foe.deckName}=${foe.leaderHp}`);
+  console.log(`  HP: ${p.deckName}=${p.leaderHp}(攻${E.leaderAtkTotal(p)}/防${E.leaderDefTotal(p)}) `
+    + `${foe.deckName}=${foe.leaderHp}(攻${E.leaderAtkTotal(foe)}/防${E.leaderDefTotal(foe)})`);
   const gear = (x) => [
-    x.weapon ? `武器${x.weapon.name}(${E.weaponAtk(x)}/${x.weapon.dur})` : '',
+    x.weapon ? `武器${x.weapon.name}(${E.weaponAtk(x)})` : '',
     x.leader === 'ヴェイン' ? `面:${x.side}` : '',
     x.preventNext ? '次のダメージ0' : '',
+    x.stages.length ? `ステージ:${x.stages.map((s) => `${s.name}${s.resting ? '(レスト)' : ''}`).join(',')}` : '',
   ].filter(Boolean).join(' ');
   if (gear(p) || gear(foe)) console.log(`  装備: ${p.deckName}=${gear(p) || 'なし'}  ${foe.deckName}=${gear(foe) || 'なし'}`);
   tp = 1 - tp;

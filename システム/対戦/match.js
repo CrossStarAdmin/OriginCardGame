@@ -22,7 +22,7 @@ function playGame(deckA, deckB, seed, stats, gameId, knobs, observe) {
     AI.mulligan(g, p);
   }
   g.players[1].power = 2; // 後攻はパワー2スタート
-  g.players[1].holy = 2;    // 後攻は聖水2つスタート（ルール/01_基本ルール）
+  g.players[1].holy = 1;    // 後攻は聖水1つスタート（ルール/01_基本ルール）
   let tp = 0;
   while (!g.over && g.turn < E.TURN_CAP) {
     g.turn++;

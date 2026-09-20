@@ -9,10 +9,8 @@ function lookOdd(p) { const c = topCost(p); return c !== null && c % 2 === 1; }
 function lookEven(p) { const c = topCost(p); return c !== null && c % 2 === 0; }
 
 // ---- 残火：このターンに自分がスペルを使っていたか（場に出たとき1回だけ判定）----
-// 師ベルゼを出したあとはバトル終了までON、火の子を出したターンはそのターン中ON
-function afterburn(p) { return p.afterburnAlways || p.afterburnTurn || p.spellsThisTurn > 0; }
-// スペル自身の残火は、そのスペルより前に別のスペルを撃っている必要がある
-function afterburnForSpell(p) { return p.afterburnAlways || p.afterburnTurn || p.spellsThisTurn > 1; }
+// 師ベルゼを出したあとはバトル終了までON、火の子が場にいるあいだは常にON（デッキ固有能力・カード一覧/02_火の子）
+function afterburn(p) { return p.afterburnAlways || p.board.some((u) => u.name === '火の子') || p.spellsThisTurn > 0; }
 
 // ---- 解放／全解放 ----
 function released(p) { return p.maxMp >= 8; }
@@ -110,8 +108,8 @@ function chooseHealTarget(g, p) {
   return { type: 'leader', p };
 }
 
-// 火口の洞守りの死亡時にデッキから加えるスペルの優先度
-const HORAMORI_SPELL_PRIORITY = { '焔弾': 4, '焼き払い': 3, '火の粉': 2, '消えぬ焔': 1 };
+// 火口の洞守りの死亡時にデッキから加えるスペル（特技）の優先度
+const HORAMORI_SPELL_PRIORITY = { '焔弾': 4, '焼き払い': 3, '火の粉': 2 };
 
 // 貪りの供物で差し出す味方。死亡時が得になるものを優先し、無ければ一番小さいもの
 const SACRIFICE_PRIORITY = { '霊脈喰らい': 30, '眷属': 20, '無様な魔物': 20 };
@@ -140,6 +138,14 @@ function graveReturnPick(p, resolving) {
 function pickKill(list, dmg) {
   const killable = list.filter((u) => u.hp <= dmg);
   return best(killable.length ? killable : list);
+}
+
+// カード効果が「強化を1回行う」ときに、攻撃力と防御力のどちらを伸ばすか
+function pickStrengthenStat(g, p) {
+  const foe = g.opp(p);
+  const incoming = E.leaderAtkTotal(foe) - p.leaderDef;
+  const outgoing = E.leaderAtkTotal(p) - foe.leaderDef;
+  return incoming >= outgoing ? 'def' : 'atk';
 }
 
 // ---- 表裏（ヴェイン）----
@@ -258,7 +264,7 @@ const KATA_PRIORITY = {
 // ---- 場に出たとき（手札・効果どちらでも発動）----
 function onEnter(g, p, u) {
   if (u.name === 'ポルカ') {
-    if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('速攻');
+    if (p.board.some((x) => x.name === 'マルカ')) u.kw.add('突進');
   }
   refreshSide(p);
 }
@@ -266,31 +272,28 @@ function onEnter(g, p, u) {
 // ---- 召喚時（手札から使って場に出したときだけ）----
 function onSummon(g, p, u) {
   const foe = g.opp(p);
+  // おうえん：召喚時にパワーを+1する（ルール/06_キーワード能力）
+  if (u.kw.has('おうえん')) E.chargePower(g, p, 1);
   switch (u.name) {
     // ---- アグロリーゼ ----
-    case '火の子': {
-      const t = chooseDamageTarget(g, p, 1, { faceOk: false });
-      if (t) E.dealTo(g, t, 1, p, u.name);
-      p.afterburnTurn = true;
-      break;
-    }
     case '学舎の見習い':
-      if (afterburn(p)) u.atk += 2;
-      break;
-    case '教授ハルド':
-      E.chargePower(g, p, 1);
+      E.boostLeader(g, p, 1, 0);
       break;
     case 'ヴェルド': {
       const taunts = targetable(g, p).filter((x) => x.kw.has('守護'));
       if (taunts.length) {
         const t = best(taunts);
         t.hp = 0; t._killer = u.name; t._killerOwner = p.idx;
+        E.boostLeader(g, p, 2, 0);
       }
       break;
     }
     case '師ベルゼ':
       p.afterburnAlways = true;
       for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      break;
+    case 'ギズモ':
+      u.atk += 1; u.maxhp += 1; u.hp += 1;
       break;
 
     // ---- ミッドレンジ奇数エルナ ----
@@ -356,14 +359,11 @@ function onSummon(g, p, u) {
     }
 
     // ---- コントロールアルベル ----
-    case '癒しの人形': {
-      const t = chooseHealTarget(g, p);
-      if (t.type === 'unit') E.healUnit(g, t.u, 1, p, u.name);
-      else E.healLeader(g, p, 1, p, u.name);
+    case '癒しの人形':
+      E.boostLeader(g, p, 0, 1);
       break;
-    }
     case '傷ついた巡礼者':
-      E.damageUnit(g, u, 2, p, u.name);
+      E.damageUnit(g, u, 1, p, u.name);
       break;
     case '聖獣キメラ':
       E.healLeader(g, p, 2, p, u.name);
@@ -376,36 +376,27 @@ function onSummon(g, p, u) {
       }
       break;
     }
-    case '老司祭ドラン': {
-      const idx = searchDeck(p, (n) => CARD_DB[n].tag === '聖徒' && CARD_DB[n].cost <= 3,
-        (n) => SEITO_PRIORITY[n] || 0);
-      if (idx >= 0 && !E.boardFull(p)) {
-        const name = p.deck.splice(idx, 1)[0];
-        const nu = E.putUnit(g, p, name);
-        if (nu) { nu.atk += 1; nu.maxhp += 1; nu.hp += 1; }
-      }
-      p.deck = E.shuffle(p.deck, g.rng);
+    case '老司祭ドラン':
+      E.boostLeader(g, p, 3, 3);
       break;
-    }
     case '怒れる聖職者アン':
-      // 「味方全体」なのでリーダーも回復する（ルール/06）
+      // 「場全体」は敵味方のキャラクター（リーダーは含まない。ルール/06_キーワード能力 記法）
       for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
-      for (const x of p.board) E.healUnit(g, x, 3, p, u.name);
-      E.healLeader(g, p, 3, p, u.name);
+      for (const x of p.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      E.cleanup(g);
       break;
     case '偽善のミゼリア':
-      // 「敵全体」はリーダーとキャラクター
-      for (const x of foe.board.slice()) E.damageUnit(g, x, 1, p, u.name);
-      E.damageLeader(g, foe, 1, p, u.name);
-      p.spellDiscount = 99; // ターン終了時まで、次に使うスペルのコストを0にする
+      p.spellDiscount = 99; // ターン終了時まで、次に使う特技（スペル）のコストを0にする
       break;
     case '聖鳥リフルエル': {
+      const picked = [];
       for (let i = 0; i < 2; i++) {
         if (E.boardFull(p)) break;
-        const idx = searchDeck(p, (n) => CARD_DB[n].tag === '聖徒' && CARD_DB[n].cost <= 5,
+        const idx = searchDeck(p, (n) => CARD_DB[n].tag === '聖徒' && CARD_DB[n].cost <= 5 && !picked.includes(n),
           (n) => SEITO_PRIORITY[n] || 0);
         if (idx < 0) break;
         const name = p.deck.splice(idx, 1)[0];
+        picked.push(name);
         // カードテキストが「その召喚時効果を発動する」と指定している
         const nu = E.putUnit(g, p, name);
         if (nu) onSummon(g, p, nu);
@@ -557,28 +548,29 @@ function onSummon(g, p, u) {
 
     // ---- ミッドレンジガイル ----
     case 'ロダンの傭兵':
-      E.damageLeader(g, p, 1, null, null);
+      E.dealTo(g, chooseDamageTarget(g, p, 1), 1, p, u.name);
       break;
-    case '番犬ゴロ':
-      E.damageLeader(g, p, 2, null, null);
+    case '鍛冶師ドヴァル': {
+      const cand = p.board.filter((x) => x.atk > 0);
+      if (cand.length) {
+        const t = cand.slice().sort((a, b) => b.atk - a.atk)[0];
+        t.atk += unyielding(p) ? 2 : 1;
+      }
       break;
-    case '鍛冶師ドヴァル':
-      if (p.weapon) p.weapon.atk += unyielding(p) ? 3 : 2;
-      break;
+    }
     case '砦の古参兵':
       if (unyielding(p)) p.preventNext = true;
       break;
     case '剣術学校の師範':
-      E.healLeader(g, p, 5, p, u.name);
+      E.healLeader(g, p, 4, p, u.name);
       break;
-    case '裏切のグラーク':
+    case '裏切のグラーク': {
+      // 「味方全体」は自分のリーダーとキャラクターすべて（ルール/06_キーワード能力 記法）
       E.damageLeader(g, p, 3, null, null);
-      for (const x of foe.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      for (const x of p.board.slice()) E.damageUnit(g, x, 3, p, u.name);
+      E.cleanup(g);
       break;
-    case '兄ゲイン':
-      for (const x of foe.board.slice()) E.damageUnit(g, x, 4, p, u.name);
-      E.damageLeader(g, foe, 2, p, u.name);
-      break;
+    }
     default:
       break;
   }
@@ -619,16 +611,12 @@ function onDeath(g, p, u) {
       p.hand.push(u.name);
     }
   } else if (u.name === '兄ゲイン') {
-    // デッキから武器を1枚選んで装備してもよい。今の武器より強いときだけ装備する
-    const idx = searchDeck(p, (n) => CARD_DB[n].kind === 'weapon', (n) => CARD_DB[n].atk * CARD_DB[n].dur);
+    // デッキから武器カードを1枚選んでリーダーに装備する。一番攻撃力が高いものを選ぶ
+    const idx = searchDeck(p, (n) => CARD_DB[n].kind === 'weapon', (n) => CARD_DB[n].atk);
     if (idx >= 0) {
-      const d = CARD_DB[p.deck[idx]];
-      const current = p.weapon ? E.weaponAtk(p) * p.weapon.dur : 0;
-      if (d.atk * d.dur > current) {
-        const name = p.deck.splice(idx, 1)[0];
-        E.recPlay(g, p, name);
-        E.equipWeapon(g, p, name);
-      }
+      const name = p.deck.splice(idx, 1)[0];
+      E.recPlay(g, p, name);
+      E.equipWeapon(g, p, name);
       p.deck = E.shuffle(p.deck, g.rng);
     }
   }
@@ -653,6 +641,8 @@ function onTurnEnd(g, p) {
       if (p.discardedThisTurn) u.atk += 2;
     } else if (u.name === '妹リン') {
       u.hp = Math.min(u.hp, 0);
+    } else if (u.name === '兵士長サム') {
+      E.strengthenDirect(g, p, pickStrengthenStat(g, p));
     }
   }
 }
@@ -711,19 +701,6 @@ function castSpell(g, p, name, target) {
       E.cleanup(g);
       break;
     }
-    case '消えぬ焔': {
-      // 場全体（敵味方のキャラクター）に3、お互いのリーダーに1。残火でそれぞれ+1
-      const boost = afterburnForSpell(p) ? 1 : 0;
-      const dmg = 3 + boost;
-      const face = 1 + boost;
-      for (const x of foe.board.slice()) E.damageUnit(g, x, dmg, p, name);
-      for (const x of p.board.slice()) E.damageUnit(g, x, dmg, p, name);
-      E.damageLeader(g, foe, face, p, name);
-      p.leaderHp -= face;
-      E.checkLeaders(g);
-      break;
-    }
-
     // ---- ミッドレンジ奇数エルナ ----
     case '先を読む力': {
       E.dealTo(g, target || chooseDamageTarget(g, p, 1), 1, p, name);
@@ -764,12 +741,17 @@ function castSpell(g, p, name, target) {
     case '禁術・蘇生':
       reviveFromGrave(g, p, 2);
       break;
-    case '謎の日記':
-      E.dealTo(g, target || chooseDamageTarget(g, p, 4), 4, p, name);
+    case '謎の日記': {
+      // 「敵キャラクター1体まで」：リーダーは対象にならず、対象がいなくてもダメージ以外は解決する
+      const cand = targetable(g, p);
+      if (cand.length) E.dealTo(g, target || { type: 'unit', u: pickKill(cand, 4) }, 4, p, name);
       E.cleanup(g);
       E.draw(g, p, 1);
       break;
+    }
     case '死のパレード':
+      E.strengthenDirect(g, p, pickStrengthenStat(g, p));
+      E.strengthenDirect(g, p, pickStrengthenStat(g, p));
       reviveFromGrave(g, p, 3);
       reviveFromGrave(g, p, 3);
       break;
@@ -907,7 +889,7 @@ function castSpell(g, p, name, target) {
     case '踏み込み': {
       const cand = targetable(g, p);
       if (cand.length) E.damageUnit(g, pickKill(cand, 3), 3, p, name);
-      E.damageLeader(g, p, 1, null, null);
+      E.cleanup(g);
       break;
     }
     case '一騎打ち': {
@@ -919,11 +901,14 @@ function castSpell(g, p, name, target) {
       } else {
         E.damageUnit(g, pickKill(cand, 4), 4, p, name);
       }
+      E.cleanup(g);
       break;
     }
-    case '立てなくなるまで':
-      if (p.weapon) E.damageLeader(g, foe, E.weaponAtk(p), p, name);
+    case '立てなくなるまで': {
+      const dmg = E.leaderAtkTotal(p);
+      if (dmg > 0) E.dealTo(g, target || chooseDamageTarget(g, p, dmg), dmg, p, name);
       break;
+    }
     default: break;
   }
 }
@@ -931,11 +916,23 @@ function castSpell(g, p, name, target) {
 // ---- パワースキル ----
 function usePowerSkill(g, p) {
   E.recPlay(g, p, 'パワースキル');
+  const stage = E.powerSkillStage(p);
   if (p.leader === 'リーゼ') {
-    E.dealTo(g, chooseDamageTarget(g, p, 2), 2, p, 'パワースキル');
+    // 業火：第1段階1ダメージ／第2段階2ダメージ／第3段階4ダメージ
+    const dmg = stage >= 3 ? 4 : stage >= 2 ? 2 : 1;
+    E.dealTo(g, chooseDamageTarget(g, p, dmg, { faceOk: false }), dmg, p, 'パワースキル');
   } else if (p.leader === 'アルベル') {
-    for (const x of p.board) E.healUnit(g, x, 3, p, 'パワースキル');
-    E.healLeader(g, p, 3, p, 'パワースキル');
+    // 聖なる祈り：第1段階1回復／第2段階3回復／第3段階5回復+リーダーを+1/+1
+    const heal = stage >= 3 ? 5 : stage >= 2 ? 3 : 1;
+    const t = chooseHealTarget(g, p);
+    if (t.type === 'unit') E.healUnit(g, t.u, heal, p, 'パワースキル');
+    else E.healLeader(g, p, heal, p, 'パワースキル');
+    if (stage >= 3) E.boostLeader(g, p, 1, 1);
+  } else if (p.leader === 'ガイル') {
+    // 鍛錬の剣：第1段階+1/+0／第2段階+1/+1／第3段階+2/+1
+    if (stage >= 3) E.boostLeader(g, p, 2, 1);
+    else if (stage >= 2) E.boostLeader(g, p, 1, 1);
+    else E.boostLeader(g, p, 1, 0);
   } else if (p.leader === 'ヴァルカス') {
     // 吸魔：最大MP+1してMPを1回復。最大MPが10なら代わりに1枚引く
     if (fullyReleased(p)) E.draw(g, p, 1);
@@ -962,8 +959,6 @@ function usePowerSkill(g, p) {
   } else if (p.leader === 'シュリ') {
     E.draw(g, p, 1);
     p.chainBonus += 1;
-  } else if (p.leader === 'ガイル') {
-    E.equipWeapon(g, p, '鍛錬の剣');
   } else if (p.leader === 'ヴェイン') {
     // 揺れる魂：裏返してよい。白なら味方1体3回復とリーダー1回復、黒なら敵キャラクター1体に3と敵リーダーに1
     const foe = g.opp(p);
@@ -987,15 +982,16 @@ function usePowerSkill(g, p) {
   E.cleanup(g);
 }
 
-// ---- 武器が壊れたとき ----
-function onWeaponBreak(g, p, w) {
-  if (w.name === '研ぎ直した長剣') E.draw(g, p, 1);
+// ---- 武器を装備したとき ----
+function onWeaponEquip(g, p, name) {
+  if (name === '兵士の剣') E.draw(g, p, 1);
+  else if (name === 'ドヴァルの遺作') {
+    E.dealTo(g, chooseDamageTarget(g, p, 4), 4, p, name);
+  }
 }
 
-// ---- 武器で攻撃したとき（戦闘ダメージのあと）----
-function onLeaderAttacked(g, p, w) {
-  if (w.name === '呪剣ノア' && isWhite(p)) E.healLeader(g, p, 2, p, w.name);
-}
+// ---- 武器が壊れたとき ----
+function onWeaponBreak(g, p, w) { /* 該当カードなし */ }
 
 // ---- キャラクターが攻撃されたとき（戦闘ダメージの前）----
 function onAttacked(g, attackerOwner, target) {
@@ -1005,15 +1001,19 @@ function onAttacked(g, attackerOwner, target) {
 // ---- 武器の攻撃力の常在修正 ----
 function weaponAtkMod(p) {
   const w = p.weapon;
-  if (w.name === '鉄の大剣' && unyielding(p)) return 2;
   if (w.name === '呪剣ノア' && isBlack(p)) return 2;
   return 0;
 }
 
+// ---- ステージをレストにして発動したとき ----
+function onStageActivate(g, p, st) {
+  if (st.name === '消えぬ焔') E.boostLeader(g, p, 2, 0);
+}
+
 // ---- リーダーが受けるダメージの修正 ----
-// ドヴァルの遺作：自分のターン中は-3（0未満にならない）。砦の古参兵：実際に1回防ぐまで残る
+// 兄ゲイン：場にいるかぎり-3（0未満にならない）。砦の古参兵：実際に1回防ぐまで残る
 function modifyLeaderDamage(g, target, amt) {
-  if (target.weapon && target.weapon.name === 'ドヴァルの遺作' && g.turnPlayer === target.idx) {
+  if (target.board.some((u) => u.name === '兄ゲイン')) {
     amt = Math.max(0, amt - 3);
   }
   if (amt > 0 && target.preventNext) {
@@ -1025,9 +1025,9 @@ function modifyLeaderDamage(g, target, amt) {
 
 module.exports = {
   onEnter, onSummon, onDeath, onTurnStart, onTurnEnd, onPowerLink, onLeaderHealed,
-  onWeaponBreak, onLeaderAttacked, onAttacked, weaponAtkMod, modifyLeaderDamage,
+  onWeaponEquip, onWeaponBreak, onAttacked, onStageActivate, weaponAtkMod, modifyLeaderDamage,
   castSpell, usePowerSkill, chooseDamageTarget, threat, best, targetable,
-  lookOdd, lookEven, topCost, afterburn, afterburnForSpell, handCostMod,
+  lookOdd, lookEven, topCost, afterburn, handCostMod,
   released, fullyReleased, chooseSacrifice, graveReturnPick, burnDownTargets,
   unyielding, chain, isBlack, isWhite, wantBlack, discardPriority,
 };
