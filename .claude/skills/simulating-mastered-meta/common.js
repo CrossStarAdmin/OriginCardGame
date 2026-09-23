@@ -7,7 +7,13 @@ const E = require(path.join(CORE, 'engine.js'));
 const K = require(path.join(CORE, 'knobs.js'));
 const { playGame, runMatch } = require(path.join(CORE, 'match.js'));
 
-const DECK_NAMES = Object.keys(DECKS);
+// 環境変数 MASTERED_DECKS（カンマ区切り）で対象デッキを絞れる。未指定なら全デッキ
+const DECK_NAMES = process.env.MASTERED_DECKS
+  ? process.env.MASTERED_DECKS.split(',').map((d) => {
+    if (!DECKS[d]) throw new Error(`不明なデッキ: ${d}`);
+    return d;
+  })
+  : Object.keys(DECKS);
 const STYLES = K.SPEC.attackStyle.choices; // 攻めから守りの順
 const EVAL_SEED_BASE = 900001;             // 評価専用。学習のシードとは混ぜない
 

@@ -258,22 +258,23 @@ function canAttackUnit(u) {
 }
 
 // キャラクターをレストにしてリーダーを強化できるか（召喚酔い中・行動済みは不可）
+// 勇気は出したターンから強化できる（ルール/06_キーワード能力）
 function canStrengthen(u) {
-  return !u.attacked && !u.frozen && !u.sick;
+  return !u.attacked && !u.frozen && (!u.sick || u.kw.has('勇気'));
 }
 
 function strengthen(g, p, u, statName) {
   if (!canStrengthen(u)) return false;
   u.attacked = true;
-  strengthenDirect(g, p, statName);
+  freeStrengthen(g, p, statName);
+  p.strengthenCount++;
   return true;
 }
 
-// カード効果が「強化を1回行う」と明示するトリガー用。キャラクターの行動状態は問わない
-function strengthenDirect(g, p, statName) {
+// 自由強化：攻撃か防御を+1する。レストにせず、パワースキルの段階も進めない（ルール/06_キーワード能力）
+function freeStrengthen(g, p, statName) {
   if (statName === 'def') p.leaderDef = Math.max(0, p.leaderDef + 1);
   else p.leaderAtk = Math.max(0, p.leaderAtk + 1);
-  p.strengthenCount++;
 }
 
 function attackUnit(g, p, u, target) {
@@ -340,6 +341,7 @@ function startPhase(g, p) {
   p.powerChargedThisTurn = false;
   p.holyUsedThisTurn = false;
   p.spellsThisTurn = 0;
+  p.healedLeaderThisTurn = false;
   p.spellDiscount = 0;
   p.cardsThisTurn = 0;
   p.chainBonus = 0;
@@ -422,7 +424,7 @@ module.exports = {
   setEffects, draw, endGame, checkLeaders, damageLeader, damageUnit, dealTo,
   healLeader, healUnit, cleanup, boardFull, putUnit, gainMaxMp, hasTaunt, chargePower,
   boostLeader, powerSkillStage,
-  canAttackUnit, canStrengthen, strengthen, strengthenDirect, attackUnit,
+  canAttackUnit, canStrengthen, strengthen, freeStrengthen, attackUnit,
   weaponAtk, equipWeapon, breakWeapon, leaderAtkTotal, leaderDefTotal,
   putStage, activateStage,
   startPhase, endPhase, leaderAutoAttack, cardCost, payAndPlay,

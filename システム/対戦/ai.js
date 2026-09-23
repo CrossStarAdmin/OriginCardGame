@@ -96,7 +96,7 @@ function cardScoreBase(g, p, name) {
       if (d.kw.includes('突進')) s += K.knob(g, p, 'rushValue');
       if (d.kw.includes('守護')) s += K.knob(g, p, 'tauntValue');
       if (d.kw.includes('必殺')) s += K.knob(g, p, 'deathtouchValue');
-      if (d.kw.includes('おうえん')) s += 1.5;
+      if (d.kw.includes('ブースト')) s += 1.5;
     }
     const targets = FX.targetable(g, p);
     switch (name) {
@@ -107,7 +107,7 @@ function cardScoreBase(g, p, name) {
       case 'マルカ': s += p.hand.includes('ポルカ') ? 3 : 0; break;
       case 'ポルカ': s += p.board.some((u) => u.name === 'マルカ') ? 3 : 0; break;
       case '火口の洞守り': s += 1; break;
-      case 'ヴェルド': s += enemyTaunts.length ? 7 : 0; break;
+      case '憤怒のヴェルド': s += FX.targetable(g, p).length ? 7 : 0; break;
       case 'ギズモ': s += 1; break;
       // 召喚時の全体3点＋死亡時の顔5点＋以降ずっと残火ON
       case '師ベルゼ': s += 4 + Math.min(6, enemyUnits.filter((u) => u.hp <= 3).length * 2); break;
@@ -126,9 +126,9 @@ function cardScoreBase(g, p, name) {
       // コントロールアルベル
       case '癒しの人形': s += 1; break;
       case '傷ついた巡礼者': s -= 1; break;
-      case '長屋の病人': s += enemyUnits.length ? 2 : 1; break;
+      case '長屋の病人': s += 2; break;
       case '怪我をした修道女キーラ': s += 3; break;
-      case '聖獣キメラ': s += 2 + (enemyUnits.length ? 1 : 0); break;
+      case '聖獣キメラ': s += 2 + (targets.length ? 3 : 0); break;
       case '聖騎士ザキエル': s += bigThreat ? 7 : (enemyUnits.length ? 2 : 0); break;
       case '老司祭ドラン': s += 3; break;
       // 場全体（敵味方とも）に3点。自分の場も巻き込むので、相手のほうが多いときだけ高く見る
@@ -142,14 +142,14 @@ function cardScoreBase(g, p, name) {
       case '聖鳥リフルエル': s += 8; break;
       // ランプヴァルカス
       case '無様な魔物': s += 1; break;
-      case '檻の番人': s += FX.released(p) ? 4 : 0; break;
+      case '檻の番人': s += 1.5 + (FX.released(p) ? 1.5 : 0); break;
       case '玉座の使い魔': s += p.deck.some((n) => CARD_DB[n].cost >= 8) ? 2 : 0; break;
-      case '眷属': s += FX.released(p) ? 3 : 1; break;
-      case '記憶喰らい': s += (foe.power > 0 ? 1 : 0) + (p.power === 2 ? 1 : 0); break;
-      case '魔軍のヴェイン': s += FX.fullyReleased(p) ? 3 : 0; break;
+      case '眷属': s += 1; break;
+      case '記憶喰らい': s += foe.power > 0 ? 1 : 0; break;
+      case '魔軍のヴェイン': s += (FX.released(p) ? 1.5 : 0) + (FX.fullyReleased(p) ? 2 : 0); break;
       case '霊脈喰らい': s += 3; break;
-      case '六罪 ヴェルド': s += enemyUnits.filter((u) => u.hp <= 3).length * 2; break;
-      case '六罪 ミゼリア': s += reviveBest(p, 5) * 0.6; break;
+      case '六罪 ヴェルド': s += 4 + enemyUnits.filter((u) => u.hp <= 3).length * 2; break;
+      case '六罪 ミゼリア': s += reviveBest(p, 9) * 0.6; break;
       case '六罪 ノクス': s += 4; break;
       case '魔王ヴァルカス': s += 4; break;
       // アグロトバル
@@ -190,16 +190,17 @@ function cardScoreBase(g, p, name) {
       case '魔軍の伝令': s += 2; break;
       case '黒いヴェイン': s += FX.isBlack(p) ? 3 : 0; break;
       case '魔軍一の剣': s += 2; break;
-      case '六罪 グラーク': s += targets.length ? 3 + Math.min(4, threat(FX.best(targets)) * 0.3) : -2; break;
+      case '六罪 グラーク': s += targets.length ? 3 + Math.min(4, threat(FX.best(targets)) * 0.3) : 0; break;
       case '六罪 ガドル': s += p.board.length * 2; break;
       case '六罪 ネフィス': s += 2 + enemyUnits.filter((u) => u.hp <= 2).length * 2; break;
       // ミッドレンジガイル
-      case '鍛冶師ドヴァル': s += p.board.some((x) => x.atk > 0) ? (FX.unyielding(p) ? 2 : 1) : -1; break;
-      case 'ロダンの傭兵': s += 1; break;
+      case '鍛冶師ドヴァル': s += FX.unyielding(p) ? 3 : 2; break;
+      case 'ロダンの傭兵': s += FX.targetable(g, p).length ? 2 : 0; break;
+      case '傭兵仲間リナ': s += enemyUnits.filter((u) => u.hp <= (FX.unyielding(p) ? 2 : 1)).length * 2; break;
       case '砦の古参兵': s += FX.unyielding(p) && !p.preventNext ? 2 : 0; break;
       case '兵士長サム': s += 3; break;
       case '剣術学校の師範': s += p.leaderHp <= 18 ? 3 : 0; break;
-      case '裏切のグラーク': s = p.leaderHp <= 5 ? -100 : s + enemyUnits.filter((u) => u.hp <= 3).length * 2.5 - 1; break;
+      case '裏切りのグラーク': s = p.leaderHp <= 5 ? -100 : s + enemyUnits.filter((u) => u.hp <= 3).length * 2.5 - 1; break;
       case '兄ゲイン': s += 3; break;
       default: break;
     }
@@ -237,21 +238,24 @@ function cardScoreBase(g, p, name) {
     }
     // ランプヴァルカス
     case '貪りの供物': {
-      if (!p.board.length || p.maxMp >= E.MAX_MP_CAP) return -100;
+      if (!p.board.length) return -100;
       const sac = FX.chooseSacrifice(p);
       const bonus = { '霊脈喰らい': 4, '眷属': 2, '無様な魔物': 2 }[sac.name] || 0;
-      return (p.maxMp <= 7 ? 3 : 1) + bonus - (bonus ? 0 : sac.value * 0.5);
+      const mp = Math.min(E.MAX_MP_CAP, p.maxMp + 1);
+      // 解放・全解放の自由強化
+      const boost = (mp >= 8 ? 1.5 : 0) + (mp >= 10 ? 1.5 : 0);
+      const ramp = p.maxMp >= E.MAX_MP_CAP ? 0 : (p.maxMp <= 7 ? 3 : 1);
+      if (!ramp && !boost) return -100;
+      return ramp + boost + bonus - (bonus ? 0 : sac.value * 0.5);
     }
-    case '魔王の復活': {
-      const pool = FX.graveReturnPick(p, false);
-      if (!pool.length) return -100;
-      const n = FX.released(p) ? 2 : 1;
-      return 1 + pool.slice(0, n).reduce((a, x) => a + x.v * 0.4, 0);
-    }
+    case '魔王の復活': return 1.5 + (FX.released(p) ? 1.5 : 0) + (FX.fullyReleased(p) ? 1.5 : 0);
     case '王の一瞥': {
-      const kills = enemyUnits.filter((u) => u.hp <= 6).length;
-      if (!kills) return -100;
-      return kills >= 2 ? 3 + kills * 3 : (bigThreat ? 3 : -1);
+      // 場全体7ダメージ。自分のキャラクターも巻き込む
+      const kills = enemyUnits.filter((u) => u.hp <= 7);
+      if (!kills.length) return -100;
+      const lost = p.board.filter((u) => u.hp <= 7).reduce((a, u) => a + (u.atk + u.hp) * 0.5, 0);
+      const gain = kills.length >= 2 ? 3 + kills.length * 3 : (bigThreat ? 3 : -1);
+      return gain - lost;
     }
     // アグロトバル
     case '薬草の仕入れ': return 1.5 + (p.hand.includes('捨て値の毒') ? 1 : 0);
@@ -327,11 +331,13 @@ function cardScoreBase(g, p, name) {
     case '一騎打ち': {
       const t = FX.targetable(g, p);
       if (!t.length) return -100;
-      if (FX.unyielding(p)) return 3 + Math.min(4, threat(FX.best(t)) * 0.4);
-      return t.some((u) => u.hp <= 4) ? 3 : 0.5;
+      const gain = 3 + Math.min(4, threat(FX.best(t)) * 0.4);
+      if (FX.unyielding(p)) return gain;
+      // 味方リーダーに2ダメージ
+      return p.leaderHp <= 2 ? -100 : gain - 1;
     }
     case '立てなくなるまで': {
-      const a = E.leaderAtkTotal(p);
+      const a = FX.tatenakuDamage(p);
       if (a <= 0) return -100;
       return foe.leaderHp <= a ? 100 : a * 0.6;
     }
@@ -359,7 +365,7 @@ function faceBurnOptions(g, p) {
     else if (n === '先を読む力') dmg = 1;
     else if (n === '傲慢のノクス') dmg = FX.lookOdd(p) ? 4 : 0;
     else if (n === '毒入りの霊薬') dmg = 4;
-    else if (n === '立てなくなるまで') dmg = E.leaderAtkTotal(p);
+    else if (n === '立てなくなるまで') dmg = FX.tatenakuDamage(p);
     else if (n === 'ドヴァルの遺作') dmg = 4;
     else if (n === '六罪 ネフィス') dmg = 2;
     else if (n === '薬草') dmg = p.poisonHerbs ? 1 : 0;
@@ -508,6 +514,10 @@ function shouldUseSkill(g, p) {
   if (p.leader === 'ガイル') return true;
   if (p.leader === 'エルナ') return p.hand.length <= 8;
   if (p.leader === 'アルベル') {
+    // 次のターンに聖鳥リフルエルを出せるなら、パワーを残して癒し状態を作る回復に回す
+    const rifrel = E.cardCost(p, '聖鳥リフルエル');
+    if (p.hand.includes('聖鳥リフルエル') && rifrel > p.mp && rifrel <= Math.min(10, p.maxMp + 1)) return false;
+    if (p.hand.includes('聖鳥リフルエル') && rifrel <= p.mp && !FX.soothed(p) && p.leaderHp < 25) return true;
     const unitHeal = p.board.reduce((a, u) => a + Math.min(3, u.maxhp - u.hp), 0);
     return E.powerSkillStage(p) >= 3 || p.leaderHp <= 22 || unitHeal >= 3;
   }
