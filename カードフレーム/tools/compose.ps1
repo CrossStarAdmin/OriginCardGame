@@ -46,6 +46,38 @@ function ConvertTo-Color([string]$hex) {
   [System.Drawing.ColorTranslator]::FromHtml($hex)
 }
 
+# 効果テキストで色を付けるキーワード。長い語から当てる（「自由強化」を「強化」より先に）
+$Keywords = @()
+if ($F.keywords) {
+  foreach ($cat in $F.keywords.categories) {
+    foreach ($w in $cat.words) { $Keywords += [pscustomobject]@{ word = [string]$w; color = [string]$cat.color } }
+  }
+}
+$Keywords = @($Keywords | Sort-Object { $_.word.Length } -Descending)
+
+# 色を付けるキーワードを囲む「」は外す
+function Remove-KeywordBrackets([string]$text) {
+  foreach ($k in $Keywords) { $text = $text.Replace("「$($k.word)」", $k.word) }
+  $text
+}
+
+# キーワードの出現位置。重ならないよう左から順に、その位置で一番長い語を取る
+function Find-Keywords([string]$text) {
+  $hits = @()
+  $i = 0
+  while ($i -lt $text.Length) {
+    $hit = $null
+    foreach ($k in $Keywords) {
+      if ($i + $k.word.Length -le $text.Length -and $text.Substring($i, $k.word.Length) -eq $k.word) { $hit = $k; break }
+    }
+    if ($hit) {
+      $hits += [pscustomobject]@{ start = $i; length = $hit.word.Length; color = $hit.color }
+      $i += $hit.word.Length
+    } else { $i++ }
+  }
+  $hits
+}
+
 # ファイルを掴んだままにしないよう、バイト列から読む
 function Read-Image([string]$path) {
   $bytes = [System.IO.File]::ReadAllBytes($path)
@@ -94,6 +126,62 @@ function Draw-Text($g, [string]$text, $slot, $fontSpec, [string]$align, [string]
   $brush = New-Object System.Drawing.SolidBrush (ConvertTo-Color $slot.color)
   $g.DrawString($text, $font, $brush, $rect, $format)
   $brush.Dispose(); $font.Dispose(); $format.Dispose()
+}
+
+# キーワードだけ色を変えて描く。折り返しと文字の大きさは Draw-Text と同じ
+# 地の文はキーワードの範囲を除いて描き、キーワードはその範囲だけに絞って色を変えて描く
+function Draw-RichText($g, [string]$text, $slot, $fontSpec, [string]$align, [string]$valign) {
+  if ([string]::IsNullOrWhiteSpace($text)) { return }
+  $hits = @(Find-Keywords $text)
+  if (-not $hits.Count) { Draw-Text $g $text $slot $fontSpec $align $valign; return }
+
+  $rect = New-Object System.Drawing.RectangleF ([float]$slot.x), ([float]$slot.y), ([float]$slot.width), ([float]$slot.height)
+  $identity = New-Object System.Drawing.Drawing2D.Matrix
+
+  # キーワードが行をまたいだら、その前で改行して測り直す
+  for ($try = 0; $try -lt 8; $try++) {
+    $format = New-Format $align $valign
+    $font = Get-FittedFont $g $text $fontSpec ([int]$slot.size) ([int]$slot.width) ([int]$slot.height) $format
+    # 位置を測れる範囲は1回32個まで
+    $regions = @()
+    for ($b = 0; $b -lt $hits.Count; $b += 32) {
+      $chunk = @($hits[$b..([Math]::Min($b + 31, $hits.Count - 1))])
+      $ranges = [System.Drawing.CharacterRange[]]@($chunk | ForEach-Object { New-Object System.Drawing.CharacterRange $_.start, $_.length })
+      $format.SetMeasurableCharacterRanges($ranges)
+      $regions += @($g.MeasureCharacterRanges($text, $font, $rect, $format))
+    }
+    $split = -1
+    for ($i = 0; $i -lt $hits.Count; $i++) {
+      $rows = @($regions[$i].GetRegionScans($identity) | ForEach-Object { [int]$_.Y } | Sort-Object -Unique)
+      if ($rows.Count -gt 1) { $split = $i; break }
+    }
+    if ($split -lt 0 -or $try -eq 7) { break }
+    $text = $text.Insert($hits[$split].start, "`n")
+    $hits = @(Find-Keywords $text)
+    foreach ($r in $regions) { $r.Dispose() }
+    $font.Dispose(); $format.Dispose()
+  }
+  $identity.Dispose()
+  $all = New-Object System.Drawing.Region
+  $all.MakeEmpty()
+  foreach ($r in $regions) { $all.Union($r) }
+
+  $base = New-Object System.Drawing.SolidBrush (ConvertTo-Color $slot.color)
+  $g.SetClip($rect)
+  $g.ExcludeClip($all)
+  $g.DrawString($text, $font, $base, $rect, $format)
+  $g.ResetClip()
+  $base.Dispose()
+
+  for ($i = 0; $i -lt $hits.Count; $i++) {
+    $brush = New-Object System.Drawing.SolidBrush (ConvertTo-Color $hits[$i].color)
+    $g.SetClip($regions[$i], [System.Drawing.Drawing2D.CombineMode]::Replace)
+    $g.DrawString($text, $font, $brush, $rect, $format)
+    $g.ResetClip()
+    $brush.Dispose()
+  }
+  foreach ($r in $regions) { $r.Dispose() }
+  $all.Dispose(); $font.Dispose(); $format.Dispose()
 }
 
 function New-RoundedRect([int]$x, [int]$y, [int]$w, [int]$h, [int]$r) {
@@ -178,7 +266,7 @@ function Draw-EffectBox($g, [string]$text, [string]$flavor, $slot, $fontSpec) {
     color  = $slot.color
   }
   if (-not $hasFlavor) {
-    Draw-Text $g $text $inner $fontSpec $slot.align $slot.valign
+    Draw-RichText $g $text $inner $fontSpec $slot.align $slot.valign
     return
   }
 
@@ -202,7 +290,7 @@ function Draw-EffectBox($g, [string]$text, [string]$flavor, $slot, $fontSpec) {
   }
   Draw-FlavorRule $g $inner.x ($flavorSlot.y - [int]([int]$slot.flavorGap / 2)) $inner.width $slot.flavorRuleColor
   Draw-Text $g $flavor $flavorSlot $fontSpec $slot.align 'Far'
-  Draw-Text $g $text $effectSlot $fontSpec $slot.align $slot.valign
+  Draw-RichText $g $text $effectSlot $fontSpec $slot.align $slot.valign
 }
 
 # 宝石と丸の中の数字。縁取りを付けて背景から浮かせる
@@ -243,7 +331,7 @@ function Compose-Card($card, [string]$artPath, [string]$destPath) {
   $effectText = ($card.effects -join "`n")
 
   # 効果の板は枠より先に敷く。枠の飾りが上に来る
-  if ($card.type -ne 'リーダー') { Draw-EffectBox $g $effectText $card.flavor $spec.effectBox $Fonts.text }
+  if ($card.type -ne 'リーダー') { Draw-EffectBox $g (Remove-KeywordBrackets $effectText) $card.flavor $spec.effectBox $Fonts.text }
 
   $g.DrawImage($frame, 0, 0, $frame.Width, $frame.Height)
 

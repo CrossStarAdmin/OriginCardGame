@@ -71,11 +71,11 @@ const CARD_DB = {
   '記憶喰らい':     { kind: 'unit', cost: 3, atk: 3, hp: 4, kw: ['突進'] },
   '魔軍のヴェイン': { kind: 'unit', cost: 4, atk: 5, hp: 2, kw: ['突進', '必殺'] },
   '霊脈喰らい':     { kind: 'unit', cost: 5, atk: 4, hp: 4 },
-  '六罪 ヴェルド':  { kind: 'unit', cost: 7, atk: 4, hp: 3, kw: ['勇気'] },
+  '六罪 ヴェルド':  { kind: 'unit', cost: 7, atk: 4, hp: 3, kw: ['勇気'], tag: '六罪' },
   '王の一瞥':       { kind: 'spell', cost: 7 },
-  '六罪 グラーク':  { kind: 'unit', cost: 7, atk: 7, hp: 7, kw: ['守護'] },
-  '六罪 ミゼリア':  { kind: 'unit', cost: 9, atk: 3, hp: 4, kw: ['必殺'] },
-  '魔王ヴァルカス': { kind: 'unit', cost: 10, atk: 8, hp: 8, kw: ['突進', '勇気', '必殺', '守護'] },
+  '六罪 グラーク':  { kind: 'unit', cost: 7, atk: 7, hp: 7, kw: ['守護'], tag: '六罪' },
+  '六罪 ミゼリア':  { kind: 'unit', cost: 9, atk: 3, hp: 4, kw: ['必殺'], tag: '六罪' },
+  '魔王ヴァルカス': { kind: 'unit', cost: 10, atk: 8, hp: 8, kw: ['突進', '勇気', '必殺', '守護'], tag: '大魔王' },
 
   // ---- アグロトバル（プリースト）----
   // token：デッキの外から加わるカード。使っても捨てても墓地へ置かず消える
