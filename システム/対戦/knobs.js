@@ -2,6 +2,9 @@
 // p.knobs に { base: {...}, vs: { 相手デッキ名: {..., cards: {...}} }, cards: { カード名: 評価の加減 } } を渡す
 // 渡さなかった値は既定値になる。既定値だけなら固定AIと同じ打ち方になる
 
+// パワースキルをカードより先に使うリーダー（練気の連携、面の切り替え、リーダー強化、薬草）。skillEarly の既定値
+const EARLY_SKILL = new Set(['トバル', 'シュリ', 'ガイル', 'アルベル', 'ヴェイン']);
+
 // 既定値。デッキの style で変わるものは style ごとに持つ
 const DEFAULTS = {
   mulliganKeepMax: { aggro: 3, midrange: 4, control: 4 }, // マリガンで残す最大コスト
@@ -14,6 +17,9 @@ const DEFAULTS = {
   followupWeight: 1,            // 同じターンに続けて使える札を見る度合い
   playThreshold: 0,             // この評価以下のカードは使わずにターンを終える
   powerSlack: 2.5,              // パワーを溜めてもプレイの質がこれ以上落ちないなら先に溜める
+  chargeAtTwo: 1,               // 1ならパワー2のとき、リーダー別の条件で手札より先に溜める
+  skillEarly: null,             // 1ならパワースキルを手札を使う前に使う。null ならリーダーごとの既定（EARLY_SKILL）
+  skillMinStage: 1,             // パワースキルをこの段階になるまで使わずに残す
   raceMargin: 0,                // aggro：相手より何ターン遅いと盤面を捌き始めるか
   aggroBigTradeThreat: 9,       // aggro：これ以上の脅威は顔より先に倒す
   midrangeTradeThreat: 6,       // midrange：これ以上の脅威は顔より先に倒す
@@ -34,6 +40,9 @@ const SPEC = {
   followupWeight: { min: 0, max: 2, step: 0.25 },
   playThreshold: { min: -3, max: 3, step: 0.5 },
   powerSlack: { min: 0, max: 6, step: 0.5 },
+  chargeAtTwo: { min: 0, max: 1, step: 1 },
+  skillEarly: { min: 0, max: 1, step: 1 },
+  skillMinStage: { min: 1, max: 3, step: 1 },
   raceMargin: { min: -2, max: 2, step: 1 },
   aggroBigTradeThreat: { min: 5, max: 14, step: 1 },
   midrangeTradeThreat: { min: 3, max: 12, step: 1 },
@@ -55,6 +64,7 @@ function knob(g, p, key) {
   if (v === undefined) v = DEFAULTS[key];
   if (v !== null && typeof v === 'object') v = v[p.style];
   if (key === 'attackStyle' && v === null) v = p.style;
+  if (key === 'skillEarly' && v === null) v = EARLY_SKILL.has(p.leader) ? 1 : 0;
   return v;
 }
 
@@ -68,4 +78,4 @@ function cardOffset(g, p, name) {
   return 0;
 }
 
-module.exports = { DEFAULTS, SPEC, knob, cardOffset };
+module.exports = { DEFAULTS, SPEC, EARLY_SKILL, knob, cardOffset };

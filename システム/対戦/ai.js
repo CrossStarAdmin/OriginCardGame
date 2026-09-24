@@ -6,9 +6,6 @@ const K = require('./knobs.js');
 
 const threat = FX.threat;
 
-// パワースキルをカードより先に使うリーダー（練気の連携、面の切り替え、リーダー強化、薬草）
-const EARLY_SKILL = new Set(['トバル', 'シュリ', 'ガイル', 'アルベル', 'ヴェイン']);
-
 // 武器の評価。今の武器を上書きして損をするなら使わない（耐久力は廃止。単純に攻撃力で比べる）
 function weaponScore(g, p, name) {
   const d = CARD_DB[name];
@@ -480,7 +477,7 @@ function bestPlayScore(g, p, mpLimit) {
 
 function chargePowerFirst(g, p) {
   if (p.power >= 3 || p.mp < 1 || p.powerChargedThisTurn) return false;
-  if (p.power === 2) {
+  if (p.power === 2 && K.knob(g, p, 'chargeAtTwo') >= 1) {
     if (p.leader === 'リーゼ' && (g.opp(p).leaderHp <= 4 || p.mp >= 3)) return true;
     if (p.leader === 'アルベル') return true;
     if (p.leader === 'ガイル') return true;
@@ -510,6 +507,7 @@ function powerPhase(g, p) {
 }
 
 function shouldUseSkill(g, p) {
+  if (E.powerSkillStage(p) < K.knob(g, p, 'skillMinStage')) return false;
   if (p.leader === 'リーゼ') return true;
   if (p.leader === 'ガイル') return true;
   if (p.leader === 'エルナ') return p.hand.length <= 8;
@@ -668,7 +666,7 @@ function takeTurn(g, p) {
     }
   }
 
-  if (p.power === 3 && EARLY_SKILL.has(p.leader) && shouldUseSkill(g, p)) {
+  if (p.power === 3 && K.knob(g, p, 'skillEarly') >= 1 && shouldUseSkill(g, p)) {
     FX.usePowerSkill(g, p);
     if (g.over) return;
   }

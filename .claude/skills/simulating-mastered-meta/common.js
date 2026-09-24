@@ -42,6 +42,7 @@ function effective(deck, k, opp, key) {
   if (v === undefined) v = K.DEFAULTS[key];
   if (v !== null && typeof v === 'object') v = v[DECKS[deck].style];
   if (key === 'attackStyle' && v === null) v = DECKS[deck].style;
+  if (key === 'skillEarly' && v === null) v = K.EARLY_SKILL.has(DECKS[deck].leader) ? 1 : 0;
   return v;
 }
 
@@ -52,19 +53,28 @@ function effectiveCard(k, opp, name) {
 }
 
 // 直す案を1つ当てた新しいつまみを返す。学習は相手デッキ別の範囲にだけ書く
+// 範囲の端で値が変わらない案は、元と同じつまみを返す
 function applyProposal(deck, k, opp, prop) {
   const out = cloneKnobs(k);
-  const vs = out.vs[opp] || (out.vs[opp] = {});
   if (prop.card) {
     const spec = K.SPEC.cardOffset;
+    const now = effectiveCard(k, opp, prop.card);
+    const next = clamp(round2(now + prop.delta), spec.min, spec.max);
+    if (next === now) return out;
+    const vs = out.vs[opp] || (out.vs[opp] = {});
     vs.cards = vs.cards || {};
-    vs.cards[prop.card] = clamp(round2(effectiveCard(k, opp, prop.card) + prop.delta), spec.min, spec.max);
+    vs.cards[prop.card] = next;
   } else if (prop.key === 'attackStyle') {
     const i = STYLES.indexOf(effective(deck, k, opp, 'attackStyle'));
-    vs.attackStyle = STYLES[clamp(i + prop.dir, 0, STYLES.length - 1)];
+    const j = clamp(i + prop.dir, 0, STYLES.length - 1);
+    if (j === i) return out;
+    (out.vs[opp] || (out.vs[opp] = {})).attackStyle = STYLES[j];
   } else {
     const spec = K.SPEC[prop.key];
-    vs[prop.key] = clamp(round2(effective(deck, k, opp, prop.key) + prop.delta), spec.min, spec.max);
+    const now = effective(deck, k, opp, prop.key);
+    const next = clamp(round2(now + prop.delta), spec.min, spec.max);
+    if (next === now) return out;
+    (out.vs[opp] || (out.vs[opp] = {}))[prop.key] = next;
   }
   return out;
 }

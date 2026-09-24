@@ -10,18 +10,43 @@ const LABELS = {
   LATE_FLOOD: '終盤に軽いカードが手札に3枚以上余った',
   CLOSE_RACE_LOSS: 'あと少しで削り切れる所まで行って負けた',
   OVERRUN_LOSS: '相手をほとんど削れずに押し切られた',
+  SKILL_LOW_STAGE: 'パワースキルを第1段階で2回以上使った',
+  SKILL_HELD: 'パワー3のまま手番を終えたことが2回以上あった',
+  SKILL_UNUSED: '6手番以上戦ってパワースキルを1回も使わなかった',
 };
+
+// パワーの使い方を動かす案。反省に無いときも1対面に1案は必ず試す
+const POWER_PROPOSALS = [
+  { key: 'chargeAtTwo', delta: 1 }, { key: 'chargeAtTwo', delta: -1 },
+  { key: 'skillEarly', delta: 1 }, { key: 'skillEarly', delta: -1 },
+  { key: 'skillMinStage', delta: 1 }, { key: 'skillMinStage', delta: -1 },
+  { key: 'powerSlack', delta: 0.5 }, { key: 'powerSlack', delta: -0.5 },
+];
 
 function labelOf(finding) {
   if (finding.startsWith('STUCK:')) return `「${finding.slice(6)}」を使えるのに抱えたまま終わった`;
   return LABELS[finding];
 }
 
-// learnerSeat の手番の終わりごとに、MPの残りと手札を記録する
+function skillCount(g, p) {
+  const s = g.stats[p.deckName] && g.stats[p.deckName]['パワースキル'];
+  return s ? s.played : 0;
+}
+
+// learnerSeat の手番ごとに、MPの残り・手札・パワースキルを使った段階を記録する
 function makeRecorder(learnerSeat) {
-  const rec = { turns: [], held: {} };
+  const rec = { turns: [], held: {}, skillStages: [] };
+  let before = null;
   const observe = (g, p, phase) => {
-    if (p.idx !== learnerSeat || phase !== 'end') return;
+    if (p.idx !== learnerSeat) return;
+    if (phase === 'start') {
+      before = { skills: skillCount(g, p), stage: C.E.powerSkillStage(p) };
+      return;
+    }
+    if (phase !== 'end') return;
+    if (before) {
+      for (let i = before.skills; i < skillCount(g, p); i++) rec.skillStages.push(before.stage);
+    }
     const foe = g.opp(p);
     const playable = p.hand.some((n) => C.E.cardCost(p, n) <= p.mp
       && !(C.CARD_DB[n].kind === 'unit' && C.E.boardFull(p)));
@@ -32,6 +57,7 @@ function makeRecorder(learnerSeat) {
       board: p.board.length,
       foeHp: foe.leaderHp,
       cheapInHand: p.hand.filter((n) => C.CARD_DB[n].cost <= 2).length,
+      power: p.power,
     });
     for (const n of new Set(p.hand)) {
       if (C.CARD_DB[n].cost <= p.maxMp) rec.held[n] = (rec.held[n] || 0) + 1;
@@ -52,6 +78,9 @@ function reflectGame(result, rec) {
   if (rec.turns.some((t) => t.turn >= LATE_TURN && t.cheapInHand >= 3)) found.push('LATE_FLOOD');
   if (!win && foe.leaderHp <= 5) found.push('CLOSE_RACE_LOSS');
   if (!win && foe.leaderHp >= 15) found.push('OVERRUN_LOSS');
+  if (rec.skillStages.filter((s) => s === 1).length >= 2) found.push('SKILL_LOW_STAGE');
+  if (rec.turns.filter((t) => t.power === 3).length >= 2) found.push('SKILL_HELD');
+  if (rec.turns.length >= 6 && rec.skillStages.length === 0) found.push('SKILL_UNUSED');
   for (const n of new Set(p.hand)) {
     if ((rec.held[n] || 0) >= 2) found.push('STUCK:' + n);
   }
@@ -79,6 +108,9 @@ function rulesFor(finding, style) {
     case 'LATE_FLOOD': return [{ key: 'mulliganKeepMax', delta: 1 }];
     case 'CLOSE_RACE_LOSS': return [{ key: 'attackStyle', dir: -1 }, ...faceProposals(style, 1)];
     case 'OVERRUN_LOSS': return [{ key: 'attackStyle', dir: 1 }, ...faceProposals(style, -1), { key: 'tauntValue', delta: 1 }];
+    case 'SKILL_LOW_STAGE': return [{ key: 'skillMinStage', delta: 1 }];
+    case 'SKILL_HELD': return [{ key: 'skillMinStage', delta: -1 }, { key: 'skillEarly', delta: 1 }, { key: 'skillEarly', delta: -1 }];
+    case 'SKILL_UNUSED': return [{ key: 'chargeAtTwo', delta: 1 }, { key: 'chargeAtTwo', delta: -1 }, { key: 'powerSlack', delta: 0.5 }];
     default: return [];
   }
 }
@@ -118,10 +150,10 @@ function scoreFindings(games) {
     .sort((a, b) => b.score - a.score || (a.finding < b.finding ? -1 : 1));
 }
 
-// 攻め方の両方向を必ず試し、ほかに反省から count-1 個、反省に無い試しを最低1個
-// 攻め方を動かせない向きのぶんは反省に無い試しで埋め、全デッキで試す数を count+2 に揃える
+// 攻め方の両方向とパワーの案1つを必ず試し、ほかに反省から count-1 個、反省に無い試しを最低1個
+// 足りないぶんは反省に無い試しで埋め、全デッキで試す数を count+3 に揃える
 function proposalsFor(deck, knobs, opp, games, rng, count) {
-  const total = count + 2;
+  const total = count + 3;
   const scored = scoreFindings(games);
   const style = C.effective(deck, knobs, opp, 'attackStyle');
   const base = JSON.stringify(knobs);
@@ -137,6 +169,10 @@ function proposalsFor(deck, knobs, opp, games, rng, count) {
   // 攻め方は3択で、一番効くつまみなので、偶然に任せず毎回両方向を試す
   push({ key: 'attackStyle', dir: -1 }, '毎回試す：攻め方を攻め寄りに');
   push({ key: 'attackStyle', dir: 1 }, '毎回試す：攻め方を守り寄りに');
+  const powerStart = out.length;
+  for (let guard = 0; out.length === powerStart && guard < 50; guard++) {
+    push(POWER_PROPOSALS[Math.floor(rng() * POWER_PROPOSALS.length)], '毎回試す：パワーの使い方');
+  }
   for (const s of scored) {
     for (const prop of rulesFor(s.finding, style)) {
       if (out.length >= total - 1) break;

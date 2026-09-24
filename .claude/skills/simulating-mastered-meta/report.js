@@ -23,7 +23,7 @@ function printRun({ dir, run, seasons }) {
   console.log(`# 学習結果 ${dir}`);
   if (run) {
     const p = run.params;
-    console.log(`条件：seed ${p.seed} / 反省 ${p.reflect}戦 / 試す ${p.test}戦×${p.proposals}案 / 評価 ${p.eval}戦 / 採用基準 +${p.minGain * 100}pt かつ z≥${p.minZ}`);
+    console.log(`条件：seed ${p.seed} / 反省 ${p.reflect}戦 / 試す ${p.test}戦×${p.proposals + 3}案 / 評価 ${p.eval}戦 / 採用基準 +${p.minGain * 100}pt かつ z≥${p.minZ}`);
     console.log(`停止：${run.stopReason}（${run.minutes.toFixed(0)}分）`);
   } else {
     console.log('停止：まだ学習中か、途中で止まった（run.json が無い）');
